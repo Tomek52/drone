@@ -37,6 +37,6 @@ extern M5AtomS3 M5;
 //#define Imu IMU
 
 #else
-#error “This library only supports boards with ESP32 processor.”
+#error "This library only supports boards with ESP32 processor."
 #endif
 #endif
