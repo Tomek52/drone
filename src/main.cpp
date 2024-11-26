@@ -496,6 +496,24 @@ void loop() {
     uint16_t _theta;     // = getElevator();
     uint16_t _psi;       // = getRudder();
 
+    if (page_nums == PAGE_SETUP)
+    {  // 長期保管に適したバッテリー電圧になったとき通知音を鳴らす
+        static bool prev_good_voltage[2];
+        for (int i = 0; i < 2; ++i) {
+            bool is_nice_voltage = (Battery_voltage[i] > 3.8f && Battery_voltage[i] < 3.9f);
+            bool is_good_voltage = (Battery_voltage[i] > 3.83f && Battery_voltage[i] < 3.87f);
+            if (is_nice_voltage == is_good_voltage) {
+                if (prev_good_voltage[i] != is_good_voltage) {
+                    prev_good_voltage[i] = is_good_voltage;
+                    if (is_good_voltage) {
+                        // 3.85v付近になったら通知音を鳴らす
+                        good_voltage_tone();
+                    }
+                }
+            }
+        }
+    }
+
     while (Loop_flag == 0);
     Loop_flag = 0;
     etime     = stime;

@@ -29,6 +29,15 @@ void beep(void) {
     buzzer_sound(4000, 100);
 }
 
+void good_voltage_tone(void) {
+    buzzer_sound(NOTE_D1, 100);
+    buzzer_sound(NOTE_D3, 100);
+    buzzer_sound(NOTE_D5, 100);
+    buzzer_sound(NOTE_D2, 100);
+    buzzer_sound(NOTE_D4, 100);
+    buzzer_sound(NOTE_D6, 100);
+}
+
 void start_tone(void) {
     buzzer_sound(NOTE_D1, 200);
     buzzer_sound(NOTE_D5, 200);
