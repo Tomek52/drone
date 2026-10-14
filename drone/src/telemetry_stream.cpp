@@ -9,6 +9,7 @@
 #include <telemetry_frame.hpp>
 
 #include "flight_control.hpp"
+#include "poshold_glue.hpp"
 #include "rc.hpp"
 #include "sensor.hpp"
 
@@ -67,6 +68,26 @@ const Field kFields[] = {
     {"stick_yaw", []() -> float { return (float)Stick[RUDDER]; }},
     {"rc_age_loops", []() -> float { return (float)Connect_flag; }},
     {"loop_dt_s", []() -> float { return (float)Interval_time; }},
+    // Position estimator (feat/position-estimator)
+    {"flow_dx", []() -> float { return (float)poshold_last_flow().dx; }},
+    {"flow_dy", []() -> float { return (float)poshold_last_flow().dy; }},
+    {"flow_sum_x", []() -> float { return (float)poshold_flow_sum_x(); }},
+    {"flow_sum_y", []() -> float { return (float)poshold_flow_sum_y(); }},
+    {"flow_squal", []() -> float { return (float)poshold_last_flow().squal; }},
+    {"flow_shutter", []() -> float { return (float)poshold_last_flow().shutter; }},
+    {"flow_valid", []() -> float { return poshold_estimator_state().flow_valid ? 1.0f : 0.0f; }},
+    {"flow_reject", []() -> float { return (float)poshold_estimator_state().reject; }},
+    {"flow_vx_mps", []() -> float { return poshold_estimator_state().flow_vx; }},
+    {"flow_vy_mps", []() -> float { return poshold_estimator_state().flow_vy; }},
+    {"vel_x_mps", []() -> float { return poshold_estimator_state().vx; }},
+    {"vel_y_mps", []() -> float { return poshold_estimator_state().vy; }},
+    {"pos_x_m", []() -> float { return poshold_estimator_state().px; }},
+    {"pos_y_m", []() -> float { return poshold_estimator_state().py; }},
+    {"height_m", []() -> float { return poshold_estimator_state().height; }},
+    {"acc_hx_mps2", []() -> float { return poshold_estimator_state().acc_x; }},
+    {"acc_hy_mps2", []() -> float { return poshold_estimator_state().acc_y; }},
+    {"acc_bias_x", []() -> float { return poshold_estimator_state().bias_x; }},
+    {"acc_bias_y", []() -> float { return poshold_estimator_state().bias_y; }},
 };
 constexpr size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);
 static_assert(kFieldCount <= stampfly_link::kMaxDataFields, "too many telemetry fields for one frame");
