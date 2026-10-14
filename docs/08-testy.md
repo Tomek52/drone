@@ -122,8 +122,14 @@ i znaki osi w telemetrii (03-architektura.md).
 
 ### Position Hold — uwięź
 
-1. Śmigła założone. Przywiąż drona dwiema cienkimi linkami (np. żyłka) do ciężkiej
-   podstawy tak, by mógł się wznieść maksymalnie ~0,5 m i przesunąć ±0,3 m.
+0. **Przed śmigłami:** bateria naładowana do ≥ 4,2 V (spoczynek). Bez śmigieł 4 sesje po ~20 s
+   zbiły napięcie z 4,34 do 3,90 V, a pod obciążeniem ze śmigłami spadek jest większy; przy
+   ~3,9 V test kończy się auto-lądowaniem (`kBatteryLandVolt` = 3,35 V) po kilku sekundach.
+   Śmigła zamontuj według przewodnika M5Stack (pozycja i kierunek A/B); zdejmij wszystko
+   twardego i wrażliwego z promienia, który linki **faktycznie** dopuszczają.
+1. Śmigła założone. Przywiąż drona 3–4 cienkimi linkami (np. żyłka) z różnych stron do ciężkiej
+   podstawy tak, by mógł się wznieść maksymalnie ~0,4 m i przesunąć ≤ 0,2 m. W Stable dron
+   dryfuje i dwie luźne linki to za mało.
 2. Najpierw lot w **Stable + Auto Alt** — sprawdź, że dron zachowuje się jak na fabrycznym firmware.
 3. Lot w **Position Hold**: po starcie dron powinien sam utrzymać pozycję; łagodne
    wychylenia prawego drążka przesuwają go w kierunku wychylenia, po puszczeniu staje.
@@ -140,3 +146,18 @@ przeciągów, wolna przestrzeń min. 3 × 3 m, okulary ochronne.
 3. Zmiana wysokości lewym drążkiem w zakresie 0,3–1,0 m.
 4. Przełączenie w locie na Stable (lewy przycisk przedni) i z powrotem lądowanie.
 5. Analiza i strojenie wg [07-strojenie.md](07-strojenie.md).
+
+### Uwięź — wyniki (2026-10-14)
+
+Pierwszy start, Stable + Auto Alt, bateria 3,86 V (zbyt niska, zob. pkt 0), uwięź luźna:
+
+| Obserwacja | Wartość |
+|---|---|
+| auto-wzlot | gaz 0,19 → 0,77 w ~3 s, oderwanie po ~3 s od startu |
+| wysokość zadana / osiągnięta | 0,5 m / **0,69 m** (przeregulowanie ~0,2 m) |
+| dryf w Stable (bez drążków) | do **0,48 m/s**, ~0,5 m w 3 s przy `roll` ≈ +1° |
+| spadek napięcia pod obciążeniem | 3,86 → 3,54 V przy `thrust` ≈ 0,75 |
+| koniec | uderzenie w przeszkodę w zasięgu linek; zabezpieczenie przeciążeniowe upstreamu zatrzymało silniki |
+
+Wnioski: Stable nie utrzymuje pozycji (to zadanie Position Hold), Auto Alt przeregulowuje
+o ~0,2 m, więc przy uwięzi 0,5 m ustaw wysokość lewym drążkiem zaraz po starcie na ~0,3 m.

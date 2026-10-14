@@ -50,6 +50,15 @@ Najpierw zawsze: log telemetrii (`tools/telemetry_logger.py`) i wykresy
 | krótkie loty mimo naładowanej baterii | zużyta bateria LiHV (wysoki opór wewnętrzny), uszkodzone śmigła | wymień baterię/śmigła; ładuj w pilocie do 4,35 V |
 | bateria nie ładuje się w pilocie | kabel bez zasilania, dioda czerwona = ładowanie | użyj zasilacza 5 V/1 A; zielona dioda = naładowana |
 
+## Lot na uwięzi
+
+| Objaw | Przyczyna | Co zrobić |
+|---|---|---|
+| w Stable dron znosi ~0,5 m/s bez drążków | brak trzymania pozycji, offset przechylenia ~1° | to nie błąd; testuj Position Hold z ciasną uwięzią |
+| przy Auto Alt dron wznosi się wyżej niż zadana (~0,2 m) | przeregulowanie fabrycznego regulatora | opuść zadaną wysokość lewym drążkiem po starcie |
+| auto-lądowanie po kilku sekundach lotu | bateria < 4,0 V w spoczynku, spadek pod obciążeniem do progu 3,35 V | naładuj do 4,3 V przed lotem |
+| `p` skacze do ±250 °/s, silniki stają | uderzenie lub szarpnięcie uwięzi; zabezpieczenie przeciążeniowe upstreamu | skróć/usztywnij uwięź, usuń przeszkody |
+
 ## Build i narzędzia (Windows)
 
 | Objaw | Przyczyna | Co zrobić |
