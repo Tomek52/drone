@@ -2,6 +2,20 @@
 
 Zmiany według gałęzi / PR (najnowsze na górze).
 
+## `feat/telemetry`
+
+- Binarna telemetria do strojenia (ADR 0003): ramki `A5 5A` z sumą Fletcher-16,
+  schemat pól wysyłany co 2 s w fragmentach.
+- Dron: USB 50 Hz + ESP-NOW 25 Hz do pilota, zapis nieblokujący (`drone/src/telemetry_stream.*`,
+  haczyk w `loop_400Hz()`).
+- Pilot: przekazywanie ramek telemetrii z ESP-NOW na USB (`joystick/src/telemetry_forward.*`,
+  haczyk w `OnDataRecv()`).
+- Wspólna biblioteka `common/stampfly_link` (kodek ramek) dla drona, pilota i testów.
+- `tools/telemetry_logger.py` (zapis CSV, opcjonalnie surowy `.bin`), `tools/plot_log.py`
+  (wykresy do strojenia), dekoder `tools/stampfly_telemetry.py` z testami.
+- CI: testy narzędzi Pythona.
+- Dokumentacja: protokół telemetrii, procedura testu telemetrii, podstawy strojenia.
+
 ## `chore/repo-setup`
 
 - Przypięte wersje platformy i bibliotek PlatformIO w obu projektach (ADR 0002).
