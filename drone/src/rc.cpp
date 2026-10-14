@@ -28,6 +28,7 @@
 #include <esp_now.h>
 #include <esp_wifi.h>
 #include "flight_control.hpp"
+#include "rc_link.hpp"  // [POSHOLD]
 
 // esp_now_peer_info_t slave;
 
@@ -84,11 +85,10 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *recv_data, int data_len)
         return;
     }
 
-    // checksum
-    uint8_t check_sum = 0;
-    for (uint8_t i = 0; i < 24; i++) check_sum = check_sum + recv_data[i];
-    // if (check_sum!=recv_data[23])USBSerial.printf("checksum=%03d recv_sum=%03d\n\r", check_sum, recv_data[23]);
-    if (check_sum != recv_data[24]) {
+    // [POSHOLD] Protocol v2: version and checksum check (replaces the v1
+    // checksum at byte 24). Packets from a joystick with another protocol
+    // version are ignored, so the drone cannot be armed (see rc_link.cpp).
+    if (!rc_link_accept(recv_data, data_len)) {
         Rc_err_flag = 1;
         return;
     }
