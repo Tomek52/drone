@@ -43,6 +43,8 @@
 
 #include "app_lvgl.h"
 #include "telemetry_forward.h"  // [POSHOLD]
+#include "flight_mode.h"        // [POSHOLD]
+#include <rc_protocol.hpp>        // [POSHOLD]
 
 M5GFX display;
 
@@ -115,6 +117,7 @@ void task_tone(void *pvParameters);
 // 受信コールバック
 void OnDataRecv(const uint8_t *mac_addr, const uint8_t *recv_data, int data_len) {
     if (telemetry_forward(recv_data, data_len)) return;  // [POSHOLD] drone telemetry -> USB
+    if (flight_mode_on_packet(recv_data, data_len)) return;  // [POSHOLD] drone status (protocol v2)
     if (is_peering) {
         if (recv_data[7] == 0xaa && recv_data[8] == 0x55 && recv_data[9] == 0x16 && recv_data[10] == 0x88) {
             Received_flag = 1;
@@ -523,6 +526,7 @@ void loop() {
     dtime     = stime - etime;
     M5.update();
     joy_update();
+    flight_mode_update(dTime);  // [POSHOLD] kill switch (unused stick button held 0.5 s)
 
     // Stop Watch Start&Stop&Reset
     if (M5.Btn.wasPressed() == true) {
@@ -608,7 +612,10 @@ void loop() {
     for (uint8_t i = 0; i < 24; i++) senddata[24] = senddata[24] + senddata[i];
 
     // 送信
-    esp_err_t result = esp_now_send(peerInfo.peer_addr, senddata, sizeof(senddata));
+    // [POSHOLD] protocol v2: bytes 0..23 as above + version, flight mode, flags, checksum
+    uint8_t packet[stampfly_link::kRcPacketLen];
+    const size_t packet_len = flight_mode_build_packet(senddata, packet);
+    esp_err_t result        = esp_now_send(peerInfo.peer_addr, packet, packet_len);
 #ifdef DEBUG
     USBSerial.printf("%02X:%02X:%02X:%02X:%02X:%02X\n", peerInfo.peer_addr[0], peerInfo.peer_addr[1],
                      peerInfo.peer_addr[2], peerInfo.peer_addr[3], peerInfo.peer_addr[4], peerInfo.peer_addr[5]);
