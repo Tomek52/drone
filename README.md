@@ -11,9 +11,10 @@ optical flow PMW3901, Z z czujnika ToF), a drążki przesuwają punkt zadany.
 
 | Tryb | Przycisk na pilocie | Kolor LED drona |
 |---|---|---|
-| Stable | lewy przedni (ekran startowy) | żółty (Manual Alt) / purpurowy (Auto Alt) |
-| Sport | lewy przedni (ekran startowy) | różowy `DC669B` |
-| Position Hold | *w przygotowaniu* | *w przygotowaniu* |
+| Stable | lewy przedni, cyklicznie (ekran startowy) | żółty (Manual Alt) / purpurowy (Auto Alt) |
+| Sport | lewy przedni, cyklicznie (ekran startowy) | różowy `DC669B` |
+| Position Hold | lewy przedni, cyklicznie (ekran startowy); w locie lewy przedni = powrót do Stable | *w przygotowaniu* |
+| **KILL** (wyłączenie silników) | **przytrzymaj wciśnięty lewy drążek 0,5 s** — w każdym trybie | — |
 
 Szczegóły: [docs/05-tryby-lotu.md](docs/05-tryby-lotu.md).
 

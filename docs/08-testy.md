@@ -23,6 +23,7 @@ CI (GitHub Actions, `.github/workflows/ci.yml`) przy każdym PR:
 |---|---|
 | `test_math_utils` | funkcje pomocnicze: ograniczanie, strefa martwa, zawijanie kąta, obrót 2D |
 | `test_position_estimator` | estymator z symulatorem ruchu: znak i skala flow, kompensacja obrotu, wysokość z przechyłem, akcelerometr w układzie heading, bramki jakości z histerezą, estymacja biasu, przerwy flow, całkowanie pozycji z yaw, mapowanie osi |
+| `test_rc_protocol` | pakiet v2 (kodowanie, wersja, suma kontrolna, pakiet v1 jako niezgodny), status drona, cykl trybów, wymuszenie Auto Alt, zmiana trybu w locie, kill switch (próg 0,5 s, podtrzymanie) |
 | `test_telemetry_frame` | kodowanie ramek telemetrii, suma kontrolna, dzielenie schematu na fragmenty, wektory wzorcowe wspólne z Pythonem |
 
 Testy narzędzi w Pythonie (dekoder telemetrii, kalibracja flow):
@@ -76,6 +77,22 @@ pierwszym włączeniem Position Hold.
     blisko zera (< 0,15 m/s). Duże wartości w fazie z pochylaniem = zły znak osi
     flow (powtórz kalibrację).
 11. Dopiero po pozytywnej weryfikacji ustaw `kFlowAxesVerified = true`.
+
+### Protokół v2, tryby i kill switch (stół, bez śmigieł)
+
+1. Wgraj **oba** firmware'y z tej samej gałęzi, sparuj.
+2. Ekran startowy: lewy przycisk przedni → Stable → Sport → **POS HOLD** (niebieska plakietka)
+   → Stable. Przy POS HOLD obrazek wysokości musi pokazywać Auto. Prawy przycisk przy POS HOLD
+   → Manual i powrót do Stable.
+3. Logger na porcie drona: `rc_proto_ok` = 1, `rc_flight_mode` zgodny z wyborem.
+4. **Kill (bez śmigieł!):** tryb Manual Alt, uzbrój drona, lekko dodaj gazu (silniki się kręcą),
+   przytrzymaj wciśnięty lewy drążek. Po ~0,5 s silniki muszą stanąć, dron wydaje długi dźwięk,
+   pilot pokazuje `KILL`. Krótkie wciśnięcia (< 0,5 s) nie mogą nic robić.
+5. **Niezgodność wersji:** wgraj na pilota firmware fabryczny (M5Burner) — dron w parkowaniu
+   miga czerwono-niebiesko i piszczy; uzbrojenie nie może być możliwe. Odwrotnie (fabryczny
+   dron + nasz pilot) — pilot po ~3 s pokazuje `DRONE FW?`, dron nie startuje.
+6. Tryb POS HOLD w tej gałęzi: dron leci jak Stable + Auto Alt, pilot pokazuje `STB NO FW`
+   (regulator pozycji dochodzi w `feat/position-controller`).
 
 Pozostałe procedury (uwięź → niski lot) zostaną opisane w gałęzi
 `feat/position-controller`.

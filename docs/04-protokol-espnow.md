@@ -70,7 +70,60 @@ synchronizacji `A5 5A` ([ADR 0003](decyzje/0003-telemetria-binarna.md)):
 
 Pilot przekazuje te ramki bez zmian na swój port USB.
 
-## Wersja 2
+## Wersja 2 (ten projekt)
 
-Wprowadzana w gałęzi `feat/joystick-mode` (pole wersji protokołu, tryb lotu,
-flaga natychmiastowego wyłączenia silników). Opis zostanie dodany w tym PR.
+Kod: `common/stampfly_link/src/rc_protocol.hpp` (wspólny dla drona, pilota i testów),
+decyzja: [ADR 0005](decyzje/0005-protokol-v2-i-kill-switch.md).
+
+### Pilot → dron, 29 B, 100 Hz
+
+Bajty 0–23 mają **to samo znaczenie co w wersji 1**, dalej:
+
+| Bajt | Typ | Zawartość |
+|---|---|---|
+| 24 | u8 | wersja protokołu = **2** |
+| 25 | u8 | tryb lotu: 0 = Stable, 1 = Sport, 2 = Position Hold |
+| 26 | u8 | flagi: bit 0 = **kill** (natychmiastowe wyłączenie silników) |
+| 27 | u8 | zarezerwowane (0) |
+| 28 | u8 | suma kontrolna = suma bajtów 0–27 (mod 256) |
+
+W Position Hold bajt 21 (tryb sterowania) = 0 (Stable), a bajt 22 = 4 (Auto Alt).
+
+### Dron → pilot: status, 8 B, 5 Hz
+
+| Bajt | Zawartość |
+|---|---|
+| 0–1 | `'S' 'F'` (0x53 0x46) |
+| 2 | wersja protokołu drona |
+| 3 | flagi: bit0 RC OK, bit1 flow dostępny (czujnik + kalibracja), bit2 flow ważny, bit3 Position Hold aktywny, bit4 failsafe, bit5 niska bateria |
+| 4 | tryb faktycznie latany przez drona (0/1/2) |
+| 5 | przyczyna (tabela niżej) |
+| 6 | zarezerwowane |
+| 7 | suma kontrolna bajtów 0–6 |
+
+| Kod | Przyczyna | Na ekranie pilota |
+|---|---|---|
+| 0 | brak | — |
+| 1 | firmware drona bez regulatora Position Hold | `STB NO FW` |
+| 2 | brak czujnika PMW3901 | `STB NO SENS` / `POS N/A` |
+| 3 | optical flow nieskalibrowany (`kFlowAxesVerified = false`) | `STB NO CAL` / `POS N/A` |
+| 4 | utrata jakości optical flow | `STB FLOW` |
+| 5 | wysokość poza zakresem | `STB HEIGHT` |
+| 6 | przekroczona maksymalna odległość od startu | `STB FENCE` |
+| 7 | utrata łączności | `STB LINK` |
+| 8 | niska bateria | `STB BATT` |
+| 9 | silniki wyłączone z pilota | `KILL` |
+| 10 | niezgodność wersji protokołu | `PROTO ERR` / `DRONE FW?` |
+
+### Zgodność wersji
+
+| Dron | Pilot | Zachowanie |
+|---|---|---|
+| v2 | v2 | normalna praca |
+| v2 | v1 (fabryczny) | dron ignoruje drążki — **nie da się wystartować**; LED drona miga czerwono-niebiesko, buzzer: 2 niskie piknięcia co 2 s |
+| v1 (fabryczny) | v2 | stary dron sprawdza bajt 24 jako sumę kontrolną — pakiety są odrzucane (pasują tylko przypadkiem), więc **dron nie wystartuje**; pilot po 3 s bez pakietów statusu pokazuje `DRONE FW?` / `PROTO ERR`. Nawet przy przypadkowej zgodności bajt 21 = 0 (Stable) |
+
+### Failsafe w wersji 2
+
+Bez zmian względem wersji 1 w tej gałęzi (auto-lądowanie po 100 ms bez pakietów).
+Zawis przed lądowaniem: gałąź `feat/position-controller`.
