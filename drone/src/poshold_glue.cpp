@@ -42,7 +42,6 @@ poshold::PosHoldSupervisor g_supervisor;
 poshold::PositionController g_controller;
 poshold::SupervisorOutput g_sup;
 poshold::ControllerOutput g_ctrl;
-PhState g_prev_state = PhState::kIdle;
 
 }  // namespace
 
@@ -172,7 +171,7 @@ void poshold_safety_update(void) {
 
     poshold::SupervisorInput in;
     in.poshold_requested = rc_link_requested_mode() == FlightMode::kPosHold;
-    in.flying            = Mode == FLIGHT_MODE;
+    in.flying            = Mode == FLIGHT_MODE || Mode == FLIP_MODE;  // a flip (Stable/Sport) is still flight
     in.landing           = Mode == AUTO_LANDING_MODE;
     in.auto_alt          = Alt_flag >= 1;
     in.takeoff_done      = Auto_takeoff_counter >= kTakeoffDoneCount;
@@ -214,7 +213,6 @@ void poshold_safety_update(void) {
     const bool airborne = Mode == FLIGHT_MODE || Mode == AUTO_LANDING_MODE || Mode == FLIP_MODE;
     update_alerts_and_led(g_sup, airborne);
     report_status(g_sup);
-    g_prev_state = g_sup.state;
 }
 
 void poshold_after_get_command(void) {
