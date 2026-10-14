@@ -112,6 +112,10 @@ void alerts_update(void) {
         if (g_alert != Alert::kNone) start_step(p, now);
     }
 
+}
+
+void alerts_apply_led_override(void) {
+    const uint32_t now = millis();
     for (int i = (int)LedOwner::kCount - 1; i >= 0; i--) {
         const LedSlot& slot = g_led[i];
         if (!slot.active) continue;
@@ -119,7 +123,6 @@ void alerts_update(void) {
         const uint32_t c = phase ? slot.b : slot.a;
         onboard_led1(c, 1);
         onboard_led2(c, 1);
-        led_show();
         break;
     }
 }

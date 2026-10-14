@@ -24,6 +24,7 @@
  */
 
 #include "led.hpp"
+#include "alerts.hpp"  // [POSHOLD]
 #include "sensor.hpp"
 #include "rc.hpp"
 #include "flight_control.hpp"
@@ -106,6 +107,8 @@ void led_drive(void) {
             LedBlinkCounter++;
         }
     }
+
+    alerts_apply_led_override();  // [POSHOLD] Position Hold / protocol LED colors, one frame per loop
 
     // LED show
     led_show();

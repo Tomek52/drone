@@ -30,6 +30,11 @@ Alert alerts_current(void);
 // Call once per control loop iteration (after led_drive()).
 void alerts_update(void);
 
+// Applies the active LED override to the onboard LEDs without showing them. Called by
+// led_drive() right before led_show(), so one frame per loop is sent (showing the upstream
+// color and the override color alternately at 400 Hz looked white).
+void alerts_apply_led_override(void);
+
 // LED overrides applied after the upstream led_drive(). Each owner has its
 // own slot; the owner with the higher value wins.
 enum class LedOwner : uint8_t {
