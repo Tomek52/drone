@@ -2,6 +2,14 @@
 
 Zmiany według gałęzi / PR (najnowsze na górze).
 
+## `docs/readme-and-guides`
+
+- Pełny główny `README.md` (etap 4): tryby, wymagania, budowanie i testy, wgrywanie,
+  parowanie, M5Burner, ładowanie i bezpieczeństwo LiHV, procedura testów, strojenie,
+  rozwiązywanie problemów, lista rzeczy niezweryfikowanych.
+- `03-architektura.md`: diagram naszych modułów w pętli drona, katalog `common/`.
+- `01-sprzet.md`: zalecenia dotyczące baterii.
+
 ## `feat/position-controller`
 
 - Regulator Position Hold (`drone/lib/poshold/src/position_controller.*`): pozycja (P) →
