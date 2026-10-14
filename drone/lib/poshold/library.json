@@ -1,0 +1,8 @@
+{
+  "name": "poshold",
+  "version": "0.1.0",
+  "description": "Hardware-independent Position Hold logic for StampFly (estimator, controller, helpers). Compiles on ESP32 and on the host (native tests).",
+  "license": "MIT",
+  "frameworks": "*",
+  "platforms": "*"
+}
