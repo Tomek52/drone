@@ -75,4 +75,12 @@ Panel lotu pokazuje tryb w miejscu, gdzie upstream wyświetlał odległość z p
 | LED miga czerwony/niebieski + 2 niskie piknięcia co 2 s (w parkowaniu) | pilot z innym protokołem — start zablokowany |
 | jeden długi wysoki dźwięk | KILL z pilota |
 
-Kolor LED trybu Position Hold i sygnały failsafe: gałąź `feat/position-controller`.
+| **stały niebieski** | **Position Hold aktywny** (nowy kolor, nieużywany wcześniej w locie) |
+| migający niebieski | Position Hold utracony — lot w Stable + Auto Alt (fallback) |
+| 3 krótkie piknięcia | fallback z Position Hold do Stable |
+| krótki rosnący dźwięk | Position Hold włączony (po auto-starcie) |
+| szybkie piknięcia | utrata łączności z pilotem (zawis, potem lądowanie) |
+| długie niskie dźwięki | niska bateria (ostrzeżenie) |
+
+Kolory upstreamu (żółty, purpurowy, zielony itd.) działają jak wcześniej; niebieski
+nadpisuje je tylko w Position Hold. Szczegóły failsafe'ów: [06-position-hold.md](06-position-hold.md#nadzorca-i-bezpieczeństwo).

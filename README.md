@@ -13,7 +13,7 @@ optical flow PMW3901, Z z czujnika ToF), a drążki przesuwają punkt zadany.
 |---|---|---|
 | Stable | lewy przedni, cyklicznie (ekran startowy) | żółty (Manual Alt) / purpurowy (Auto Alt) |
 | Sport | lewy przedni, cyklicznie (ekran startowy) | różowy `DC669B` |
-| Position Hold | lewy przedni, cyklicznie (ekran startowy); w locie lewy przedni = powrót do Stable | *w przygotowaniu* |
+| **Position Hold** | lewy przedni, cyklicznie (ekran startowy); w locie lewy przedni = powrót do Stable | **stały niebieski** (migający = utracony, lot w Stable) |
 | **KILL** (wyłączenie silników) | **przytrzymaj wciśnięty lewy drążek 0,5 s** — w każdym trybie | — |
 
 Szczegóły: [docs/05-tryby-lotu.md](docs/05-tryby-lotu.md).

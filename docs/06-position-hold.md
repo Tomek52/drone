@@ -1,8 +1,8 @@
 # 06. Position Hold — estymacja i sterowanie
 
-Ten dokument opisuje, jak dron wie, gdzie jest (estymacja) i jak utrzymuje
-pozycję (sterowanie). Część o sterowaniu zostanie dodana w gałęzi
-`feat/position-controller`.
+Ten dokument opisuje, jak dron wie, gdzie jest (estymacja), jak utrzymuje
+pozycję (sterowanie) i co robi, gdy coś pójdzie nie tak (nadzorca i failsafe'y).
+Wszystkie parametry: `drone/lib/poshold/src/poshold_config.hpp`.
 
 ## Układy współrzędnych
 
@@ -144,4 +144,91 @@ Skrypt `tools/flow_calibration.py` wylicza z logu `kFlowSwapXY`, `kFlowSignX`,
 
 ## Sterowanie
 
-Zostanie opisane w gałęzi `feat/position-controller`.
+Kod: `drone/lib/poshold/src/position_controller.*` (testowany `native`, w tym
+symulacja w pętli zamkniętej), połączenie z upstreamem: `drone/src/poshold_glue.*`.
+
+```mermaid
+flowchart LR
+    ST["drążki"] --> SP["punkt zadany XY (world)<br/>+ wysokość zadana"]
+    SP --> PE["błąd pozycji<br/>→ układ heading"]
+    EST["estymator: p, v"] --> PE
+    PE -->|"× kPosKp"| VS["prędkość zadana<br/>(+ feed-forward z drążka)<br/>limit kMaxSpeed"]
+    VS --> VE["błąd prędkości"]
+    EST --> VE
+    VE -->|"PI: kVelKp, kVelKi"| ACC["przyspieszenie zadane<br/>limit g·tan(10°)"]
+    ACC -->|"pitch = −atan(ax/g)<br/>roll = atan(ay/g)"| ANG["kąty zadane ±10°"]
+    ANG --> UPS["regulator kąta i prędkości kątowej<br/>(upstream)"]
+    SP -->|"Alt_ref"| ALT["regulator wysokości Auto Alt<br/>(upstream)"]
+```
+
+### Drążki w Position Hold (Mode 2)
+
+| Drążek | Ruch | Tryb ciągły (domyślny) | Tryb krokowy (`kStepMode = true`) |
+|---|---|---|---|
+| prawy | przód/tył | punkt zadany przesuwa się z prędkością ∝ wychyleniu (pełne = `kMaxSpeed` 0,5 m/s) | każde wychylenie > 60% = jeden krok `kStepXY` (30 cm) |
+| prawy | lewo/prawo | jw. | jw. |
+| lewy | góra/dół | wysokość zadana zmienia się z prędkością ∝ wychyleniu (pełne = 0,3 m/s) | krok `kStepZ` (20 cm) |
+| lewy | lewo/prawo | obrót, pełne wychylenie = 90°/s | jw. (ciągły) |
+
+Kierunki „przód/prawo” są w **układzie drona** (zgodnie z wymaganiem). Strefa martwa
+drążków: 10%. Wysokość zadana: 0,20–1,20 m (w oknie wiarygodności optical flow).
+
+Po puszczeniu drążka punkt zadany jest ustawiany w przewidywanym miejscu zatrzymania
+(`pozycja + prędkość · kBrakeTau`) — dron hamuje i zostaje tam, zamiast cofać się do
+punktu, który już minął. Podczas lotu z drążkiem punkt zadany nie wyprzedza drona
+o więcej niż `kMaxLead` (0,5 m).
+
+### Wzory
+
+```
+e_h   = R(−yaw) · (sp − p)                          błąd pozycji w układzie heading
+v_sp  = kPosKp · e_h + v_ff,         |v_sp| ≤ kMaxSpeed
+a     = kVelKp · (v_sp − v) + I,     I += kVelKi·(v_sp − v)·dt, |I| ≤ kVelIMax
+|a|   ≤ g · tan(kMaxTilt)
+pitch_ref = −atan(a_x / g)          (nos w dół = przyspieszenie do przodu)
+roll_ref  =  atan(a_y / g)          (prawa strona w dół = w prawo)
+```
+
+Referencje kątów zastępują w `angle_control()` upstreamu wartości wyliczone z drążków
+(haczyk `poshold_override_attitude`), a dalej działa niezmieniony regulator kąta
+i prędkości kątowej. Wysokość zadana trafia do `Alt_ref` istniejącego regulatora
+Auto Altitude. W trybie Position Hold flip jest zablokowany.
+
+## Nadzorca i bezpieczeństwo
+
+Kod: `drone/lib/poshold/src/poshold_supervisor.*` (testowany `native`).
+Decyzje: [ADR 0006](decyzje/0006-nadzorca-i-failsafe.md).
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> WaitEngage: Position Hold wybrany, lot, Auto Alt
+    WaitEngage --> Active: po starcie, flow OK, wysokość OK
+    WaitEngage --> Fallback: brak czujnika/kalibracji lub 3 s bez warunków
+    Active --> Fallback: flow lub wysokość złe przez 0,2 s, geofence
+    Active --> Idle: pilot wybrał Stable lub lądowanie poniżej 0,10 m
+    Fallback --> Idle: po wylądowaniu
+```
+
+**Fallback** = Stable + Auto Altitude sterowane drążkami (drążki znów zadają kąty!).
+Nie ma automatycznego powrotu do Position Hold w powietrzu — Position Hold można
+ponownie wybrać dopiero po wylądowaniu.
+
+| Sytuacja | Reakcja | Sygnał |
+|---|---|---|
+| Złe optical flow / wysokość poza oknem > 0,2 s | fallback do Stable + Auto Alt | 3 krótkie piknięcia, LED miga na niebiesko, pilot: `STB FLOW` / `STB HEIGHT` |
+| Brak czujnika PMW3901 lub brak kalibracji | Position Hold nie wchodzi, lot w Stable | jw.; na ziemi pilot: `POS N/A` |
+| Utrata łączności (> 0,1 s), Auto Alt | **zawis** z neutralnymi drążkami (Position Hold dalej trzyma XY, jeśli aktywny) przez 3 s, potem łagodne auto-lądowanie upstreamu (XY trzymane do 0,10 m) | szybkie piknięcia, pilot: `STB LINK` |
+| Utrata łączności, Manual Alt | natychmiastowe auto-lądowanie (jak w upstreamie) | jw. |
+| Bateria < 3,50 V (filtrowana) | ostrzeżenie | długie niskie dźwięki |
+| Bateria < 3,35 V przez 2 s | **auto-lądowanie** (w każdym trybie) | pilot: `STB BATT` |
+| Odległość od startu > 2,5 m (`kFenceRadius`·`kFenceLandFactor`) | fallback + **auto-lądowanie** | pilot: `STB FENCE` |
+| Punkt zadany | nigdy dalej niż 2,0 m od startu | — |
+| Kąty w Position Hold | twardy limit ±10° (plus ±30° upstreamu) | — |
+| KILL z pilota (lewy drążek 0,5 s) | natychmiastowe zatrzymanie silników, każdy tryb | długi dźwięk, pilot: `KILL` |
+
+⚠️ Progi baterii są wstępne — napięcie spada pod obciążeniem. Ustal je z logów
+(`plot_log.py --groups battery`), zob. [07-strojenie.md](07-strojenie.md).
+
+Punktem startu (początek układu world, środek geofence) jest miejsce, w którym dron
+przeszedł z parkowania do lotu.
