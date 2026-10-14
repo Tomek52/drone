@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ${{ matrix.project }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: drone
+            env: esp32-s3-devkitc-1
+          - project: joystick
+            env: m5stack-atoms3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio
+          key: pio-${{ matrix.project }}-${{ hashFiles(format('{0}/platformio.ini', matrix.project)) }}
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+      - name: Build firmware
+        working-directory: ${{ matrix.project }}
+        run: pio run -e ${{ matrix.env }}
+
+  native-tests:
+    name: Native unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio
+          key: pio-native-${{ hashFiles('drone/platformio.ini') }}
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+      - name: Run drone native tests
+        working-directory: drone
+        run: pio test -e native
