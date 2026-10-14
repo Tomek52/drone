@@ -45,7 +45,7 @@ py -m unittest discover -s tools -v
    powinny się zgadzać ze znakami w [03-architektura.md](03-architektura.md)
    (roll dodatni = prawa strona w dół, pitch dodatni = nos w górę).
 5. Podłącz pilota do PC, uruchom logger na porcie pilota, włącz drona na baterii —
-   dane powinny płynąć przez ESP-NOW (25 Hz).
+   dane powinny płynąć przez ESP-NOW (zmierzone: ok. 16 Hz, bez luk w `seq`).
 
 
 ### Optical flow — wykrycie czujnika (stół, bez śmigieł)
@@ -72,12 +72,18 @@ pierwszym włączeniem Position Hold.
    początku i końca obu ruchów (wykres `flow_dx/dy` lub `flow_vx/vy`).
 7. `py tools/flow_calibration.py logs/<plik>.csv --forward T0 T1 1.0 --right T0 T1 1.0`
 8. Wpisz wynik do `drone/lib/poshold/src/poshold_config.hpp`, zbuduj i wgraj firmware.
-9. **Weryfikacja:** powtórz przeniesienie do przodu o 1 m — `pos_x_m` powinno wzrosnąć
-   o ~1,0 (±15%), `vel_x_mps` dodatnie podczas ruchu; w prawo — `pos_y_m` ~+1,0.
+9. **Weryfikacja:** powtórz przeniesienie do przodu o 1 m — `vel_x_mps` ma być dodatnie
+   podczas ruchu, w prawo — `vel_y_mps` dodatnie. ⚠️ `pos_x_m`/`pos_y_m` są w układzie świata
+   obróconym o `yaw` (na naszym dronie `yaw` startuje z −180°), więc `pos_x_m` może maleć;
+   porównuj moduł przemieszczenia. Odległość z przenoszenia ręcznego ma rozrzut ±40%, dlatego
+   **skalę wyznacz z pochyleń** (pkt 10a).
 10. **Test kompensacji obrotu:** nad jednym punktem pochylaj drona nosem w górę/dół
     i na boki (±15°) bez przesuwania. `vel_x_mps` i `vel_y_mps` powinny pozostać
     blisko zera (< 0,15 m/s). Duże wartości w fazie z pochylaniem = zły znak osi
     flow (powtórz kalibrację).
+10a. **Skala z pochyleń (zalecana, niezależna od ręki):** dla okien z czystym pochyleniem
+    `K = Δkąt[rad] / Δzliczeń` (`flow_sum_y` dla pitch, `flow_sum_x` dla roll). Na naszym
+    dronie: 8 okien, 0,0015–0,0018, mediana 0,00175 rad/zliczenie.
 11. Dopiero po pozytywnej weryfikacji ustaw `kFlowAxesVerified = true`.
 
 ### Protokół v2, tryby i kill switch (stół, bez śmigieł)

@@ -111,18 +111,21 @@ Dryf, parowanie, jakość optical flow, krótkie loty, kody błędów na ekranie
 ## Co nie zostało potwierdzone w oficjalnych źródłach
 
 Zweryfikowano z dokumentacją M5Stack: wersje sprzętu, mapę pinów (w tym CS PMW3901 = G12),
-adresy I2C, procedury wgrywania, parowania i ładowania, M5Burner. **Do weryfikacji na sprzęcie:**
+adresy I2C, procedury wgrywania, parowania i ładowania, M5Burner. Wyniki testów na sprzęcie
+(Windows 11, 2026-10-14, StampFly v1.0 + Atom JoyStick/AtomS3):
 
-| Co | Gdzie opisane |
-|---|---|
-| orientacja montażu i skala PMW3901 (kalibracja obowiązkowa) | docs/06, docs/08 |
-| sterownik USB w Windows 11 bez instalacji | docs/02 |
-| czy dron startuje sam po wgraniu w trybie pobierania (zwykle trzeba zresetować) | docs/02 |
-| czy parowanie przetrwa ponowne wgranie firmware'u pilota | docs/02 |
-| adres wgrywania gotowych plików `.bin` z upstreamu (zalecany M5Burner) | docs/02 |
-| wartość rezystora bocznikowego INA3221 (prąd baterii nie jest jeszcze mierzony) | docs/01 |
-| fizyczne położenie przycisku KILL (wg kodu: wciśnięcie lewego drążka w Mode 2) | docs/05 |
-| progi napięcia baterii, wzmocnienia regulatorów (wartości wstępne z symulacji) | docs/07 |
+| Co | Wynik | Gdzie opisane |
+|---|---|---|
+| sterownik USB w Windows 11 bez instalacji | ✅ port COM pojawia się sam | docs/02 |
+| CS PMW3901 = G12 | ✅ `PMW3901 ready (id=0x49)` | docs/08 |
+| czy dron startuje sam po wgraniu | ❌ trzeba odłączyć i podłączyć zasilanie | docs/02 |
+| czy parowanie przetrwa wgranie firmware'u pilota | ✅ przetrwało | docs/02 |
+| orientacja montażu i skala PMW3901 | ✅ skalibrowane: `swap=true`, `signX=−1`, `0,00175 rad/zliczenie` (ok. 12× mniej niż z datasheetu) | docs/06, docs/07, docs/08 |
+| fizyczne położenie przycisku KILL | ✅ wciśnięcie lewego drążka ≥ 0,5 s zatrzymuje silniki (próba bez śmigieł) | docs/05 |
+| częstotliwość telemetrii przez pilota | ⚠️ ok. 16 Hz, nie 25 Hz | docs/03, docs/08 |
+| dystans 1 m z przenoszenia ręcznego ±15% | ⚠️ nie da się zweryfikować ręcznie (rozrzut ±40%); skala potwierdzona z żyroskopu | docs/07 |
+| wartość rezystora bocznikowego INA3221 (prąd baterii nie jest jeszcze mierzony) | do weryfikacji | docs/01 |
+| progi napięcia baterii, wzmocnienia regulatorów (wartości wstępne z symulacji) | do weryfikacji; pod lekkim obciążeniem bez śmigieł 4,25 → ok. 3,95 V | docs/07 |
 
 ## Struktura repozytorium
 
