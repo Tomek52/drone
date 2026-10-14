@@ -24,6 +24,7 @@ constexpr uint8_t kInvProductId  = 0xB6;
 spi_device_handle_t g_dev = nullptr;
 bool g_present            = false;
 uint8_t g_product_id      = 0;
+uint8_t g_last_rx[12]      = {0};  // raw bytes of the last pmw3901_read_motion() (diagnostics)
 
 void cs(bool active) {
     gpio_set_level(kPinCs, active ? 0 : 1);
@@ -159,14 +160,23 @@ Pmw3901Motion pmw3901_read_motion(void) {
     WORD_ALIGNED_ATTR uint8_t tx[4] = {kRegMotionBurst, 0, 0, 0};
     WORD_ALIGNED_ATTR uint8_t zeros[12] = {0};
     WORD_ALIGNED_ATTR uint8_t rx[12]    = {0};
-    if (spi_device_acquire_bus(g_dev, portMAX_DELAY) != ESP_OK) return m;
-    cs(true);
-    bool ok = xfer(tx, nullptr, 1);
-    delayMicroseconds(50);
-    ok = ok && xfer(zeros, rx, sizeof(rx));
-    cs(false);
-    spi_device_release_bus(g_dev);
-    if (!ok) return m;
+    // The first burst after the bus was used by another device (BMI270 in the
+    // control loop) never reaches the sensor on the real drone: it returns the
+    // constant pattern FF FE 93 FE 93 ... and does not clear the motion
+    // counters. An immediately following burst returns valid data, so the first
+    // one is a throw-away. Observed on hardware with -DPOSHOLD_PMW_DEBUG=1.
+    bool ok = false;
+    for (int pass = 0; pass < 2; pass++) {
+        if (spi_device_acquire_bus(g_dev, portMAX_DELAY) != ESP_OK) return m;
+        cs(true);
+        ok = xfer(tx, nullptr, 1);
+        delayMicroseconds(50);
+        ok = ok && xfer(zeros, rx, sizeof(rx));
+        cs(false);
+        spi_device_release_bus(g_dev);
+        if (!ok) return m;
+    }
+    memcpy(g_last_rx, rx, sizeof(rx));
 
     m.ok      = true;
     m.motion  = (rx[0] & 0x80u) != 0;
@@ -190,14 +200,10 @@ void pmw3901_debug_dump(void) {
     cs(false);
     spi_device_release_bus(g_dev);
 
-    // Single register reads: Motion, DeltaX_L/H, DeltaY_L/H, SQUAL, Shutter_U/L.
-    static const uint8_t kRegs[] = {0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x0C, 0x0B};
-    uint8_t v[sizeof(kRegs)]     = {0};
-    for (size_t i = 0; i < sizeof(kRegs); i++) reg_read(kRegs[i], &v[i]);
-
     USBSerial.printf(
-        "\r\n[PMWDBG] ok=%d burst=%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X"
-        " regs mot=%02X dxl=%02X dxh=%02X dyl=%02X dyh=%02X sq=%02X shU=%02X shL=%02X\r\n",
-        ok, rx[0], rx[1], rx[2], rx[3], rx[4], rx[5], rx[6], rx[7], rx[8], rx[9], rx[10], rx[11], v[0], v[1], v[2],
-        v[3], v[4], v[5], v[6], v[7]);
+        "\r\n[PMWDBG] ok=%d fresh=%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X"
+        " loop=%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+        ok, rx[0], rx[1], rx[2], rx[3], rx[4], rx[5], rx[6], rx[7], rx[8], rx[9], rx[10], rx[11], g_last_rx[0],
+        g_last_rx[1], g_last_rx[2], g_last_rx[3], g_last_rx[4], g_last_rx[5], g_last_rx[6], g_last_rx[7],
+        g_last_rx[8], g_last_rx[9], g_last_rx[10], g_last_rx[11]);
 }
