@@ -40,4 +40,9 @@ uint8_t pmw3901_product_id(void);
 // Reads one motion burst (~0.15 ms). Call at ~100 Hz from the control loop.
 Pmw3901Motion pmw3901_read_motion(void);
 
+// Bench diagnostics: prints one line with a raw motion burst and the same
+// values read one register at a time (to tell a burst-read problem from a
+// sensor problem). Takes a few ms; never call it in flight.
+void pmw3901_debug_dump(void);
+
 #endif

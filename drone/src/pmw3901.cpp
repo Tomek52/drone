@@ -176,3 +176,28 @@ Pmw3901Motion pmw3901_read_motion(void) {
     m.shutter = (uint16_t)((uint16_t)rx[10] << 8 | rx[11]);
     return m;
 }
+
+void pmw3901_debug_dump(void) {
+    if (!g_present) return;
+    WORD_ALIGNED_ATTR uint8_t tx[4]     = {kRegMotionBurst, 0, 0, 0};
+    WORD_ALIGNED_ATTR uint8_t zeros[12] = {0};
+    WORD_ALIGNED_ATTR uint8_t rx[12]    = {0};
+    if (spi_device_acquire_bus(g_dev, portMAX_DELAY) != ESP_OK) return;
+    cs(true);
+    bool ok = xfer(tx, nullptr, 1);
+    delayMicroseconds(50);
+    ok = ok && xfer(zeros, rx, sizeof(rx));
+    cs(false);
+    spi_device_release_bus(g_dev);
+
+    // Single register reads: Motion, DeltaX_L/H, DeltaY_L/H, SQUAL, Shutter_U/L.
+    static const uint8_t kRegs[] = {0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x0C, 0x0B};
+    uint8_t v[sizeof(kRegs)]     = {0};
+    for (size_t i = 0; i < sizeof(kRegs); i++) reg_read(kRegs[i], &v[i]);
+
+    USBSerial.printf(
+        "\r\n[PMWDBG] ok=%d burst=%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X"
+        " regs mot=%02X dxl=%02X dxh=%02X dyl=%02X dyh=%02X sq=%02X shU=%02X shL=%02X\r\n",
+        ok, rx[0], rx[1], rx[2], rx[3], rx[4], rx[5], rx[6], rx[7], rx[8], rx[9], rx[10], rx[11], v[0], v[1], v[2],
+        v[3], v[4], v[5], v[6], v[7]);
+}

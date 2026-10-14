@@ -4,6 +4,10 @@
 
 #include "poshold_glue.hpp"
 
+#ifndef POSHOLD_PMW_DEBUG
+#define POSHOLD_PMW_DEBUG 0
+#endif
+
 #include <Arduino.h>
 
 #include <math.h>
@@ -70,6 +74,10 @@ void poshold_update_estimation(void) {
     g_last_flow_us     = now;
 
     g_last_flow = pmw3901_read_motion();
+#if POSHOLD_PMW_DEBUG
+    // [POSHOLD] bench diagnostics only (build with -DPOSHOLD_PMW_DEBUG=1), ~2 Hz.
+    if (g_loop_counter % 200 == 0) pmw3901_debug_dump();
+#endif
     if (g_last_flow.ok) {
         g_flow_sum_x += g_last_flow.dx;
         g_flow_sum_y += g_last_flow.dy;
