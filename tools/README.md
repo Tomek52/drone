@@ -45,7 +45,7 @@ py tools/plot_log.py logs/20261014_120000.csv --groups attitude altitude --t0 5 
 ```
 
 Grupy paneli: `attitude`, `rates`, `altitude`, `position`, `velocity`, `flow`,
-`battery`, `sticks`, `timing`. Panele bez danych w logu są pomijane.
+`poshold`, `battery`, `sticks`, `timing`. Panele bez danych w logu są pomijane.
 Konwencja: niebieska linia ciągła = pomiar/estymata, pomarańczowa przerywana =
 wartość zadana, cienka zielona = surowy czujnik.
 

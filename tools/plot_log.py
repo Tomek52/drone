@@ -60,8 +60,15 @@ GROUPS: Dict[str, List[Panel]] = {
         ("Height above floor (tilt compensated)", "m", [("height_m", "height", 0, False)]),
         ("Flow raw counts", "counts", [("flow_dx", "dx", 0, False), ("flow_dy", "dy", 1, False)]),
     ],
+    "poshold": [
+        ("Position Hold state (0 idle, 1 wait, 2 active, 3 fallback)", "state", [("ph_state", "state", 0, False)]),
+        ("Fallback / failsafe reason (docs/04)", "code", [("ph_reason", "reason", 0, False)]),
+        ("Distance from take-off point", "m", [("dist_m", "distance", 0, False)]),
+        ("Attitude references from Position Hold", "deg", [("roll_ref_deg", "roll ref", 0, False),
+                                                           ("pitch_ref_deg", "pitch ref", 1, False)]),
+    ],
     "battery": [
-        ("Battery voltage", "V", [("vbat_v", "voltage", 0, False)]),
+        ("Battery voltage", "V", [("vbat_v", "raw", 2, False), ("vbat_filt_v", "filtered", 0, False)]),
         ("Battery current", "A", [("ibat_a", "current", 0, False)]),
     ],
     "sticks": [
