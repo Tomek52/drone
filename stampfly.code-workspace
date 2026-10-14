@@ -1,0 +1,14 @@
+{
+  "folders": [
+    { "name": "drone (StampFly)", "path": "drone" },
+    { "name": "joystick (Atom JoyStick)", "path": "joystick" },
+    { "name": "tools", "path": "tools" },
+    { "name": "docs", "path": "docs" }
+  ],
+  "settings": {
+    "files.associations": { "*.ino": "cpp" }
+  },
+  "extensions": {
+    "recommendations": ["platformio.platformio-ide"]
+  }
+}
