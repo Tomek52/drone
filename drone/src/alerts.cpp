@@ -48,10 +48,13 @@ uint8_t g_step       = 0;
 uint32_t g_step_end  = 0;
 uint16_t g_tone      = 0xFFFF;
 
-uint32_t g_led_a     = 0;
-uint32_t g_led_b     = 0;
-uint16_t g_led_blink = 0;
-bool g_led_active    = false;
+struct LedSlot {
+    uint32_t a     = 0;
+    uint32_t b     = 0;
+    uint16_t blink = 0;
+    bool active    = false;
+};
+LedSlot g_led[(int)LedOwner::kCount];
 
 void set_tone(uint16_t f) {
     if (f == g_tone) return;
@@ -109,22 +112,26 @@ void alerts_update(void) {
         if (g_alert != Alert::kNone) start_step(p, now);
     }
 
-    if (g_led_active) {
-        const bool phase = g_led_blink ? ((now / g_led_blink) & 1u) : false;
-        const uint32_t c = phase ? g_led_b : g_led_a;
+    for (int i = (int)LedOwner::kCount - 1; i >= 0; i--) {
+        const LedSlot& slot = g_led[i];
+        if (!slot.active) continue;
+        const bool phase = slot.blink ? ((now / slot.blink) & 1u) : false;
+        const uint32_t c = phase ? slot.b : slot.a;
         onboard_led1(c, 1);
         onboard_led2(c, 1);
         led_show();
+        break;
     }
 }
 
-void alerts_set_led_override(uint32_t color_a, uint32_t color_b, uint16_t blink_ms) {
-    g_led_a      = color_a;
-    g_led_b      = color_b;
-    g_led_blink  = blink_ms;
-    g_led_active = true;
+void alerts_set_led_override(LedOwner owner, uint32_t color_a, uint32_t color_b, uint16_t blink_ms) {
+    LedSlot& slot = g_led[(int)owner];
+    slot.a        = color_a;
+    slot.b        = color_b;
+    slot.blink    = blink_ms;
+    slot.active   = true;
 }
 
-void alerts_clear_led_override(void) {
-    g_led_active = false;
+void alerts_clear_led_override(LedOwner owner) {
+    g_led[(int)owner].active = false;
 }

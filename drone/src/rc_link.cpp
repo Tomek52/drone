@@ -8,6 +8,7 @@
 #include <esp_now.h>
 
 #include "alerts.hpp"
+#include "telemetry_stream.hpp"
 #include "flight_control.hpp"
 #include "led.hpp"
 
@@ -105,7 +106,7 @@ void rc_link_update(void) {
         alerts_play(Alert::kKill);
         g_kill_reason   = Reason::kKill;
         g_kill_until_ms = millis() + 3000;
-        USBSerial.printf("[POSHOLD] KILL from joystick\r\n");
+        telemetry_text("[POSHOLD] KILL from joystick\r\n");
     }
 
     // Protocol mismatch: refuse to arm (sticks are ignored in rc.cpp) and signal it.
@@ -113,14 +114,14 @@ void rc_link_update(void) {
     if (mismatch && Mode == PARKING_MODE) {
         if (!g_mismatch_signalled) {
             alerts_play(Alert::kProtocolMismatch);
-            alerts_set_led_override(kMismatchColorA, kMismatchColorB, 250);
-            USBSerial.printf("[POSHOLD] protocol mismatch: joystick v%u, drone v%u\r\n", g_peer_version,
+            alerts_set_led_override(LedOwner::kProtocol, kMismatchColorA, kMismatchColorB, 250);
+            telemetry_text("[POSHOLD] protocol mismatch: joystick v%u, drone v%u\r\n", g_peer_version,
                              kRcProtocolVersion);
             g_mismatch_signalled = true;
         }
     } else if (g_mismatch_signalled) {
         alerts_stop(Alert::kProtocolMismatch);
-        alerts_clear_led_override();
+        alerts_clear_led_override(LedOwner::kProtocol);
         g_mismatch_signalled = false;
     }
 
