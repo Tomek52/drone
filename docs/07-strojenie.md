@@ -99,4 +99,5 @@ mocno zwiększyć `kPosKp`, najpierw popraw pętlę prędkości.
 |---|---|---|---|
 | `logs/20261014_221210.csv` | `kFlowSwapXY` | `false` → `true` | ruch do przodu = licznik czujnika −Y, w prawo = +X |
 | `logs/20261014_221210.csv` | `kFlowSignX` | 1,0 → −1,0 | jw. (po zamianie osi) |
-| `logs/20261014_221210.csv` | `kFlowRadPerCount` | 0,0209 → 0,00341 | ok. 6× mniej niż z datasheetu (1 m na ~0,42 m ≈ 745 zliczeń). Przeciek między osiami 21% / 17% (próg 20%) — **do weryfikacji** powtórnym przeniesieniem; `kFlowAxesVerified` nadal `false` |
+| `logs/20261014_221210.csv` | `kFlowRadPerCount` | 0,0209 → 0,00341 | z przenoszenia 1 m w ręku; odległości niewiarygodne (powtórzenie dało rozrzut ±40% między osiami), skorygowane w następnym wierszu |
+| `logs/20261014_222429.csv` | `kFlowRadPerCount` | 0,00341 → 0,00175 | skala z czystych pochyleń względem kąta/żyroskopu (8 okien: 0,0015–0,0018, mediana 0,00175); znaki kompensacji obrotu zgodne z docs/06; regresja `vel_x` na `h·q` miała nachylenie +0,8 (powinno ≈ 0) |

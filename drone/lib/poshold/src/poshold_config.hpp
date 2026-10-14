@@ -29,12 +29,12 @@ constexpr bool kFlowSwapXY       = true;   // use sensor Y as body X (and vice v
 constexpr float kFlowSignX       = -1.0f;  // +1 or -1, applied after the swap
 constexpr float kFlowSignY       = 1.0f;
 
-// Angle per count. Derived from the datasheet field of view (42 deg) over
-// the 35-pixel array: 42 deg / 35 = 0.733 rad / 35 = 0.0209 rad.
-// Measured on the real drone (hand carry, 1 m forward / 1 m right at ~0.42 m,
-// logs/20261014_221210.csv): 0.0034 rad/count, i.e. ~6x smaller than the
-// datasheet-derived value above. Still to be confirmed by the verification carry.
-constexpr float kFlowRadPerCount = 0.00341f;
+// Angle per count [rad]. The first guess from the datasheet field of view
+// (42 deg over 35 px = 0.0209 rad) is ~12x too large. Measured on the real drone
+// from pure tilts against the attitude/gyro (logs/20261014_222429.csv, 8 windows,
+// median 0.00175, spread +-10%); the earlier hand-carry value (0.00341) was wrong
+// because the carried distances were not 1 m.
+constexpr float kFlowRadPerCount = 0.00175f;
 
 // Flow is read every N-th 400 Hz control loop (4 -> 100 Hz).
 constexpr uint8_t kFlowReadDivider = 4;
