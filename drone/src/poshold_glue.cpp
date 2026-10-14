@@ -35,6 +35,10 @@ uint32_t g_last_flow_us    = 0;
 uint8_t g_last_mode        = INIT_MODE;
 int32_t g_flow_sum_x       = 0;  // cumulative raw counts (exact segment sums for calibration)
 int32_t g_flow_sum_y       = 0;
+// [POSHOLD] diagnostics: reject reasons of EVERY flow sample (100 Hz), because the
+// 50 Hz telemetry only sees one phase of them.
+uint8_t g_reject_mask       = 0;  // bit n set: reason n occurred since the last telemetry read
+uint32_t g_reject_total     = 0;  // cumulative number of rejected samples
 
 // Minimum valid bottom ToF reading [mm]; upstream ignores readings <= 20 mm.
 constexpr int16_t kMinRawRangeMm = 20;
@@ -91,6 +95,10 @@ void poshold_update_estimation(void) {
     // Altitude2: Kalman-filtered bottom ToF distance (slant range, not tilt compensated).
     const float range = (RawRange > kMinRawRangeMm) ? (float)Altitude2 : -1.0f;
     g_estimator.update_flow(s, range, dt);
+
+    const uint8_t reason = (uint8_t)g_estimator.state().reject;
+    g_reject_mask |= (uint8_t)(1u << reason);
+    if (reason != 0) g_reject_total++;
 }
 
 const poshold::EstimatorState& poshold_estimator_state(void) {
@@ -107,6 +115,16 @@ int32_t poshold_flow_sum_x(void) {
 
 int32_t poshold_flow_sum_y(void) {
     return g_flow_sum_y;
+}
+
+uint8_t poshold_flow_reject_mask_take(void) {
+    const uint8_t m = g_reject_mask;
+    g_reject_mask   = 0;
+    return m;
+}
+
+uint32_t poshold_flow_reject_total(void) {
+    return g_reject_total;
 }
 
 // ---------------------------------------------------------------------------

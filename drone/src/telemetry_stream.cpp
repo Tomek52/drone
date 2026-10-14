@@ -78,6 +78,8 @@ const Field kFields[] = {
     {"flow_shutter", []() -> float { return (float)poshold_last_flow().shutter; }},
     {"flow_valid", []() -> float { return poshold_estimator_state().flow_valid ? 1.0f : 0.0f; }},
     {"flow_reject", []() -> float { return (float)poshold_estimator_state().reject; }},
+    {"flow_rej_mask", []() -> float { return (float)poshold_flow_reject_mask_take(); }},
+    {"flow_rej_total", []() -> float { return (float)poshold_flow_reject_total(); }},
     {"flow_vx_mps", []() -> float { return poshold_estimator_state().flow_vx; }},
     {"flow_vy_mps", []() -> float { return poshold_estimator_state().flow_vy; }},
     {"vel_x_mps", []() -> float { return poshold_estimator_state().vx; }},
