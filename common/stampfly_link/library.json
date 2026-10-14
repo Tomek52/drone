@@ -1,0 +1,8 @@
+{
+  "name": "stampfly_link",
+  "version": "0.1.0",
+  "description": "Shared drone <-> joystick <-> PC link definitions (telemetry frames, ESP-NOW protocol). Header-only, builds on ESP32 and on the host.",
+  "license": "MIT",
+  "frameworks": "*",
+  "platforms": "*"
+}
