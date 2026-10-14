@@ -24,7 +24,11 @@ namespace config {
 // the mapping below must be verified with the hand-carry test (docs/08-testy.md).
 // CALIBRATE: set kFlowAxesVerified = true only after that test passed. Position
 // Hold refuses to engage while it is false.
-constexpr bool kFlowAxesVerified = false;
+// Verified 2026-10-14 on the real drone: axis mapping (two carries), rotation
+// compensation and scale against the gyro (logs/20261014_223324.csv), ToF height
+// against a 35 cm table. NOT verified by a measured 1 m carry (hand error +-40%):
+// check the velocity scale during the tether tests.
+constexpr bool kFlowAxesVerified = true;
 constexpr bool kFlowSwapXY       = true;   // use sensor Y as body X (and vice versa)
 constexpr float kFlowSignX       = -1.0f;  // +1 or -1, applied after the swap
 constexpr float kFlowSignY       = 1.0f;

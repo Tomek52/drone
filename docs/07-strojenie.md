@@ -101,3 +101,4 @@ mocno zwiększyć `kPosKp`, najpierw popraw pętlę prędkości.
 | `logs/20261014_221210.csv` | `kFlowSignX` | 1,0 → −1,0 | jw. (po zamianie osi) |
 | `logs/20261014_221210.csv` | `kFlowRadPerCount` | 0,0209 → 0,00341 | z przenoszenia 1 m w ręku; odległości niewiarygodne (powtórzenie dało rozrzut ±40% między osiami), skorygowane w następnym wierszu |
 | `logs/20261014_222429.csv` | `kFlowRadPerCount` | 0,00341 → 0,00175 | skala z czystych pochyleń względem kąta/żyroskopu (8 okien: 0,0015–0,0018, mediana 0,00175); znaki kompensacji obrotu zgodne z docs/06; regresja `vel_x` na `h·q` miała nachylenie +0,8 (powinno ≈ 0) |
+| `logs/20261014_223324.csv` | `kFlowAxesVerified` | `false` → `true` | po K = 0,00175: nachylenia kompensacji −0,06 / +0,03 (przed +0,76 / −0,90), `vel_x` max 0,12, `vel_y` max 0,20 przy szybkim pochyleniu (p95 0,14); ToF na stoliku 35 cm = 347 mm. Dystans 1 m ±15% niezweryfikowany ręcznie — sprawdzić na uwięzi |
