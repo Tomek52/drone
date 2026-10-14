@@ -88,7 +88,7 @@ const Field kFields[] = {
     {"pos_y_m", []() -> float { return poshold_estimator_state().py; }},
     {"height_m", []() -> float { return poshold_estimator_state().height; }},
     {"acc_bias_x", []() -> float { return poshold_estimator_state().bias_x; }},
-    {"acc_bias_y", []() -> float { return poshold_estimator_state().bias_y; }},
+    {"thrust0", []() -> float { return (float)Thrust0; }},
     // Control link v2 (feat/joystick-mode)
     {"rc_proto_ok", []() -> float { return rc_link_protocol_ok() ? 1.0f : 0.0f; }},
     {"rc_flight_mode", []() -> float { return (float)rc_link_requested_mode(); }},
