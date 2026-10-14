@@ -92,3 +92,11 @@ mocno zwiększyć `kPosKp`, najpierw popraw pętlę prędkości.
 | Log | Parametr | Stara → nowa | Obserwacja |
 |---|---|---|---|
 | `logs/20261015_101500.csv` | `kVelKp` | 2,0 → 1,5 | mniejsze falowanie, hamowanie dłuższe o ~10 cm |
+
+### Dziennik zmian parametrów (nasz sprzęt)
+
+| Log | Parametr | Stara → nowa | Obserwacja |
+|---|---|---|---|
+| `logs/20261014_221210.csv` | `kFlowSwapXY` | `false` → `true` | ruch do przodu = licznik czujnika −Y, w prawo = +X |
+| `logs/20261014_221210.csv` | `kFlowSignX` | 1,0 → −1,0 | jw. (po zamianie osi) |
+| `logs/20261014_221210.csv` | `kFlowRadPerCount` | 0,0209 → 0,00341 | ok. 6× mniej niż z datasheetu (1 m na ~0,42 m ≈ 745 zliczeń). Przeciek między osiami 21% / 17% (próg 20%) — **do weryfikacji** powtórnym przeniesieniem; `kFlowAxesVerified` nadal `false` |

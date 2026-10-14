@@ -25,14 +25,16 @@ namespace config {
 // CALIBRATE: set kFlowAxesVerified = true only after that test passed. Position
 // Hold refuses to engage while it is false.
 constexpr bool kFlowAxesVerified = false;
-constexpr bool kFlowSwapXY       = false;  // use sensor Y as body X (and vice versa)
-constexpr float kFlowSignX       = 1.0f;   // +1 or -1, applied after the swap
+constexpr bool kFlowSwapXY       = true;   // use sensor Y as body X (and vice versa)
+constexpr float kFlowSignX       = -1.0f;  // +1 or -1, applied after the swap
 constexpr float kFlowSignY       = 1.0f;
 
 // Angle per count. Derived from the datasheet field of view (42 deg) over
 // the 35-pixel array: 42 deg / 35 = 0.733 rad / 35 = 0.0209 rad.
-// CALIBRATE with the known-distance test (docs/07-strojenie.md).
-constexpr float kFlowRadPerCount = 0.0209f;
+// Measured on the real drone (hand carry, 1 m forward / 1 m right at ~0.42 m,
+// logs/20261014_221210.csv): 0.0034 rad/count, i.e. ~6x smaller than the
+// datasheet-derived value above. Still to be confirmed by the verification carry.
+constexpr float kFlowRadPerCount = 0.00341f;
 
 // Flow is read every N-th 400 Hz control loop (4 -> 100 Hz).
 constexpr uint8_t kFlowReadDivider = 4;
