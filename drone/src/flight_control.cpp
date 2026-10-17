@@ -105,7 +105,9 @@ const float Pitch_angle_td  = 0.04f;
 const float Pitch_angle_eta = 0.125f;
 
 // Altitude control PID gain
-const float alt_kp     = 0.38f;  // 5.0//soso 0.5
+// [POSHOLD] 0.38 -> 0.50 (tune/alt-kp): hallway hovers sat +4..+9 cm above Alt_ref and recovered from the
+// take-off overshoot in ~15 s; the climb-rate setpoint for a 10 cm error (0.04 m/s) was below the vz noise.
+const float alt_kp     = 0.50f;  // 5.0//soso 0.5 (upstream 0.38)
 const float alt_ti     = 10.0f;  // 200.0//soso 10.0
 const float alt_td     = 0.5f;   // 0.5//soso 0.5
 const float alt_eta    = 0.125f;

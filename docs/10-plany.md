@@ -42,9 +42,11 @@ odróżnić od ruchu pionowego.
 | Sprawa | Stan |
 |---|---|
 | Utrata łączności (zawis ~3 s i lądowanie) z zapisanym logiem | tylko obserwacja bez logu |
-| Progi baterii z logów (`kBatteryWarnVolt`, `kBatteryLandVolt`) | wstępne; w locie 4,2 → 3,8 V w ~20 s |
-| Strojenie `kPosKp`, `kVelKp`, `kVelKi` z odpowiedzi na wychylenie drążka | czeka na lot z drążkami |
+| Progi baterii z logów (`kBatteryWarnVolt`, `kBatteryLandVolt`) | przeanalizowane 16 lotów (4,32 → 3,54 V pod obciążeniem): w zawisie napięcie spada o 0,3–0,4 V względem spoczynkowego, najniższe filtrowane 3,56 V, progu 3,50 V żaden lot nie osiągnął. Progi zostają bez zmian; do ich weryfikacji potrzebny jest lot na uwięzi do ostrzeżenia |
+| Strojenie `kPosKp`, `kVelKp`, `kVelKi` z odpowiedzi na wychylenie drążka | zrobione w locie 2026-10-17 (popchnięcia i drążki), parametry zostają |
+| Wysokość przy baterii < 3,6 V: wahania ±0,15 m (okres ~4,5 s) | czujnik ToF wykluczony (szum 5 → 6 mm, brak zer i skoków > 100 mm, `alt_tof` = `alt_est`), wzmocnienie ciągu w przybliżeniu stałe (12–16 m/s² na 1,0 gazu), sprzężenie napięcia wykluczone; przyczyna nieznana, kolejny krok to eksperyment (np. niższe `z_dot_kp`/`alt_kp` przy niskim napięciu) albo przyjęcie granicy ~3,6 V |
 | Dryf przed wejściem w Active (~15 cm w pierwszych 3–4 s) i trym przechylenia | do zbadania |
+| Pion: błąd ustalony +4…+9 cm i wolny powrót po przeregulowaniu przy starcie | `alt_kp` 0,38 → 0,50 do zweryfikowania w locie; hipoteza o wpływie napięcia na trym obalona (trym trafia w 1,2%) |
 | Pilot: FastLED 3.10.7 (drona przestawiono na 3.7.8) | diody pilota niesprawdzone |
 | Dystans z przenoszenia 1 m ±15% | skala potwierdzona żyroskopem, dystansu nie da się zweryfikować ręcznie |
 | Magnetometr BMM150 do `yaw` | `yaw` dryfuje ±15° w 20 s; pozycja nie jest od tego zależna |

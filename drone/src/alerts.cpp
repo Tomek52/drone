@@ -27,7 +27,9 @@ struct Pattern {
 const Step kMismatch[]  = {{800, 120}, {0, 120}, {800, 120}, {0, 1640}};
 const Step kKill[]      = {{2500, 600}, {0, 10}};
 const Step kFallback[]  = {{3000, 80}, {0, 80}, {3000, 80}, {0, 80}, {3000, 80}, {0, 10}};
-const Step kLowBatt[]   = {{600, 400}, {0, 600}};
+// [POSHOLD] 2500 Hz, not 600 Hz: the buzzer is a piezo and was inaudible over the motors at 600 Hz
+// (low-battery warning not heard in the 2026-10-17 discharge flight).
+const Step kLowBatt[]   = {{2500, 300}, {0, 700}};
 const Step kLinkLost[]  = {{2000, 60}, {0, 140}};
 const Step kModeOn[]    = {{2000, 60}, {3000, 60}, {4000, 80}, {0, 10}};
 
