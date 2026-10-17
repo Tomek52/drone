@@ -234,3 +234,13 @@ hamuje dłużej niż zakłada `kBrakeTau` (0,3 s; realnie ~0,45 s), więc mija p
 Active 25,6 s, błąd XY std. 4,3 / 3,0 cm, SQUAL mediana 99. Zadana wysokość zmieniona lewym
 drążkiem: 0,50 → 0,60 (osiągnięte 0,64–0,69, błąd ustalony +6…+9 cm) → 0,41 (osiągnięte 0,47 po ~2,5 s,
 potem wahania ±8–10 cm, okres 3–4 s). `thrust0` rośnie 0,64 → 0,67 przy spadku napięcia 3,88 → 3,76 V.
+
+### Korytarz — `kBrakeTau` = 0,45 (2026-10-17, `20261017_214337.csv`)
+
+Active 17,5 s, SQUAL mediana 86 (0% < 30). Przeregulowanie za punkt zadany po puszczeniu drążka:
+3,2 / 5,4 / 6,5 / 3,3 cm (średnio 4,6 cm, wcześniej 6,5 cm). Błąd XY std. 5,0 / 3,7 cm, w tym ruchy.
+
+Wcześniejsza próba tego samego dnia (`20261017_213815.csv`) nie mogła wejść w Active: po wgraniu
+firmware'u czujnik PMW3901 zwracał stałe `squal = 0`, `shutter = 900`, `dx = dy = 0` (martwy po
+inicjalizacji); po restarcie zasilania ożył (`squal` 6–9, `shutter` 8191). Przed każdym lotem
+sprawdzaj w telemetrii, że `squal` > 0 w postoju.
