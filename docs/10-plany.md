@@ -45,6 +45,7 @@ odróżnić od ruchu pionowego.
 | Progi baterii z logów (`kBatteryWarnVolt`, `kBatteryLandVolt`) | wstępne; w locie 4,2 → 3,8 V w ~20 s |
 | Strojenie `kPosKp`, `kVelKp`, `kVelKi` z odpowiedzi na wychylenie drążka | czeka na lot z drążkami |
 | Dryf przed wejściem w Active (~15 cm w pierwszych 3–4 s) i trym przechylenia | do zbadania |
+| Pion: błąd ustalony +4…+9 cm i wolny powrót po przeregulowaniu przy starcie | `alt_kp` 0,38 → 0,50 do zweryfikowania w locie; hipoteza o wpływie napięcia na trym obalona (trym trafia w 1,2%) |
 | Pilot: FastLED 3.10.7 (drona przestawiono na 3.7.8) | diody pilota niesprawdzone |
 | Dystans z przenoszenia 1 m ±15% | skala potwierdzona żyroskopem, dystansu nie da się zweryfikować ręcznie |
 | Magnetometr BMM150 do `yaw` | `yaw` dryfuje ±15° w 20 s; pozycja nie jest od tego zależna |
