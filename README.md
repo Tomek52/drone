@@ -5,8 +5,11 @@ oparty na oficjalnym, otwartym firmware M5Stack (licencja MIT), rozszerzony
 o nowy tryb lotu **Position Hold / Auto**: dron wisi w miejscu (XY z czujnika
 optical flow PMW3901, Z z czujnika ToF), a drążki przesuwają punkt zadany.
 
-> ⚠️ Projekt nie był jeszcze testowany w locie. Zanim polecisz, przejdź procedurę
-> testów (niżej) od stołu bez śmigieł. Stan prac: [docs/CHANGELOG.md](docs/CHANGELOG.md).
+> ⚠️ Projekt przeszedł pierwszą kampanię testów na sprzęcie (stół, KILL, kalibracja flow, Position
+> Hold w ręku, na uwięzi i krótki zawis swobodny ~20 s w korytarzu z płytkami), ale **nie jest
+> gotowy do swobodnego latania**: wzmocnienia regulatorów są wstępne, progi baterii niedostrojone,
+> a Position Hold działa tylko nad podłogą z wyraźnym wzorem i dobrym światłem (zob. niżej).
+> Procedurę testów przejdź od stołu bez śmigieł. Stan prac: [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 ## Tryby lotu
 
@@ -90,6 +93,10 @@ Pełne instrukcje: [docs/02-instalacja-i-wgrywanie.md](docs/02-instalacja-i-wgry
    (przenoszenie w ręku), protokół i KILL, **test „w ręku”** kierunków regulatora.
 2. **Uwięź:** Stable, potem Position Hold, KILL, wyłączenie pilota (zawis → lądowanie).
 3. **Niski lot** (~0,5 m) nad **teksturowaną, dobrze oświetloną podłogą**, wolna przestrzeń 3 × 3 m.
+
+   **Podłoga decyduje o jakości flow.** Zmierzone SQUAL (próg 30): płytki z fugami 60–115, jednolite
+   panele przy słabym świetle 8–50 (loty swobodne wypadały w fallback po ułamku sekundy). Przed lotem
+   zrób ankietę SQUAL bez silników (dron w ręku ~0,5 m nad podłogą, `flow_squal` w logu, mediana ≥ 45).
 
 Krok po kroku: [docs/08-testy.md](docs/08-testy.md).
 
