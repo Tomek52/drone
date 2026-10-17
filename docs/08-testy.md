@@ -161,3 +161,10 @@ Pierwszy start, Stable + Auto Alt, bateria 3,86 V (zbyt niska, zob. pkt 0), uwi�
 
 Wnioski: Stable nie utrzymuje pozycji (to zadanie Position Hold), Auto Alt przeregulowuje
 o ~0,2 m, więc przy uwięzi 0,5 m ustaw wysokość lewym drążkiem zaraz po starcie na ~0,3 m.
+
+### Uwięź — KILL w powietrzu i utrata łączności (2026-10-17)
+
+Wykonane przez użytkownika na uwięzi, **bez zapisu telemetrii** (brak logu): KILL w powietrzu
+zatrzymuje silniki, wyłączenie pilota powoduje zawis i lądowanie. Wynik jest obserwacją, nie
+pomiarem: czas zawisu (~3 s), łagodność lądowania i zachowanie `ph_state`/`ph_reason` nie zostały
+zmierzone. Do powtórzenia z loggerem przy najbliższym locie.
