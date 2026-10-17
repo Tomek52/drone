@@ -164,6 +164,21 @@ void test_link_loss_hover_then_landing_with_auto_alt() {
     TEST_ASSERT_FALSE(o.neutral_sticks);
 }
 
+void test_link_loss_landing_blocked_at_upstream_timeout() {
+    PosHoldSupervisor s;
+    run(s, flying_ok(), 0.1f);
+    SupervisorInput in = flying_ok();
+    in.link_age        = 40 * 0.0025f;  // upstream rc_isconnected() trips here
+    SupervisorOutput o = s.update(in);
+    TEST_ASSERT_FALSE(o.allow_link_landing);
+    in.link_age = 3.0f;
+    o           = s.update(in);
+    TEST_ASSERT_FALSE(o.allow_link_landing);
+    in.link_age = 3.2f;
+    o           = s.update(in);
+    TEST_ASSERT_TRUE(o.allow_link_landing);
+}
+
 void test_link_loss_manual_alt_lands_immediately() {
     PosHoldSupervisor s;
     SupervisorInput in   = flying_ok();
@@ -242,6 +257,7 @@ int main(int, char**) {
     RUN_TEST(test_height_out_of_window_falls_back);
     RUN_TEST(test_pilot_switch_to_stable_deactivates_without_alarm);
     RUN_TEST(test_link_loss_hover_then_landing_with_auto_alt);
+    RUN_TEST(test_link_loss_landing_blocked_at_upstream_timeout);
     RUN_TEST(test_link_loss_manual_alt_lands_immediately);
     RUN_TEST(test_low_battery_requests_landing_in_any_mode);
     RUN_TEST(test_short_voltage_dip_does_not_land);
