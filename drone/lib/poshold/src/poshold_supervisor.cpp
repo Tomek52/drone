@@ -40,9 +40,12 @@ SupervisorOutput PosHoldSupervisor::update(const SupervisorInput& in) {
 
     // --- Link loss (all modes) ---------------------------------------------------------
     out.link_lost = in.link_age > p_.link_lost_after;
-    if (out.link_lost && in.auto_alt && in.flying) {
-        out.neutral_sticks     = true;
+    // The upstream timeout (40 loops = 0.1 s) trips exactly when link_age == link_lost_after, one
+    // loop before link_lost becomes true, so with Auto Altitude the landing must be blocked
+    // from the first missed packet on, not only once link_lost is set.
+    if (in.auto_alt && in.flying) {
         out.allow_link_landing = in.link_age > p_.link_lost_after + p_.link_hover_time;
+        if (out.link_lost) out.neutral_sticks = true;
     }
 
     // --- Landing requests (latched until touchdown) ------------------------------------
