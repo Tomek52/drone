@@ -26,6 +26,7 @@ Najpierw zawsze: log telemetrii (`tools/telemetry_logger.py`) i wykresy
 | `vel_x/y` rośnie przy pochylaniu drona w miejscu | błędny znak osi **albo zawyżona skala** (nachylenie `vel_x` vs `h·q` ≈ +1) | skala z pochyleń (08-testy.md, pkt 10a); znak osi z przeniesienia |
 | `flow_dx = flow_dy = −365`, `flow_squal = 147`, `flow_shutter = 37886` stale | pierwszy burst po transakcji BMI270 nie dociera do czujnika (wzór `FF FE 93 FE…`) | `pmw3901_read_motion()` wykonuje burst dwa razy; diagnostyka: build z `-DPOSHOLD_PMW_DEBUG=1`, linie `[PMWDBG]` |
 | `flow_shutter = 8191` stale (maksimum) | czujnik na pełnej ekspozycji: słabe światło | lepsze oświetlenie podłogi |
+| `flow_squal = 0`, `flow_shutter = 900`, `flow_dx = flow_dy = 0` w postoju i w locie, Position Hold nie wchodzi (`ph_reason` 4) | czujnik PMW3901 odpowiedział na ID, ale po inicjalizacji zwraca same zera (zdarzyło się raz po wgraniu firmware'u; po restarcie zasilania działał) | firmware sprawdza to po inicjalizacji i powtarza ją do 3 razy, a przy porażce zgłasza `POS N/A`; ręcznie: restart zasilania. Przed lotem sprawdź `squal` > 0 w postoju |
 | `pos_x/y` po przeniesieniu o 1 m ≠ 1 m | błędna skala `kFlowRadPerCount` lub wysokość | powtórz kalibrację na stałej wysokości |
 | `vel_x/y` dryfuje powoli przy nieruchomym dronie | duży bias akcelerometru; dron nieskalibrowany na poziomej powierzchni | uruchamiaj drona na płaskim, poziomym podłożu (kalibracja „fioletowa”) |
 
