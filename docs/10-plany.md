@@ -49,3 +49,4 @@ odróżnić od ruchu pionowego.
 | Dystans z przenoszenia 1 m ±15% | skala potwierdzona żyroskopem, dystansu nie da się zweryfikować ręcznie |
 | Magnetometr BMM150 do `yaw` | `yaw` dryfuje ±15° w 20 s; pozycja nie jest od tego zależna |
 | `thrust_duty` zamrożone po KILL w telemetrii, `alt_mode` na ziemi | drobne |
+| Test niskiej baterii 2026-10-17 (`logs/20261017_232225.csv`, start 3,97 V) | dron wisiał niestabilnie (wysokość std. 0,07–0,17 m, XY do 0,13 m), dwa razy stracił wysokość przy 3,40 i 3,36 V filtrowanego (gaz 0,80–0,89) i spadł (powód 5 i 4); próg lądowania 3,35 V jest za niski dla słabszej baterii. Progi zostają na decyzję właściciela (3,50 / 3,35 V); ostrzeżenie z drona (buzzer) nie było słyszalne mimo ~5 min poniżej 3,50 V, dlatego dodano ostrzeżenie w pilocie (`feat/pilot-low-battery-alert`) |
