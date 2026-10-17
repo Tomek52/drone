@@ -42,6 +42,7 @@
 #include "./images/move_start_5.h"
 
 #include "app_lvgl.h"
+#include "telemetry_forward.h"  // [POSHOLD]
 
 M5GFX display;
 
@@ -113,6 +114,7 @@ void task_tone(void *pvParameters);
 
 // 受信コールバック
 void OnDataRecv(const uint8_t *mac_addr, const uint8_t *recv_data, int data_len) {
+    if (telemetry_forward(recv_data, data_len)) return;  // [POSHOLD] drone telemetry -> USB
     if (is_peering) {
         if (recv_data[7] == 0xaa && recv_data[8] == 0x55 && recv_data[9] == 0x16 && recv_data[10] == 0x88) {
             Received_flag = 1;

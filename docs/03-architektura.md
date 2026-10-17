@@ -47,7 +47,9 @@ flowchart TD
 | Pętla sterowania, IMU (BMI270, SPI 8 MHz), filtr Madgwicka | 400 Hz | |
 | Dolny ToF (VL53L3, tryb MEDIUM, budżet 33 ms) | ~30 Hz | odczyt po przerwaniu INT |
 | Filtr Kalmana wysokości | 400 Hz | predykcja z akcelerometru, korekcja ToF |
-| Telemetria ESP-NOW | 40 Hz | pakiet 120 B |
+| Telemetria ESP-NOW upstreamu (`88 88`) | 40 Hz | pakiet 120 B, czyta ją UI pilota |
+| Telemetria binarna `[POSHOLD]` — USB drona | 50 Hz | ramki `A5 5A`, [ADR 0003](decyzje/0003-telemetria-binarna.md) |
+| Telemetria binarna `[POSHOLD]` — ESP-NOW → USB pilota | 25 Hz | ramki `A5 5A` |
 | Pętla pilota | 100 Hz | timer 10 ms |
 
 ### Estymacja
@@ -100,3 +102,19 @@ i w ADR-ach.
 - Interfejs: LVGL 8.3 (osobne zadanie FreeRTOS), dwa ekrany: **startowy** (wybór trybów)
   i **lotu** (sztuczny horyzont, start/lądowanie).
 - Odbiór telemetrii drona (pakiety `88 88`) do wyświetlania kątów, napięcia, wysokości.
+
+## Telemetria do strojenia `[POSHOLD]`
+
+```mermaid
+flowchart LR
+    L["loop_400Hz()"] --> TS["telemetry_stream_update()<br/>drone/src/telemetry_stream.cpp"]
+    TS -->|"USB 50 Hz"| PC1["PC: telemetry_logger.py"]
+    TS -->|"ESP-NOW 25 Hz"| J["Pilot: telemetry_forward()"]
+    J -->|"USB"| PC2["PC: telemetry_logger.py"]
+    PC1 --> CSV["logs/*.csv → plot_log.py"]
+    PC2 --> CSV
+```
+
+Kodek ramek (`common/stampfly_link/`) jest wspólny dla drona, pilota i testów
+`native`; dekoder w Pythonie (`tools/stampfly_telemetry.py`) jest sprawdzany na tych
+samych wektorach bajtów co kod C++.

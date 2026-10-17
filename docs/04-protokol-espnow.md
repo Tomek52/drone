@@ -51,6 +51,25 @@ zostaje zapisany jako odbiorca telemetrii.
 Dron liczy obiegi pętli od ostatniego poprawnego pakietu; po 40 obiegach (100 ms)
 przechodzi w auto-lądowanie.
 
+## Telemetria binarna (dron → pilot → PC)
+
+Niezależnie od pakietów `88 88` dron wysyła ramki binarne rozpoznawane po
+synchronizacji `A5 5A` ([ADR 0003](decyzje/0003-telemetria-binarna.md)):
+
+| Offset | Rozmiar | Pole |
+|---|---|---|
+| 0 | 2 | `A5 5A` |
+| 2 | 1 | typ: `0x01` fragment schematu, `0x02` dane |
+| 3 | 1 | długość ładunku N (≤ 240) |
+| 4 | N | ładunek |
+| 4+N | 2 | Fletcher-16 (LE) z bajtów typ, długość, ładunek |
+
+- Fragment schematu: wersja formatu (u8), liczba wszystkich pól (u8), indeks pierwszego
+  pola we fragmencie (u8), liczba pól we fragmencie (u8), nazwy rozdzielone przecinkiem.
+- Dane: czas `u32` [µs], numer sekwencyjny `u16`, potem `float32` dla każdego pola.
+
+Pilot przekazuje te ramki bez zmian na swój port USB.
+
 ## Wersja 2
 
 Wprowadzana w gałęzi `feat/joystick-mode` (pole wersji protokołu, tryb lotu,

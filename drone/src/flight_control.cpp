@@ -45,6 +45,7 @@
 #include "telemetry.hpp"
 #include "button.hpp"
 #include "buzzer.h"
+#include "telemetry_stream.hpp"  // [POSHOLD]
 
 // モータPWM出力Pinのアサイン
 // Motor PWM Pin
@@ -404,6 +405,7 @@ void loop_400Hz(void) {
     //// Telemetry
     // telemetry_fast();
     telemetry();
+    telemetry_stream_update();  // [POSHOLD] binary telemetry (USB + ESP-NOW)
 
     uint32_t ce_time = micros();
     Dt_time          = ce_time - cs_time;
