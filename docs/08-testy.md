@@ -199,3 +199,20 @@ Bateria 4,08 V przed startem, dron stał nieruchomo 2–3 min w parkowaniu (`vel
 SQUAL w fazie Active: mediana 38, p5 = 28, 7,8% próbek < 30 (`kFlowMinSqual`). `flow_shutter` = 8191
 (maksimum) cały czas: za mało światła. Zalecenie docs/07 (próg ≈ 50–60% typowej wartości, tu 19–23)
 i lepsze oświetlenie podłogi, zanim zmienimy próg.
+
+### Niski lot bez uwięzi — pierwszy zawis w korytarzu (2026-10-17, `20261017_203405.csv`)
+
+Miejsce: korytarz z płytkami i fugami (kurtyny na ścianach, mata pod dronem), SQUAL w ankiecie 50–106.
+W pokoju z jednolitymi panelami SQUAL 8–50 i dwa loty swobodne wypadły w fallback po 0,2–1,4 s.
+
+| Miara | Wynik |
+|---|---|
+| wejście w Active / czas w Active | 2,8 s po starcie / **19,2 s** (zakończone lądowaniem pilota, bez fallbacku) |
+| błąd pozycji XY | std. 3,5 cm (x), 6,7 cm (y); maks. oddalenie od startu 0,28 m |
+| wysokość | średnio 0,56 m, std. 7,5 cm |
+| SQUAL w locie | mediana 87, minimum 60, 0% poniżej 30 |
+| `roll_ref` średnio | −0,76° (na uwięzi −2,3…−3,9°: stały przechył pochodził głównie z uwięzi) |
+| napięcie | 4,20 → 3,77 V w 19 s |
+
+Wniosek: jakość flow zależy od podłogi, nie od regulatora. Jednolita podłoga + słabe światło
+(`flow_shutter` = 8191) daje SQUAL 8–50 i fallbacki; płytki z fugami dają 60–115.
