@@ -56,6 +56,9 @@ GROUPS: Dict[str, List[Panel]] = {
     "flow": [
         ("Optical flow quality (SQUAL)", "-", [("flow_squal", "SQUAL", 0, False)]),
         ("Flow valid", "0/1", [("flow_valid", "valid", 0, False)]),
+        ("Flow reject reason (0 = ok)", "code", [("flow_reject", "reason", 0, False)]),
+        ("Height above floor (tilt compensated)", "m", [("height_m", "height", 0, False)]),
+        ("Flow raw counts", "counts", [("flow_dx", "dx", 0, False), ("flow_dy", "dy", 1, False)]),
     ],
     "battery": [
         ("Battery voltage", "V", [("vbat_v", "voltage", 0, False)]),

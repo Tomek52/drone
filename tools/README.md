@@ -10,8 +10,9 @@ py -m pip install -r tools/requirements.txt
 |---|---|
 | `telemetry_logger.py` | zapis telemetrii z portu USB (dron albo pilot) do `logs/*.csv` |
 | `plot_log.py` | wykresy z pliku CSV (PNG obok CSV, opcjonalnie okno) |
+| `flow_calibration.py` | mapowanie osi i skala optical flow z próby przenoszenia (docs/08-testy.md) |
 | `stampfly_telemetry.py` | biblioteka: dekoder ramek binarnych (używana przez powyższe) |
-| `test_stampfly_telemetry.py` | testy dekodera (`py -m unittest discover -s tools -v`) |
+| `test_*.py` | testy (`py -m unittest discover -s tools -v`) |
 
 ## Zapis telemetrii
 

@@ -46,6 +46,7 @@
 #include "button.hpp"
 #include "buzzer.h"
 #include "telemetry_stream.hpp"  // [POSHOLD]
+#include "poshold_glue.hpp"       // [POSHOLD]
 
 // モータPWM出力Pinのアサイン
 // Motor PWM Pin
@@ -262,6 +263,7 @@ void init_copter(void) {
     // Initialize PWM
     init_pwm();
     sensor_init();
+    poshold_init();  // [POSHOLD] optical flow sensor + position estimator
     USBSerial.printf("Finish sensor init!\r\n");
 
     // PID GAIN and etc. Init
@@ -303,6 +305,7 @@ void loop_400Hz(void) {
 
     // Read Sensor Value
     sense_time       = sensor_read();
+    poshold_update_estimation();  // [POSHOLD] velocity/position estimate (optical flow)
     uint32_t cs_time = micros();
 
     // LED Drive

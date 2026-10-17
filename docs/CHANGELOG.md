@@ -2,6 +2,23 @@
 
 Zmiany według gałęzi / PR (najnowsze na górze).
 
+## `feat/position-estimator`
+
+- Sterownik PMW3901MB (`drone/src/pmw3901.*`): drugie urządzenie na SPI2 (CS G12),
+  kontrola Product ID, sekwencja inicjalizacji wg sterownika Bitcraze (MIT), odczyt burst z SQUAL.
+- Estymator prędkości i pozycji (`drone/lib/poshold/src/position_estimator.*`, ADR 0004):
+  prędkość z flow skalowana wysokością z ToF (z kompensacją przechyłu), kompensacja obrotu
+  z żyroskopu, filtr komplementarny z akcelerometrem i estymacją biasu, pozycja XY przez całkowanie,
+  bramki jakości (SQUAL, okno wysokości, prędkość obrotu, przechył) z histerezą.
+- Jeden plik konfiguracji `drone/lib/poshold/src/poshold_config.hpp`.
+- Haczyki w upstreamie: `poshold_init()` po `sensor_init()`, `poshold_update_estimation()` po `sensor_read()`.
+- Telemetria: 19 nowych pól (flow, prędkości, pozycja, wysokość, bias, skumulowane zliczenia).
+- `tools/flow_calibration.py`: wyznaczanie mapowania osi i skali flow z próby przenoszenia.
+- Testy `native` estymatora (15 przypadków z symulatorem ruchu) i test skryptu kalibracji.
+- Dokumentacja: `06-position-hold.md` (estymacja), procedury kalibracji w `08-testy.md`,
+  tabela problemów z optical flow w `09-rozwiazywanie-problemow.md`.
+- **Bez zmian w sterowaniu** — estymator działa tylko na potrzeby telemetrii.
+
 ## `feat/telemetry`
 
 - Binarna telemetria do strojenia (ADR 0003): ramki `A5 5A` z sumą Fletcher-16,
