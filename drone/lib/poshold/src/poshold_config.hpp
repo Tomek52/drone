@@ -100,7 +100,7 @@ constexpr float kMaxTilt        = 0.1745f;  // [rad] (10 deg) hard limit of roll
 constexpr float kMinAltitude    = 0.20f;  // [m] altitude setpoint range in Position Hold
 constexpr float kMaxAltitude    = 1.20f;  //     (inside the optical flow height window)
 constexpr float kMaxLead        = 0.50f;  // [m] max distance between setpoint and drone while flying with the stick
-constexpr float kBrakeTau       = 0.30f;  // [s] on stick release the setpoint = position + velocity * kBrakeTau
+constexpr float kBrakeTau       = 0.45f;  // [s] on stick release the setpoint = position + velocity * kBrakeTau (0.30 overshot by 5-8 cm)
 // Geofence around the take-off point: the setpoint never leaves kFenceRadius;
 // beyond kFenceRadius * kFenceLandFactor the drone lands (estimate or control failure).
 constexpr float kFenceRadius     = 2.00f;  // [m]
