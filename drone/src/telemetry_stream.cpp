@@ -5,6 +5,9 @@
 #include "telemetry_stream.hpp"
 
 #include <Arduino.h>
+#include <math.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <esp_now.h>
 #include <telemetry_frame.hpp>
 
@@ -59,9 +62,6 @@ const Field kFields[] = {
     {"tof_raw_mm", []() -> float { return (float)RawRange; }},
     {"vz_mps", []() -> float { return (float)Alt_velocity; }},
     {"vz_ref_mps", []() -> float { return Z_dot_ref; }},
-    {"ax_g", []() -> float { return (float)Accel_x_raw; }},
-    {"ay_g", []() -> float { return (float)Accel_y_raw; }},
-    {"az_g", []() -> float { return (float)Accel_z_raw; }},
     {"vbat_v", []() -> float { return (float)Voltage; }},
     {"stick_thr", []() -> float { return (float)Stick[THROTTLE]; }},
     {"stick_roll", []() -> float { return (float)Stick[AILERON]; }},
@@ -85,14 +85,23 @@ const Field kFields[] = {
     {"pos_x_m", []() -> float { return poshold_estimator_state().px; }},
     {"pos_y_m", []() -> float { return poshold_estimator_state().py; }},
     {"height_m", []() -> float { return poshold_estimator_state().height; }},
-    {"acc_hx_mps2", []() -> float { return poshold_estimator_state().acc_x; }},
-    {"acc_hy_mps2", []() -> float { return poshold_estimator_state().acc_y; }},
     {"acc_bias_x", []() -> float { return poshold_estimator_state().bias_x; }},
     {"acc_bias_y", []() -> float { return poshold_estimator_state().bias_y; }},
     // Control link v2 (feat/joystick-mode)
     {"rc_proto_ok", []() -> float { return rc_link_protocol_ok() ? 1.0f : 0.0f; }},
     {"rc_flight_mode", []() -> float { return (float)rc_link_requested_mode(); }},
-    {"rc_kill", []() -> float { return rc_link_kill_active() ? 1.0f : 0.0f; }},
+    // Position Hold controller and supervisor (feat/position-controller)
+    {"ph_state", []() -> float { return (float)poshold_supervisor_output().state; }},
+    {"ph_reason", []() -> float { return (float)poshold_supervisor_output().reason; }},
+    {"pos_sp_x_m", []() -> float { return poshold_controller_output().sp_x; }},
+    {"pos_sp_y_m", []() -> float { return poshold_controller_output().sp_y; }},
+    {"vel_sp_x_mps", []() -> float { return poshold_controller_output().vsp_x; }},
+    {"vel_sp_y_mps", []() -> float { return poshold_controller_output().vsp_y; }},
+    {"dist_m", []() -> float {
+         const auto& e = poshold_estimator_state();
+         return sqrtf(e.px * e.px + e.py * e.py);
+     }},
+    {"vbat_filt_v", []() -> float { return poshold_supervisor_output().vbat_filtered; }},
 };
 constexpr size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);
 static_assert(kFieldCount <= stampfly_link::kMaxDataFields, "too many telemetry fields for one frame");
@@ -177,4 +186,14 @@ void telemetry_stream_update(void) {
 
 uint32_t telemetry_stream_usb_dropped(void) {
     return g_usb_dropped;
+}
+
+void telemetry_text(const char* fmt, ...) {
+    char buf[96];
+    va_list args;
+    va_start(args, fmt);
+    const int n = vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+    if (n <= 0) return;
+    usb_write((const uint8_t*)buf, (size_t)(n < (int)sizeof(buf) ? n : (int)sizeof(buf) - 1));
 }

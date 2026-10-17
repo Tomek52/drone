@@ -24,6 +24,8 @@ CI (GitHub Actions, `.github/workflows/ci.yml`) przy każdym PR:
 | `test_math_utils` | funkcje pomocnicze: ograniczanie, strefa martwa, zawijanie kąta, obrót 2D |
 | `test_position_estimator` | estymator z symulatorem ruchu: znak i skala flow, kompensacja obrotu, wysokość z przechyłem, akcelerometr w układzie heading, bramki jakości z histerezą, estymacja biasu, przerwy flow, całkowanie pozycji z yaw, mapowanie osi |
 | `test_rc_protocol` | pakiet v2 (kodowanie, wersja, suma kontrolna, pakiet v1 jako niezgodny), status drona, cykl trybów, wymuszenie Auto Alt, zmiana trybu w locie, kill switch (próg 0,5 s, podtrzymanie) |
+| `test_position_controller` | regulator: kierunki kątów, obrót przez yaw, limit 10°, zbieżność w pętli zamkniętej (przeregulowanie < 30%), usuwanie zakłócenia przez człon I, drążki (prędkość, hamowanie, limit wyprzedzenia), geofence, wysokość, strefa martwa, tryb krokowy |
+| `test_supervisor` | nadzorca: wejście w tryb, oczekiwanie na start, brak czujnika/kalibracji, timeout, utrata flow z tolerancją i zatrzaskiem, okno wysokości, przełączenie na Stable, utrata łączności (zawis → lądowanie, Manual Alt), bateria (próg, czas, krótkie spadki), geofence, lądowanie |
 | `test_telemetry_frame` | kodowanie ramek telemetrii, suma kontrolna, dzielenie schematu na fragmenty, wektory wzorcowe wspólne z Pythonem |
 
 Testy narzędzi w Pythonie (dekoder telemetrii, kalibracja flow):
@@ -94,5 +96,41 @@ pierwszym włączeniem Position Hold.
 6. Tryb POS HOLD w tej gałęzi: dron leci jak Stable + Auto Alt, pilot pokazuje `STB NO FW`
    (regulator pozycji dochodzi w `feat/position-controller`).
 
-Pozostałe procedury (uwięź → niski lot) zostaną opisane w gałęzi
-`feat/position-controller`.
+### Position Hold — test „w ręku” (bez śmigieł!)
+
+Sprawdza kierunki działania regulatora bez ryzyka lotu.
+
+1. **Zdejmij śmigła.** Kalibracja flow wykonana. Logger na porcie drona (USB).
+2. Pilot: Position Hold, ekran lotu. Trzymaj drona poziomo ~0,4 m nad podłogą.
+3. Start (ekran AtomS3) — silniki kręcą się bez śmigieł, auto-start trwa ~2,5 s.
+   Po nim dron powinien zapiszczeć (rosnący dźwięk), LED stały niebieski, pilot `POS HOLD`.
+4. Przesuń drona ręką **do przodu** o ~20 cm i trzymaj: `pitch_ref_deg` powinien być
+   **dodatni** (nos w górę = hamowanie/powrót). Do tyłu → ujemny.
+5. Przesuń **w prawo**: `roll_ref_deg` **ujemny** (powrót w lewo). W lewo → dodatni.
+6. Zasłoń czujnik flow dłonią: po ~0,2 s 3 piknięcia, LED miga na niebiesko,
+   pilot `STB FLOW` — fallback.
+7. Wyłącz silniki (ekran AtomS3 → lądowanie, albo KILL).
+
+Odwrotne znaki w krokach 4–5 = **nie lataj**; sprawdź kalibrację flow
+i znaki osi w telemetrii (03-architektura.md).
+
+### Position Hold — uwięź
+
+1. Śmigła założone. Przywiąż drona dwiema cienkimi linkami (np. żyłka) do ciężkiej
+   podstawy tak, by mógł się wznieść maksymalnie ~0,5 m i przesunąć ±0,3 m.
+2. Najpierw lot w **Stable + Auto Alt** — sprawdź, że dron zachowuje się jak na fabrycznym firmware.
+3. Lot w **Position Hold**: po starcie dron powinien sam utrzymać pozycję; łagodne
+   wychylenia prawego drążka przesuwają go w kierunku wychylenia, po puszczeniu staje.
+4. Test KILL w powietrzu na uwięzi (dron spadnie z niewielkiej wysokości).
+5. Test utraty łączności: wyłącz pilota — dron ma wisieć ~3 s, potem łagodnie wylądować.
+
+### Position Hold — niski lot
+
+Teksturowana, dobrze oświetlona podłoga (dywan we wzory, puzzle piankowe), bez
+przeciągów, wolna przestrzeń min. 3 × 3 m, okulary ochronne.
+
+1. Start w Position Hold, wysokość ~0,5 m, 30 s zawisu bez drążków — log.
+2. Krótkie ruchy prawym drążkiem w każdą stronę, puszczanie — log.
+3. Zmiana wysokości lewym drążkiem w zakresie 0,3–1,0 m.
+4. Przełączenie w locie na Stable (lewy przycisk przedni) i z powrotem lądowanie.
+5. Analiza i strojenie wg [07-strojenie.md](07-strojenie.md).

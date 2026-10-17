@@ -309,6 +309,7 @@ void loop_400Hz(void) {
     sense_time       = sensor_read();
     poshold_update_estimation();  // [POSHOLD] velocity/position estimate (optical flow)
     rc_link_update();             // [POSHOLD] kill switch, protocol check, status to joystick
+    poshold_safety_update();      // [POSHOLD] Position Hold supervisor, failsafes, controller
     uint32_t cs_time = micros();
 
     // LED Drive
@@ -345,13 +346,15 @@ void loop_400Hz(void) {
 
         // Judge Mode change
         if (judge_mode_change() == 1) Mode = AUTO_LANDING_MODE;
-        if (rc_isconnected() == 0) Mode = AUTO_LANDING_MODE;
+        // [POSHOLD] with Auto Altitude: hover first, land after kLinkLossHoverTime
+        if (rc_isconnected() == 0 && poshold_link_loss_landing_allowed()) Mode = AUTO_LANDING_MODE;
         // if (Range0flag == 20) Mode = AUTO_LANDING_MODE;
         if (OverG_flag == 1) Mode = PARKING_MODE;
         if (Mode != OldMode) ahrs_reset();
 
         // Get command
         get_command();
+        poshold_after_get_command();  // [POSHOLD] altitude setpoint, yaw rate, no flips
 
         // Angle Control
         angle_control();
@@ -1016,6 +1019,9 @@ void angle_control(void) {
             if (Roll_angle_reference < -(30.0f * PI / 180.0f)) Roll_angle_reference = -30.0f * PI / 180.0f;
             if (Pitch_angle_reference > (30.0f * PI / 180.0f)) Pitch_angle_reference = 30.0f * PI / 180.0f;
             if (Pitch_angle_reference < -(30.0f * PI / 180.0f)) Pitch_angle_reference = -30.0f * PI / 180.0f;
+
+            // [POSHOLD] Position Hold replaces the stick-based angle references
+            poshold_override_attitude(&Roll_angle_reference, &Pitch_angle_reference);
 
             // Error
             phi_err   = Roll_angle_reference - (Roll_angle - Roll_angle_offset);

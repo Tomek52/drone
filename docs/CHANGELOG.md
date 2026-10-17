@@ -2,6 +2,25 @@
 
 Zmiany według gałęzi / PR (najnowsze na górze).
 
+## `feat/position-controller`
+
+- Regulator Position Hold (`drone/lib/poshold/src/position_controller.*`): pozycja (P) →
+  prędkość (PI z anti wind-up) → kąty (limit 10°) → regulator kąta upstreamu; wysokość przez
+  `Alt_ref` istniejącego Auto Alt; drążki w układzie drona (ciągły: 0,5 m/s, krokowy: 30 cm / 20 cm),
+  hamowanie w przewidywanym punkcie zatrzymania, limit wyprzedzenia, geofence punktu zadanego.
+- Nadzorca (`drone/lib/poshold/src/poshold_supervisor.*`, ADR 0006): wejście po auto-starcie,
+  fallback do Stable + Auto Alt przy złym flow/wysokości (zatrzaskiwany), zawis 3 s po utracie
+  łączności i łagodne lądowanie, lądowanie przy niskiej baterii i po przekroczeniu geofence.
+- Haczyki w upstreamie: nadzorca przed maszyną stanów, `poshold_after_get_command()`,
+  `poshold_override_attitude()` w `angle_control()`, warunek lądowania po utracie łączności.
+- LED: stały niebieski = Position Hold, migający niebieski = fallback; sygnały dźwiękowe;
+  status dla pilota z faktycznym trybem i przyczyną.
+- Nieblokujące komunikaty tekstowe na USB w locie (`telemetry_text`).
+- Telemetria: stan i przyczyna, punkt i prędkość zadana, odległość od startu, napięcie filtrowane.
+- Testy `native`: 15 testów regulatora (w tym symulacja w pętli zamkniętej) i 14 testów nadzorcy.
+- Dokumentacja: sterowanie i nadzorca w `06-position-hold.md`, strojenie krok po kroku,
+  procedury: test „w ręku”, uwięź, niski lot; rozwiązywanie problemów.
+
 ## `feat/joystick-mode`
 
 - Protokół ESP-NOW v2 (ADR 0005, `common/stampfly_link/src/rc_protocol.hpp`): pole wersji,

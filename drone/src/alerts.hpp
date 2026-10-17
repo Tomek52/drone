@@ -30,9 +30,15 @@ Alert alerts_current(void);
 // Call once per control loop iteration (after led_drive()).
 void alerts_update(void);
 
-// LED override requested by the Position Hold code, applied after the
-// upstream led_drive(): 0 = no override.
-void alerts_set_led_override(uint32_t color_a, uint32_t color_b, uint16_t blink_ms);
-void alerts_clear_led_override(void);
+// LED overrides applied after the upstream led_drive(). Each owner has its
+// own slot; the owner with the higher value wins.
+enum class LedOwner : uint8_t {
+    kPosHold  = 0,  // Position Hold active / fallback (in flight)
+    kProtocol = 1,  // protocol mismatch (on the ground)
+    kCount    = 2,
+};
+// blink_ms = 0: steady color_a; otherwise alternate color_a / color_b.
+void alerts_set_led_override(LedOwner owner, uint32_t color_a, uint32_t color_b, uint16_t blink_ms);
+void alerts_clear_led_override(LedOwner owner);
 
 #endif
