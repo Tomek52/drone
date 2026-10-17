@@ -50,6 +50,13 @@ Najpierw zawsze: log telemetrii (`tools/telemetry_logger.py`) i wykresy
 | krótkie loty mimo naładowanej baterii | zużyta bateria LiHV (wysoki opór wewnętrzny), uszkodzone śmigła | wymień baterię/śmigła; ładuj w pilocie do 4,35 V |
 | bateria nie ładuje się w pilocie | kabel bez zasilania, dioda czerwona = ładowanie | użyj zasilacza 5 V/1 A; zielona dioda = naładowana |
 
+## Diody LED drona
+
+| Objaw | Przyczyna | Co zrobić |
+|---|---|---|
+| wszystkie diody drona (moduł i dwie na płytce) stale białe, niezależnie od trybu | FastLED 3.10.7 nie steruje diodami na ESP32-S3 / Arduino-ESP32 2.0.17 | `fastled/FastLED @ 3.7.8` w `drone/platformio.ini`; diagnostyka: build z `-DPOSHOLD_LED_DEBUG=1` (moduł czerwony, górna dioda płytki zielona, dolna niebieska) |
+| dioda miga na przemian dwoma kolorami (np. żółty/niebieski wygląda biało) | nakładka Position Hold wołała drugi `led_show()` po `led_drive()` | nakładka stosowana w `led_drive()` przed jedynym `led_show()` (już jest) |
+
 ## Lot na uwięzi
 
 | Objaw | Przyczyna | Co zrobić |
