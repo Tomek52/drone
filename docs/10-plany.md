@@ -42,7 +42,7 @@ odróżnić od ruchu pionowego.
 | Sprawa | Stan |
 |---|---|
 | Utrata łączności (zawis ~3 s i lądowanie) z zapisanym logiem | tylko obserwacja bez logu |
-| Progi baterii z logów (`kBatteryWarnVolt`, `kBatteryLandVolt`) | wstępne; w locie 4,2 → 3,8 V w ~20 s |
+| Progi baterii z logów (`kBatteryWarnVolt`, `kBatteryLandVolt`) | przeanalizowane 16 lotów (4,32 → 3,54 V pod obciążeniem): w zawisie napięcie spada o 0,3–0,4 V względem spoczynkowego, najniższe filtrowane 3,56 V, progu 3,50 V żaden lot nie osiągnął. Progi zostają bez zmian; do ich weryfikacji potrzebny jest lot na uwięzi do ostrzeżenia |
 | Strojenie `kPosKp`, `kVelKp`, `kVelKi` z odpowiedzi na wychylenie drążka | czeka na lot z drążkami |
 | Dryf przed wejściem w Active (~15 cm w pierwszych 3–4 s) i trym przechylenia | do zbadania |
 | Pion: błąd ustalony +4…+9 cm i wolny powrót po przeregulowaniu przy starcie | `alt_kp` 0,38 → 0,50 do zweryfikowania w locie; hipoteza o wpływie napięcia na trym obalona (trym trafia w 1,2%) |
