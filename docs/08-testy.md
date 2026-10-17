@@ -9,7 +9,7 @@ w [07-strojenie.md](07-strojenie.md), otwarte sprawy w [10-plany.md](10-plany.md
 | Obszar | Wynik |
 |---|---|
 | Wgrywanie, parowanie, protokół v2, tryby | ✅ działa; po wgraniu dron wymaga restartu zasilania |
-| KILL (lewy drążek ≥ 0,5 s) w powietrzu | ✅ działa (także przy utracie łączności zadziała tylko po przywróceniu pakietów) |
+| KILL (lewy drążek ≥ 0,5 s) w powietrzu | ✅ działa |
 | Kalibracja optical flow | ✅ `swap=true`, `signX=−1`, `signY=+1`, 0,00175 rad/zliczenie, `kFlowAxesVerified=true` |
 | Position Hold, poziom (XY) | ✅ odchylenie std. 3–5 cm w zawisie, powrót po popchnięciu 1–4 s, bez kołysania; `kPosKp`, `kVelKp`, `kVelKi` bez zmian |
 | Hamowanie po puszczeniu drążka | ✅ `kBrakeTau` 0,30 → 0,45, przeregulowanie za nowy punkt 3–6 cm |
@@ -17,7 +17,7 @@ w [07-strojenie.md](07-strojenie.md), otwarte sprawy w [10-plany.md](10-plany.md
 | Wysokość poniżej ok. 3,6 V | ⚠️ wahania ±0,15 m (okres ~4,5 s), przyczyna nieznana (wykluczone: ToF, sprzężenie napięcia, wzmocnienie ciągu) |
 | Utrata łączności | ✅ po poprawce: zawis 3 s, `ph_reason` = 7, lądowanie; wcześniej lądował po 0,1 s (błąd nadzorcy, naprawiony) |
 | Niska bateria: automatyczne lądowanie | ✅ przy 3,34 V filtrowanego; ⚠️ przy słabszej baterii dron traci wysokość już przy ok. 3,40 V |
-| Niska bateria: ostrzeżenie | ⚠️ buzzer drona niesłyszalny w locie (nawet po zmianie na 2500 Hz — niezweryfikowane); ostrzeżenie w pilocie (pik + `LOW BATT`) dodane, jeszcze nielatane |
+| Niska bateria: ostrzeżenie | ⚠️ buzzer drona niesłyszalny w locie, także po zmianie tonu 600 → 2500 Hz (test 2026-10-17); ostrzeżenie w pilocie (pik + `LOW BATT`) dodane, jeszcze nielatane |
 | Ochrona OverG (> 2 g) | ✅ za mocne uderzenie w drona wyłącza silniki (upstream, zamierzone) |
 | Awaria czujnika po jednym rozruchu (PMW3901 martwy) | ✅ ponowna inicjalizacja 3 razy, komunikat w logu, wymaga cyklu zasilania |
 
