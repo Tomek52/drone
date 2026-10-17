@@ -216,3 +216,21 @@ W pokoju z jednolitymi panelami SQUAL 8–50 i dwa loty swobodne wypadły w fall
 
 Wniosek: jakość flow zależy od podłogi, nie od regulatora. Jednolita podłoga + słabe światło
 (`flow_shutter` = 8191) daje SQUAL 8–50 i fallbacki; płytki z fugami dają 60–115.
+
+### Korytarz — odpowiedź na wychylenie drążka (2026-10-17, `20261017_212223.csv`)
+
+Position Hold aktywny 33 s (SQUAL mediana 101, 0% < 30). Sześć wychyleń prawego drążka:
+
+| Zdarzenie | Wychylenie | Prędkość zadana / osiągnięta | Skok punktu zadanego / pozycja |
+|---|---|---|---|
+| przód, 38,2 s | 0,42 przez 1,05 s | 0,26 / 0,23 m/s, opóźnienie 0,5–0,8 s | −0,01 → −0,15 m; pozycja wychodzi o 5 cm dalej |
+| bok, 31,2 s | 0,44 przez 0,59 s | 0,26 / 0,19 m/s | punkt zadany −0,10 m, dron mija go o 8 cm i wraca wolno |
+
+Zadane kąty maks. ~3° (limit 10°): pętla prędkości daleko od nasycenia. Po puszczeniu drążka dron
+hamuje dłużej niż zakłada `kBrakeTau` (0,3 s; realnie ~0,45 s), więc mija punkt zadany i wraca.
+
+### Korytarz — zmiany wysokości (2026-10-17, `20261017_212835.csv`)
+
+Active 25,6 s, błąd XY std. 4,3 / 3,0 cm, SQUAL mediana 99. Zadana wysokość zmieniona lewym
+drążkiem: 0,50 → 0,60 (osiągnięte 0,64–0,69, błąd ustalony +6…+9 cm) → 0,41 (osiągnięte 0,47 po ~2,5 s,
+potem wahania ±8–10 cm, okres 3–4 s). `thrust0` rośnie 0,64 → 0,67 przy spadku napięcia 3,88 → 3,76 V.
