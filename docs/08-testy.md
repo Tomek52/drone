@@ -181,3 +181,21 @@ Pierwszy start w tej sesji (7,55 s) skończył się fallbackiem przez geofence p
 `vx` = 27,6 m/s przeniesione z parkowania (zob. docs/09, „Estymator na ziemi"), a gwałtowne
 szarpnięcie uwięzi uruchomiło zabezpieczenie przeciążeniowe. Position Hold nie zdążył wejść
 w Active ani w tym, ani w drugim starcie, więc KILL sprawdzony był w trybie oczekiwania na wejście.
+
+### Uwięź — Position Hold po naprawie prędkości na ziemi (2026-10-17, `20261017_174107.csv`)
+
+Bateria 4,08 V przed startem, dron stał nieruchomo 2–3 min w parkowaniu (`vel_x`, `vel_y`, `pos_x`, `pos_y` = 0,000).
+
+| Miara | Wynik |
+|---|---|
+| wejście w Active | 4,3 s po starcie (7,1 s → 11,4 s) |
+| czas w Active | **31 s** (11,4–42,3 s) |
+| błąd pozycji względem punktu zadanego | x: std. 2,2 cm (zakres −8…+5 cm); y: std. 7 cm (−34…+26 cm, przy zmianie punktu zadanego drążkiem) |
+| wysokość | średnio 0,54 m, std. 4,8 cm, zakres 0,44–0,64 m (przy `z_dot_kp` = 0,06) |
+| stały przechył w locie | `roll_ref` średnio −2,3°, rośnie do −3,9° w 20 s (człon całkujący kompensuje stałe zakłócenie w prawo: ciągnięcie uwięzi lub trym) |
+| znoszenie w prawo | przed wejściem w Active 0,33 m w 4,3 s (zachowanie Stable); po wejściu pozycja trzymana |
+| koniec | `ph_state` 3, `ph_reason` 4 (utrata flow): SQUAL < 30 przez ~0,7 s (19–28), `flow_valid` → 0 po 3 złych próbkach, fallback po 0,2 s zwłoki; potem KILL |
+
+SQUAL w fazie Active: mediana 38, p5 = 28, 7,8% próbek < 30 (`kFlowMinSqual`). `flow_shutter` = 8191
+(maksimum) cały czas: za mało światła. Zalecenie docs/07 (próg ≈ 50–60% typowej wartości, tu 19–23)
+i lepsze oświetlenie podłogi, zanim zmienimy próg.
