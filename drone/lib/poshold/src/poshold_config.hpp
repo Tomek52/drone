@@ -24,15 +24,21 @@ namespace config {
 // the mapping below must be verified with the hand-carry test (docs/08-testy.md).
 // CALIBRATE: set kFlowAxesVerified = true only after that test passed. Position
 // Hold refuses to engage while it is false.
-constexpr bool kFlowAxesVerified = false;
-constexpr bool kFlowSwapXY       = false;  // use sensor Y as body X (and vice versa)
-constexpr float kFlowSignX       = 1.0f;   // +1 or -1, applied after the swap
+// Verified 2026-10-14 on the real drone: axis mapping (two carries), rotation
+// compensation and scale against the gyro (logs/20261014_223324.csv), ToF height
+// against a 35 cm table. NOT verified by a measured 1 m carry (hand error +-40%):
+// check the velocity scale during the tether tests.
+constexpr bool kFlowAxesVerified = true;
+constexpr bool kFlowSwapXY       = true;   // use sensor Y as body X (and vice versa)
+constexpr float kFlowSignX       = -1.0f;  // +1 or -1, applied after the swap
 constexpr float kFlowSignY       = 1.0f;
 
-// Angle per count. Derived from the datasheet field of view (42 deg) over
-// the 35-pixel array: 42 deg / 35 = 0.733 rad / 35 = 0.0209 rad.
-// CALIBRATE with the known-distance test (docs/07-strojenie.md).
-constexpr float kFlowRadPerCount = 0.0209f;
+// Angle per count [rad]. The first guess from the datasheet field of view
+// (42 deg over 35 px = 0.0209 rad) is ~12x too large. Measured on the real drone
+// from pure tilts against the attitude/gyro (logs/20261014_222429.csv, 8 windows,
+// median 0.00175, spread +-10%); the earlier hand-carry value (0.00341) was wrong
+// because the carried distances were not 1 m.
+constexpr float kFlowRadPerCount = 0.00175f;
 
 // Flow is read every N-th 400 Hz control loop (4 -> 100 Hz).
 constexpr uint8_t kFlowReadDivider = 4;
@@ -94,7 +100,7 @@ constexpr float kMaxTilt        = 0.1745f;  // [rad] (10 deg) hard limit of roll
 constexpr float kMinAltitude    = 0.20f;  // [m] altitude setpoint range in Position Hold
 constexpr float kMaxAltitude    = 1.20f;  //     (inside the optical flow height window)
 constexpr float kMaxLead        = 0.50f;  // [m] max distance between setpoint and drone while flying with the stick
-constexpr float kBrakeTau       = 0.30f;  // [s] on stick release the setpoint = position + velocity * kBrakeTau
+constexpr float kBrakeTau       = 0.45f;  // [s] on stick release the setpoint = position + velocity * kBrakeTau (0.30 overshot by 5-8 cm)
 // Geofence around the take-off point: the setpoint never leaves kFenceRadius;
 // beyond kFenceRadius * kFenceLandFactor the drone lands (estimate or control failure).
 constexpr float kFenceRadius     = 2.00f;  // [m]

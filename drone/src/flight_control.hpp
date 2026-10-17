@@ -131,6 +131,7 @@ extern volatile float Roll_angle_reference, Pitch_angle_reference, Yaw_angle_ref
 // スロットル指令値
 // Throttle
 extern volatile float Thrust_command;
+extern volatile float Thrust0;  // [POSHOLD] hover trim duty, exported for telemetry
 // 角速度指令値
 // Rate command
 extern volatile float Roll_rate_command, Pitch_rate_command, Yaw_rate_command;

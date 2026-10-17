@@ -88,6 +88,8 @@ class PositionEstimator {
     void reset();
     // Sets the current position as the origin; velocity and bias are kept.
     void reset_position();
+    // Zero-velocity update: sets the fused velocity to zero; position and bias are kept.
+    void reset_velocity();
 
     // Called at the control rate.
     //   fx, fy, fz : body specific force [g] (level and still: 0, 0, -1)

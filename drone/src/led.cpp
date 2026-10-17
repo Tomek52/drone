@@ -24,6 +24,11 @@
  */
 
 #include "led.hpp"
+#include "alerts.hpp"  // [POSHOLD]
+
+#ifndef POSHOLD_LED_DEBUG
+#define POSHOLD_LED_DEBUG 0
+#endif
 #include "sensor.hpp"
 #include "rc.hpp"
 #include "flight_control.hpp"
@@ -106,6 +111,18 @@ void led_drive(void) {
             LedBlinkCounter++;
         }
     }
+
+    alerts_apply_led_override();  // [POSHOLD] Position Hold / protocol LED colors, one frame per loop
+
+#if POSHOLD_LED_DEBUG
+    // [POSHOLD] bench diagnostics (build with -DPOSHOLD_LED_DEBUG=1): fixed bright colors to
+    // tell which physical LED is which. esp_led = red, onboard LED 1 = green, LED 2 = blue.
+    led_esp[0]     = CRGB(0xFF0000);
+    led_onboard[0] = CRGB(0x00FF00);
+    led_onboard[1] = CRGB(0x0000FF);
+    FastLED.show(255);
+    return;
+#endif
 
     // LED show
     led_show();

@@ -5,8 +5,11 @@ oparty na oficjalnym, otwartym firmware M5Stack (licencja MIT), rozszerzony
 o nowy tryb lotu **Position Hold / Auto**: dron wisi w miejscu (XY z czujnika
 optical flow PMW3901, Z z czujnika ToF), a drążki przesuwają punkt zadany.
 
-> ⚠️ Projekt nie był jeszcze testowany w locie. Zanim polecisz, przejdź procedurę
-> testów (niżej) od stołu bez śmigieł. Stan prac: [docs/CHANGELOG.md](docs/CHANGELOG.md).
+> ⚠️ Projekt przeszedł pierwszą kampanię testów na sprzęcie (stół, KILL, kalibracja flow, Position
+> Hold w ręku, na uwięzi i krótki zawis swobodny ~20 s w korytarzu z płytkami), ale **nie jest
+> gotowy do swobodnego latania**: wzmocnienia regulatorów są wstępne, progi baterii niedostrojone,
+> a Position Hold działa tylko nad podłogą z wyraźnym wzorem i dobrym światłem (zob. niżej).
+> Procedurę testów przejdź od stołu bez śmigieł. Stan prac: [docs/CHANGELOG.md](docs/CHANGELOG.md).
 
 ## Tryby lotu
 
@@ -91,6 +94,10 @@ Pełne instrukcje: [docs/02-instalacja-i-wgrywanie.md](docs/02-instalacja-i-wgry
 2. **Uwięź:** Stable, potem Position Hold, KILL, wyłączenie pilota (zawis → lądowanie).
 3. **Niski lot** (~0,5 m) nad **teksturowaną, dobrze oświetloną podłogą**, wolna przestrzeń 3 × 3 m.
 
+   **Podłoga decyduje o jakości flow.** Zmierzone SQUAL (próg 30): płytki z fugami 60–115, jednolite
+   panele przy słabym świetle 8–50 (loty swobodne wypadały w fallback po ułamku sekundy). Przed lotem
+   zrób ankietę SQUAL bez silników (dron w ręku ~0,5 m nad podłogą, `flow_squal` w logu, mediana ≥ 45).
+
 Krok po kroku: [docs/08-testy.md](docs/08-testy.md).
 
 ## Strojenie regulatorów z logów
@@ -111,18 +118,21 @@ Dryf, parowanie, jakość optical flow, krótkie loty, kody błędów na ekranie
 ## Co nie zostało potwierdzone w oficjalnych źródłach
 
 Zweryfikowano z dokumentacją M5Stack: wersje sprzętu, mapę pinów (w tym CS PMW3901 = G12),
-adresy I2C, procedury wgrywania, parowania i ładowania, M5Burner. **Do weryfikacji na sprzęcie:**
+adresy I2C, procedury wgrywania, parowania i ładowania, M5Burner. Wyniki testów na sprzęcie
+(Windows 11, 2026-10-14, StampFly v1.0 + Atom JoyStick/AtomS3):
 
-| Co | Gdzie opisane |
-|---|---|
-| orientacja montażu i skala PMW3901 (kalibracja obowiązkowa) | docs/06, docs/08 |
-| sterownik USB w Windows 11 bez instalacji | docs/02 |
-| czy dron startuje sam po wgraniu w trybie pobierania (zwykle trzeba zresetować) | docs/02 |
-| czy parowanie przetrwa ponowne wgranie firmware'u pilota | docs/02 |
-| adres wgrywania gotowych plików `.bin` z upstreamu (zalecany M5Burner) | docs/02 |
-| wartość rezystora bocznikowego INA3221 (prąd baterii nie jest jeszcze mierzony) | docs/01 |
-| fizyczne położenie przycisku KILL (wg kodu: wciśnięcie lewego drążka w Mode 2) | docs/05 |
-| progi napięcia baterii, wzmocnienia regulatorów (wartości wstępne z symulacji) | docs/07 |
+| Co | Wynik | Gdzie opisane |
+|---|---|---|
+| sterownik USB w Windows 11 bez instalacji | ✅ port COM pojawia się sam | docs/02 |
+| CS PMW3901 = G12 | ✅ `PMW3901 ready (id=0x49)` | docs/08 |
+| czy dron startuje sam po wgraniu | ❌ trzeba odłączyć i podłączyć zasilanie | docs/02 |
+| czy parowanie przetrwa wgranie firmware'u pilota | ✅ przetrwało | docs/02 |
+| orientacja montażu i skala PMW3901 | ✅ skalibrowane: `swap=true`, `signX=−1`, `0,00175 rad/zliczenie` (ok. 12× mniej niż z datasheetu) | docs/06, docs/07, docs/08 |
+| fizyczne położenie przycisku KILL | ✅ wciśnięcie lewego drążka ≥ 0,5 s zatrzymuje silniki (próba bez śmigieł) | docs/05 |
+| częstotliwość telemetrii przez pilota | ⚠️ ok. 16 Hz, nie 25 Hz | docs/03, docs/08 |
+| dystans 1 m z przenoszenia ręcznego ±15% | ⚠️ nie da się zweryfikować ręcznie (rozrzut ±40%); skala potwierdzona z żyroskopu | docs/07 |
+| wartość rezystora bocznikowego INA3221 (prąd baterii nie jest jeszcze mierzony) | do weryfikacji | docs/01 |
+| progi napięcia baterii, wzmocnienia regulatorów (wartości wstępne z symulacji) | do weryfikacji; pod lekkim obciążeniem bez śmigieł 4,25 → ok. 3,95 V | docs/07 |
 
 ## Struktura repozytorium
 

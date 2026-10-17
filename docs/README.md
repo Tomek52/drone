@@ -15,6 +15,7 @@ są oznaczone: **⚠️ do weryfikacji na sprzęcie**.
 | [07-strojenie.md](07-strojenie.md) | Strojenie regulatorów krok po kroku z użyciem logów |
 | [08-testy.md](08-testy.md) | Testy `native`, procedury testów na sprzęcie |
 | [09-rozwiazywanie-problemow.md](09-rozwiazywanie-problemow.md) | Typowe problemy i ich rozwiązania |
+| [10-plany.md](10-plany.md) | Rzeczy na później (m.in. wysokość bezwzględna nad przeszkodami) i otwarte sprawy po testach na sprzęcie |
 | [decyzje/](decyzje/) | Architecture Decision Records (ADR) — jedna decyzja = jeden plik |
 | [CHANGELOG.md](CHANGELOG.md) | Zmiany według gałęzi / PR |
 

@@ -40,6 +40,11 @@ pio run -d joystick     # firmware pilota (środowisko m5stack-atoms3)
 ```
 
 Pierwsze budowanie pobiera toolchain ESP32-S3 i biblioteki (kilka minut).
+
+> **Windows:** FastLED 3.10.7 sprawdza `__has_include(<fs.h>)`. System plików Windows nie
+> rozróżnia wielkości liter, więc znajduje `FS.h` z frameworku i próbuje kompilować obsługę
+> karty SD, co kończy się błędem `looser throw specifier` (GCC 8.4). Na Linuxie (CI) tego
+> nie ma. Oba `platformio.ini` mają dlatego `lib_ignore = SD` (żaden firmware nie używa SD).
 Wersje są przypięte w `platformio.ini` — zob. [ADR 0002](decyzje/0002-przypiecie-wersji-toolchaina.md).
 
 ## Testy na komputerze (`native`)
@@ -63,9 +68,8 @@ Procedura z oficjalnego przewodnika M5Stack:
    ```
    Jeśli PlatformIO wybierze zły port, dopisz w `drone/platformio.ini` w sekcji
    środowiska `upload_port = COM5` (Twój numer portu).
-4. Odłącz USB i podłącz baterię (albo naciśnij reset), aby uruchomić nowy firmware.
-   ⚠️ Po wgraniu w trybie pobierania ESP32-S3 zwykle nie startuje sam — potrzebny
-   jest reset/ponowne zasilenie; do weryfikacji na sprzęcie.
+4. Odłącz USB i podłącz baterię (albo odłącz i podłącz USB bez przycisku), aby uruchomić nowy
+   firmware. Zweryfikowane: po wgraniu dron **nie** startuje sam, potrzebny jest restart zasilania.
 
 Podgląd komunikatów (z dronem na USB, bez śmigieł):
 
@@ -75,7 +79,8 @@ pio device monitor -d drone -b 115200
 
 ## Wgrywanie na pilota (Atom JoyStick z AtomS3)
 
-Procedura z oficjalnego przewodnika M5Stack:
+Procedura z oficjalnego przewodnika M5Stack (po wgraniu naciśnij krótko boczny przycisk — reset;
+bez tego pilot zostaje w trybie pobierania):
 
 1. Podłącz AtomS3 kablem USB.
 2. **Przytrzymaj boczny przycisk (reset) AtomS3 ok. 2 s**, aż zaświeci się
@@ -101,7 +106,8 @@ Procedura z oficjalnego przewodnika M5Stack (zgodna z kodem upstreamu):
    sukcesu i restartuje się.
 
 Parowanie wykonuje się raz; po wgraniu nowego firmware'u na pilota zapisane dane
-zwykle zostają (partycja SPIFFS nie jest nadpisywana przy `upload`). ⚠️ do weryfikacji.
+zostają (partycja SPIFFS nie jest nadpisywana przy `upload`). Zweryfikowane: pilot nadal
+łączył się z dronem po wgraniu firmware'u.
 
 ## Powrót do fabrycznego firmware'u (M5Burner)
 

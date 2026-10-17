@@ -40,3 +40,13 @@
 - Aktualizacje wersji robimy świadomie, w osobnym PR, z ponowną kompilacją i testami.
 - Przy `git subtree pull` z upstreamu możliwy konflikt w `platformio.ini` (zmiany
   oznaczone `[POSHOLD]`).
+
+## Korekta po testach na sprzęcie (2026-10-17)
+
+- **Dron: `FastLED @ 3.7.8` zamiast 3.10.7.** Z 3.10.7 wszystkie trzy diody drona (moduł StampS3
+  oraz dwie diody płytki) świecą stale na biało i nie reagują na dane z firmware'u, nawet przy
+  wymuszeniu czerwonego/zielonego/niebieskiego. Z 3.7.8 te same kolory działają (moduł czerwony,
+  górna dioda płytki zielona, dolna niebieska). Firmware jest też o ~280 KB mniejszy.
+- Pilot nadal używa 3.10.7 (jego diody nie były sprawdzane); do ujednolicenia po osobnym teście.
+- `lib_ignore = SD` (Windows) pozostaje dla pilota z 3.10.7; dla drona z 3.7.8 nie był już
+  weryfikowany osobno.

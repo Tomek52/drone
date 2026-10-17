@@ -4,6 +4,10 @@
 
 #include "poshold_glue.hpp"
 
+#ifndef POSHOLD_PMW_DEBUG
+#define POSHOLD_PMW_DEBUG 0
+#endif
+
 #include <Arduino.h>
 
 #include <math.h>
@@ -31,6 +35,10 @@ uint32_t g_last_flow_us    = 0;
 uint8_t g_last_mode        = INIT_MODE;
 int32_t g_flow_sum_x       = 0;  // cumulative raw counts (exact segment sums for calibration)
 int32_t g_flow_sum_y       = 0;
+// [POSHOLD] diagnostics: reject reasons of EVERY flow sample (100 Hz), because the
+// 50 Hz telemetry only sees one phase of them.
+uint8_t g_reject_mask       = 0;  // bit n set: reason n occurred since the last telemetry read
+uint32_t g_reject_total     = 0;  // cumulative number of rejected samples
 
 // Minimum valid bottom ToF reading [mm]; upstream ignores readings <= 20 mm.
 constexpr int16_t kMinRawRangeMm = 20;
@@ -57,8 +65,19 @@ void poshold_update_estimation(void) {
 
     // The take-off point is the origin (geofence, logs): reset on take-off only,
     // not on FLIGHT -> AUTO_LANDING / FLIP transitions.
-    if (Mode == FLIGHT_MODE && g_last_mode == PARKING_MODE) g_estimator.reset_position();
+    if (Mode == FLIGHT_MODE && g_last_mode == PARKING_MODE) {
+        g_estimator.reset_position();
+        g_estimator.reset_velocity();
+    }
     g_last_mode = Mode;
+
+    // Zero-velocity update: a parked drone does not move. On the ground the flow is rejected
+    // (height < 0.10 m), so the accelerometer bias was integrated unchecked: after a minute
+    // the velocity reached 20-27 m/s and the geofence tripped right after take-off.
+    if (Mode == PARKING_MODE) {
+        g_estimator.reset_position();
+        g_estimator.reset_velocity();
+    }
 
     g_estimator.predict(Accel_x, Accel_y, Accel_z, Roll_rate, Pitch_rate, Roll_angle - Roll_angle_offset,
                         Pitch_angle - Pitch_angle_offset, Yaw_angle - Yaw_angle_offset, Interval_time);
@@ -70,6 +89,10 @@ void poshold_update_estimation(void) {
     g_last_flow_us     = now;
 
     g_last_flow = pmw3901_read_motion();
+#if POSHOLD_PMW_DEBUG
+    // [POSHOLD] bench diagnostics only (build with -DPOSHOLD_PMW_DEBUG=1), ~2 Hz.
+    if (g_loop_counter % 200 == 0) pmw3901_debug_dump();
+#endif
     if (g_last_flow.ok) {
         g_flow_sum_x += g_last_flow.dx;
         g_flow_sum_y += g_last_flow.dy;
@@ -83,6 +106,10 @@ void poshold_update_estimation(void) {
     // Altitude2: Kalman-filtered bottom ToF distance (slant range, not tilt compensated).
     const float range = (RawRange > kMinRawRangeMm) ? (float)Altitude2 : -1.0f;
     g_estimator.update_flow(s, range, dt);
+
+    const uint8_t reason = (uint8_t)g_estimator.state().reject;
+    g_reject_mask |= (uint8_t)(1u << reason);
+    if (reason != 0) g_reject_total++;
 }
 
 const poshold::EstimatorState& poshold_estimator_state(void) {
@@ -99,6 +126,16 @@ int32_t poshold_flow_sum_x(void) {
 
 int32_t poshold_flow_sum_y(void) {
     return g_flow_sum_y;
+}
+
+uint8_t poshold_flow_reject_mask_take(void) {
+    const uint8_t m = g_reject_mask;
+    g_reject_mask   = 0;
+    return m;
+}
+
+uint32_t poshold_flow_reject_total(void) {
+    return g_reject_total;
 }
 
 // ---------------------------------------------------------------------------

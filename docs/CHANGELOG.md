@@ -2,6 +2,24 @@
 
 Zmiany według gałęzi / PR (najnowsze na górze).
 
+## Pierwsze testy na sprzęcie (Windows 11, 2026-10-14)
+
+Gałęzie (każda od poprzedniej, ostatnia zawiera wszystko): `fix/windows-fastled-sd` →
+`fix/joystick-telemetry-forward` → `fix/pmw3901-burst-read` → `tune/flow-calibration` →
+`docs/bench-results` → `fix/flow-reject-diagnostics` → `docs/tether-results`.
+
+- Build na Windows: `lib_ignore = SD` w obu `platformio.ini` (FastLED i `fs.h`/`FS.h`).
+- Pilot: bufor TX USB-CDC 2048 B (ramki telemetrii 236 B były gubione przy 256 B).
+- PMW3901: pierwszy burst po transakcji BMI270 nie dociera do czujnika; burst wykonywany dwa razy.
+  Diagnostyka `-DPOSHOLD_PMW_DEBUG=1` (linie `[PMWDBG]`).
+- Kalibracja flow na sprzęcie: `swap=true`, `signX=−1`, `signY=+1`, `kFlowRadPerCount = 0,00175`
+  (z pochyleń względem żyroskopu), `kFlowAxesVerified = true`.
+- Telemetria: pola `flow_rej_mask` (powody odrzucenia wszystkich próbek 100 Hz między ramkami)
+  i `flow_rej_total`.
+- Zweryfikowane na sprzęcie: protokół v2 i tryby, KILL (bez śmigieł), Position Hold „w ręku”
+  (4 kierunki, fallback przy utracie flow). Pierwszy lot na uwięzi (Stable + Auto Alt): zob.
+  `08-testy.md`, sekcja „Uwięź — wyniki”.
+
 ## `docs/readme-and-guides`
 
 - Pełny główny `README.md` (etap 4): tryby, wymagania, budowanie i testy, wgrywanie,

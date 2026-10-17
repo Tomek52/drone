@@ -24,6 +24,10 @@ const Pmw3901Motion& poshold_last_flow(void);
 // Cumulative raw flow counts since boot (for the hand-carry calibration).
 int32_t poshold_flow_sum_x(void);
 int32_t poshold_flow_sum_y(void);
+// Diagnostics: bit n = flow reject reason n occurred in any 100 Hz sample since the
+// previous call (clears the mask); cumulative count of rejected samples.
+uint8_t poshold_flow_reject_mask_take(void);
+uint32_t poshold_flow_reject_total(void);
 
 // --- Position Hold control and safety (feat/position-controller) -------------
 // Before the mode state machine (after rc_link_update()): supervisor,

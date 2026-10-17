@@ -111,7 +111,10 @@ const float alt_td     = 0.5f;   // 0.5//soso 0.5
 const float alt_eta    = 0.125f;
 const float alt_period = 0.0333;
 
-const float z_dot_kp  = 0.08f;  // 0.35//soso 0.1
+// [POSHOLD] 0.08 -> 0.06 (tune/altitude-gains): the climb-rate loop saturated the +-15% thrust
+// clamp and oscillated (period ~3.2 s, 0.2..0.9 m around 0.5 m) on the first Position Hold
+// tether flight, see docs/07-strojenie.md.
+const float z_dot_kp  = 0.06f;  // 0.35//soso 0.1 (upstream 0.08)
 const float z_dot_ti  = 0.95f;  // 500.0//soso 0.95
 const float z_dot_td  = 0.08f;  // 0.15//1.0//soso 0.08
 const float z_dot_eta = 0.125f;

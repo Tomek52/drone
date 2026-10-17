@@ -314,6 +314,11 @@ void IRAM_ATTR onTimer() {
 }
 
 void setup() {
+    // [POSHOLD] The default USB-CDC TX buffer (256 B) is barely larger than one
+    // 236 B telemetry frame, so telemetry_forward() dropped almost every frame.
+    // Must be set before begin() (M5.begin()), which only applies the default
+    // when no buffer has been configured.
+    USBSerial.setTxBufferSize(2048);
     M5.begin();
     Wire1.begin(38, 39);
     Wire1.setClock(400 * 1000);

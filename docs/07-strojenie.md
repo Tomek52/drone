@@ -92,3 +92,19 @@ mocno zwiększyć `kPosKp`, najpierw popraw pętlę prędkości.
 | Log | Parametr | Stara → nowa | Obserwacja |
 |---|---|---|---|
 | `logs/20261015_101500.csv` | `kVelKp` | 2,0 → 1,5 | mniejsze falowanie, hamowanie dłuższe o ~10 cm |
+
+### Dziennik zmian parametrów (nasz sprzęt)
+
+| Log | Parametr | Stara → nowa | Obserwacja |
+|---|---|---|---|
+| `logs/20261014_221210.csv` | `kFlowSwapXY` | `false` → `true` | ruch do przodu = licznik czujnika −Y, w prawo = +X |
+| `logs/20261014_221210.csv` | `kFlowSignX` | 1,0 → −1,0 | jw. (po zamianie osi) |
+| `logs/20261014_221210.csv` | `kFlowRadPerCount` | 0,0209 → 0,00341 | z przenoszenia 1 m w ręku; odległości niewiarygodne (powtórzenie dało rozrzut ±40% między osiami), skorygowane w następnym wierszu |
+| `logs/20261014_222429.csv` | `kFlowRadPerCount` | 0,00341 → 0,00175 | skala z czystych pochyleń względem kąta/żyroskopu (8 okien: 0,0015–0,0018, mediana 0,00175); znaki kompensacji obrotu zgodne z docs/06; regresja `vel_x` na `h·q` miała nachylenie +0,8 (powinno ≈ 0) |
+| `logs/20261014_223324.csv` | `kFlowAxesVerified` | `false` → `true` | po K = 0,00175: nachylenia kompensacji −0,06 / +0,03 (przed +0,76 / −0,90), `vel_x` max 0,12, `vel_y` max 0,20 przy szybkim pochyleniu (p95 0,14); ToF na stoliku 35 cm = 347 mm. Dystans 1 m ±15% niezweryfikowany ręcznie — sprawdzić na uwięzi |
+| `logs/20261014_235803.csv` | `z_dot_kp` (upstream, pętla prędkości pionowej) | 0,08 → 0,06 | Position Hold na uwięzi: XY dobrze (±7 cm), ale wysokość oscyluje 0,21–0,92 m wokół 0,50 m z okresem ~3,2 s, gaz uderza w ograniczenia ±15% (0,54–0,76), `vz` do 1,3 m/s. Zmieniony tylko `z_dot_kp`; w telemetrii pole `thrust0` (zastąpiło `acc_bias_y`). Oczekiwanie: mniejsza amplituda, brak uderzeń w ograniczenia; jeśli nie — następnie `alt_kp` |
+| `logs/20261015_001652.csv` | `z_dot_kp` (wynik) | 0,06 | wysokość 0,38–0,71 m (było 0,21–0,92), std. 0,080 m (było 0,125), gaz 0,67–0,73 poza ograniczeniami ±15%, `vz` std. 0,12 (było 0,33), błąd XY 4 cm. Amplituda rośnie w drugiej połowie lotu razem ze spadkiem napięcia 4,09 → 3,61 V (`thrust0` 0,67 → 0,71): wpływ napięcia/trymu, do zbadania przed `alt_kp` |
+| `logs/20261017_174107.csv` | `kFlowMinSqual` (bez zmiany) | 30 | SQUAL w Active: mediana 38, p5 28, 7,8% próbek < 30; Position Hold trzymał 31 s (błąd XY 2–7 cm) i wypadł przez 0,7 s SQUAL 19–28 przy `flow_shutter` = 8191 (za ciemno). Do rozważenia: lepsze światło, potem próg ≈ 22 |
+| `logs/20261017_212223.csv` | `kBrakeTau` | 0,30 → 0,45 | po puszczeniu drążka dron mija nowy punkt zadany o 5–8 cm i wraca (hamowanie ~0,45 s przy 0,2 m/s). Zmienione, wynik w następnym logu |
+| `logs/20261017_214337.csv` | `kBrakeTau` (wynik) | 0,45 | cztery wychylenia (2× przód, 2× bok): przeregulowanie za nowy punkt zadany 3,2 / 5,4 / 6,5 / 3,3 cm, średnio 4,6 cm (było 5 i 8 cm); błąd XY w zawisie std. 3–5 cm, więc to poziom szumu. Zostaje 0,45 |
+| `logs/20261017_212835.csv` | `alt_kp` / `z_dot_kp` (bez zmiany) | 0,38 / 0,06 | wysokość: błąd ustalony +6…+9 cm i wahania ±8–10 cm (okres 3–4 s) przy spadku napięcia; `thrust0` 0,64 → 0,67. Do rozważenia po `kBrakeTau` |
