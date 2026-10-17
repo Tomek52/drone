@@ -187,6 +187,15 @@ void flight_mode_ui_update_running(void) {
         beep();
     }
 
+    // The drone buzzer is drowned out by the motors in flight, so the low-battery warning
+    // (status flag from the drone, set below 3.50 V filtered) also sounds here.
+    const bool low_batt = status_fresh() && (g_status.flags & kStatusLowBattery);
+    static uint32_t last_batt_beep = 0;
+    if (low_batt && !g_kill_flag && millis() - last_batt_beep > 1500) {
+        last_batt_beep = millis();
+        buzzer_sound(3000, 150);
+    }
+
     // The first line of the top-left panel shows the mode instead of the front ToF distance.
     lv_obj_t *label = guider_ui.screen_running_label_1;
     lv_obj_t *panel = guider_ui.screen_running_cont_2;
@@ -199,6 +208,10 @@ void flight_mode_ui_update_running(void) {
         fg = kColWhite;
     } else if (protocol_error()) {
         snprintf(text, sizeof(text), "PROTO ERR");
+        bg = kColError;
+        fg = kColWhite;
+    } else if (low_batt) {
+        snprintf(text, sizeof(text), "LOW BATT");
         bg = kColError;
         fg = kColWhite;
     } else if (g_sel.mode() == FlightMode::kPosHold) {
