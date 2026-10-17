@@ -24,6 +24,11 @@ void PositionEstimator::reset_position() {
     s_.py = 0.0f;
 }
 
+void PositionEstimator::reset_velocity() {
+    s_.vx = 0.0f;
+    s_.vy = 0.0f;
+}
+
 void PositionEstimator::predict(float fx, float fy, float fz, float p, float q, float roll, float pitch, float yaw,
                                 float dt) {
     if (!(dt > 0.0f)) return;

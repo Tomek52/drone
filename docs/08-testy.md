@@ -168,3 +168,16 @@ Wykonane przez użytkownika na uwięzi, **bez zapisu telemetrii** (brak logu): K
 zatrzymuje silniki, wyłączenie pilota powoduje zawis i lądowanie. Wynik jest obserwacją, nie
 pomiarem: czas zawisu (~3 s), łagodność lądowania i zachowanie `ph_state`/`ph_reason` nie zostały
 zmierzone. Do powtórzenia z loggerem przy najbliższym locie.
+
+### Uwięź — KILL w powietrzu (2026-10-17, z logiem `20261017_172112.csv`)
+
+| Obserwacja | Wartość |
+|---|---|
+| stan przy KILL | `mode` 2 (lot), `ph_state` 1 (oczekiwanie na wejście), wysokość 0,31 m, `vz` +0,38 m/s, gaz 0,60 |
+| reakcja | `mode` 2 → 3 (parkowanie) w jednej próbce (~50 ms), `vbat` 4,02 → 4,24 V w tej samej próbce (zdjęte obciążenie silników) |
+| po KILL | dron spada na matę (kąty do −66° przy upadku na uwięzi), po spadku spoczywa |
+
+Pierwszy start w tej sesji (7,55 s) skończył się fallbackiem przez geofence po ~3 s: estymata miała
+`vx` = 27,6 m/s przeniesione z parkowania (zob. docs/09, „Estymator na ziemi"), a gwałtowne
+szarpnięcie uwięzi uruchomiło zabezpieczenie przeciążeniowe. Position Hold nie zdążył wejść
+w Active ani w tym, ani w drugim starcie, więc KILL sprawdzony był w trybie oczekiwania na wejście.

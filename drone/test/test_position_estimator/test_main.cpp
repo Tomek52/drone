@@ -264,6 +264,18 @@ void test_position_integrates_in_world_frame_with_yaw() {
     TEST_ASSERT_FLOAT_WITHIN(0.05f, 0.5f, est.state().py);
 }
 
+void test_reset_velocity_clears_ground_drift() {
+    PositionEstimator est(test_params());
+    // Parked on the ground: flow is rejected, only a small accelerometer bias is integrated.
+    for (int i = 0; i < 8000; i++) est.predict(0.01f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, kDt);
+    TEST_ASSERT_TRUE(est.state().vx > 1.5f);
+    const float px = est.state().px;
+    est.reset_velocity();
+    TEST_ASSERT_EQUAL_FLOAT(0.0f, est.state().vx);
+    TEST_ASSERT_EQUAL_FLOAT(0.0f, est.state().vy);
+    TEST_ASSERT_EQUAL_FLOAT(px, est.state().px);  // position (and bias) are kept
+}
+
 void test_axis_mapping_swap_and_sign() {
     EstimatorParams p = test_params();
     p.flow_swap_xy = true;
@@ -297,6 +309,7 @@ int main(int, char**) {
     RUN_TEST(test_accelerometer_bias_is_estimated);
     RUN_TEST(test_velocity_coasts_on_accelerometer_during_flow_dropout);
     RUN_TEST(test_position_integrates_in_world_frame_with_yaw);
+    RUN_TEST(test_reset_velocity_clears_ground_drift);
     RUN_TEST(test_axis_mapping_swap_and_sign);
     return UNITY_END();
 }

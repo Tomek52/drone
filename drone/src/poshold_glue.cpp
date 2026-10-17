@@ -65,8 +65,19 @@ void poshold_update_estimation(void) {
 
     // The take-off point is the origin (geofence, logs): reset on take-off only,
     // not on FLIGHT -> AUTO_LANDING / FLIP transitions.
-    if (Mode == FLIGHT_MODE && g_last_mode == PARKING_MODE) g_estimator.reset_position();
+    if (Mode == FLIGHT_MODE && g_last_mode == PARKING_MODE) {
+        g_estimator.reset_position();
+        g_estimator.reset_velocity();
+    }
     g_last_mode = Mode;
+
+    // Zero-velocity update: a parked drone does not move. On the ground the flow is rejected
+    // (height < 0.10 m), so the accelerometer bias was integrated unchecked: after a minute
+    // the velocity reached 20-27 m/s and the geofence tripped right after take-off.
+    if (Mode == PARKING_MODE) {
+        g_estimator.reset_position();
+        g_estimator.reset_velocity();
+    }
 
     g_estimator.predict(Accel_x, Accel_y, Accel_z, Roll_rate, Pitch_rate, Roll_angle - Roll_angle_offset,
                         Pitch_angle - Pitch_angle_offset, Yaw_angle - Yaw_angle_offset, Interval_time);

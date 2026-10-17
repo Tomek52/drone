@@ -50,6 +50,12 @@ Najpierw zawsze: log telemetrii (`tools/telemetry_logger.py`) i wykresy
 | krótkie loty mimo naładowanej baterii | zużyta bateria LiHV (wysoki opór wewnętrzny), uszkodzone śmigła | wymień baterię/śmigła; ładuj w pilocie do 4,35 V |
 | bateria nie ładuje się w pilocie | kabel bez zasilania, dioda czerwona = ładowanie | użyj zasilacza 5 V/1 A; zielona dioda = naładowana |
 
+## Estymator na ziemi
+
+| Objaw | Przyczyna | Co zrobić |
+|---|---|---|
+| tuż po starcie `dist_m` rośnie o dziesiątki metrów, fallback z powodem 6 (geofence), auto-lądowanie | w parkowaniu flow jest odrzucany (wysokość < 0,10 m), więc estymator całkował sam akcelerometr z biasem: po minucie `vel_x` = 20–27 m/s i ta prędkość przenosiła się do lotu | zero-velocity update w parkowaniu i przy starcie (`reset_velocity()`, `fix/ground-velocity-reset`) |
+
 ## Diody LED drona
 
 | Objaw | Przyczyna | Co zrobić |
