@@ -132,6 +132,8 @@ przełączy się na Stable + Auto Altitude (gałąź `feat/position-controller`)
   rozdzielczość czujnika (zliczenia na piksel) do weryfikacji kalibracją.
 - Założenie płaskiej podłogi: progi, stopnie i ruchome obiekty pod dronem
   zaburzają pomiar.
+- Wysokość to odległość od powierzchni pod dronem (dron „śledzi teren” nad przeszkodami); wysokość
+  bezwzględna jest zaplanowana: [10-plany.md](10-plany.md).
 - Orientacja montażu PMW3901 na StampFly nie jest udokumentowana — mapowanie osi
   trzeba wyznaczyć próbą z przenoszeniem drona (zob. niżej). Do tego czasu
   `kFlowAxesVerified = false` i Position Hold nie da się włączyć.
