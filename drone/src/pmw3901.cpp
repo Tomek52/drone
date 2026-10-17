@@ -93,7 +93,7 @@ void init_registers() {
 
 }  // namespace
 
-bool pmw3901_init(void) {
+static bool pmw3901_init_once(void) {
     g_present = false;
 
     gpio_reset_pin(kPinCs);
@@ -140,6 +140,28 @@ bool pmw3901_init(void) {
     g_present = true;
     USBSerial.printf("[POSHOLD] PMW3901 ready (id=0x%02X)\r\n", id);
     return true;
+}
+
+// After a boot the sensor sometimes answered the product ID and then returned constant zeros
+// (SQUAL 0, shutter 900, no motion) until the power was cycled; Position Hold then silently
+// could not engage. Check that it actually tracks and redo the whole init if it does not.
+bool pmw3901_init(void) {
+    constexpr int kAttempts = 3;
+    for (int attempt = 1; attempt <= kAttempts; attempt++) {
+        if (!pmw3901_init_once()) return false;  // not detected: retrying does not help
+        delay(100);
+        bool alive = false;
+        for (int i = 0; i < 5 && !alive; i++) {
+            const Pmw3901Motion m = pmw3901_read_motion();
+            alive                 = m.ok && !(m.squal == 0 && m.shutter == 900);
+            delay(10);
+        }
+        if (alive) return true;
+        USBSerial.printf("[POSHOLD] PMW3901 returns no data after init (attempt %d/%d)\r\n", attempt, kAttempts);
+    }
+    g_present = false;  // Position Hold reports "not available" instead of failing silently
+    USBSerial.printf("[POSHOLD] PMW3901 dead after %d init attempts: Position Hold unavailable\r\n", kAttempts);
+    return false;
 }
 
 bool pmw3901_present(void) {
