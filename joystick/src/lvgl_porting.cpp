@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "lvgl_porting.h"
+#include "flight_mode.h"  // [POSHOLD]
 
 #define EXAMPLE_LVGL_TICK_PERIOD_MS    2 /*!< LVGL tick period in ms */
 #define EXAMPLE_LVGL_TASK_MAX_DELAY_MS 500
@@ -80,6 +81,8 @@ static bool button_is_pressed(uint8_t id) {
             }
             break;
         case 1:
+            // [POSHOLD] In Position Hold flight the press switches to Stable and is hidden from LVGL.
+            if (flight_mode_intercept_left_button(left_button)) return false;
             if (left_button) {
                 return true;
             }

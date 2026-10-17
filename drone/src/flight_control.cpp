@@ -47,6 +47,8 @@
 #include "buzzer.h"
 #include "telemetry_stream.hpp"  // [POSHOLD]
 #include "poshold_glue.hpp"       // [POSHOLD]
+#include "rc_link.hpp"            // [POSHOLD]
+#include "alerts.hpp"             // [POSHOLD]
 
 // モータPWM出力Pinのアサイン
 // Motor PWM Pin
@@ -306,10 +308,12 @@ void loop_400Hz(void) {
     // Read Sensor Value
     sense_time       = sensor_read();
     poshold_update_estimation();  // [POSHOLD] velocity/position estimate (optical flow)
+    rc_link_update();             // [POSHOLD] kill switch, protocol check, status to joystick
     uint32_t cs_time = micros();
 
     // LED Drive
     led_drive();
+    alerts_update();  // [POSHOLD] non-blocking buzzer patterns and LED overrides
     // if (Interval_time>0.006)USBSerial.printf("%9.6f\n\r", Interval_time);
     // USBSerial.printf("Mode=%d OverG=%d\n\r", Mode, OverG_flag);
     // Begin Mode select

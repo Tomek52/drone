@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "app_lvgl.h"
+#include "flight_mode.h"  // [POSHOLD]
 #include "main.h"
 
 lv_ui guider_ui;
@@ -337,6 +338,8 @@ void setup_scr_screen(lv_ui *ui) {
     lv_obj_set_style_text_align(ui->screen_btn_1, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // The custom code of screen.
+
+    flight_mode_ui_attach_setup(ui->screen);  // [POSHOLD]
 
     // Update current screen layout.
     lv_obj_update_layout(ui->screen);
@@ -858,18 +861,12 @@ void setup_ui(lv_ui *ui) {
 void screen_timer_cb(lv_timer_t *t) {
     if (check_control_mode_change() == 1) {
         beep();
-        if (Mode == ANGLECONTROL)
-            Mode = RATECONTROL;
-        else
-            Mode = ANGLECONTROL;
+        flight_mode_on_mode_button();  // [POSHOLD] Stable -> Sport -> Position Hold -> Stable
     }
 
     if (check_alt_mode_change() == 1) {
         beep();
-        if (AltMode == ALT_CONTROL_MODE)
-            AltMode = NOT_ALT_CONTROL_MODE;
-        else
-            AltMode = ALT_CONTROL_MODE;
+        flight_mode_on_alt_button();  // [POSHOLD] Auto/Manual altitude (Position Hold needs Auto)
     }
 
     lv_label_set_text_fmt(guider_ui.screen_label_1, "BAT1:%.1fV", Battery_voltage[0]);
@@ -899,6 +896,7 @@ void screen_timer_cb(lv_timer_t *t) {
         lv_img_set_src(guider_ui.screen_img_1, &_SportMode_alpha_64x75);
         lv_obj_set_style_bg_color(guider_ui.screen_cont_2, lv_color_hex(0xfcd741), LV_PART_MAIN | LV_STATE_DEFAULT);
     }
+    flight_mode_ui_update_setup();  // [POSHOLD] Position Hold badge / protocol error
 
     // if (peerInfo.peer_addr[4] == 0xFF && peerInfo.peer_addr[5] == 0xFF) {
     //     lv_obj_set_style_bg_color(guider_ui.screen_cont_10, lv_color_hex(0xf00000), LV_PART_MAIN|LV_STATE_DEFAULT);
@@ -1001,4 +999,5 @@ void screen_running_timer_cb(lv_timer_t *t) {
                               guider_ui.screen_running_label_1, guider_ui.screen_running_label_2, pitch_value,
                               pitch_rotation, roll_value);
     }
+    flight_mode_ui_update_running();  // [POSHOLD] mode / fallback / kill on the top-left panel
 }

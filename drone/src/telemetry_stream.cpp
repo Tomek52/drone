@@ -10,6 +10,7 @@
 
 #include "flight_control.hpp"
 #include "poshold_glue.hpp"
+#include "rc_link.hpp"
 #include "rc.hpp"
 #include "sensor.hpp"
 
@@ -88,6 +89,10 @@ const Field kFields[] = {
     {"acc_hy_mps2", []() -> float { return poshold_estimator_state().acc_y; }},
     {"acc_bias_x", []() -> float { return poshold_estimator_state().bias_x; }},
     {"acc_bias_y", []() -> float { return poshold_estimator_state().bias_y; }},
+    // Control link v2 (feat/joystick-mode)
+    {"rc_proto_ok", []() -> float { return rc_link_protocol_ok() ? 1.0f : 0.0f; }},
+    {"rc_flight_mode", []() -> float { return (float)rc_link_requested_mode(); }},
+    {"rc_kill", []() -> float { return rc_link_kill_active() ? 1.0f : 0.0f; }},
 };
 constexpr size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);
 static_assert(kFieldCount <= stampfly_link::kMaxDataFields, "too many telemetry fields for one frame");

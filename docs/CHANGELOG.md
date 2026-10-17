@@ -2,6 +2,20 @@
 
 Zmiany według gałęzi / PR (najnowsze na górze).
 
+## `feat/joystick-mode`
+
+- Protokół ESP-NOW v2 (ADR 0005, `common/stampfly_link/src/rc_protocol.hpp`): pole wersji,
+  tryb lotu, flaga kill; pakiet statusu dron → pilot (5 Hz) z faktycznym trybem i przyczyną.
+- Dron: odrzuca pakiety innej wersji (start niemożliwy), sygnalizuje niezgodność LED-em i buzzerem;
+  kill switch zatrzymuje silniki w każdym trybie lotu (`drone/src/rc_link.*`).
+- Dron: nieblokujący odtwarzacz sygnałów buzzera i nadpisywanie LED (`drone/src/alerts.*`).
+- Pilot: cykl trybów Stable → Sport → Position Hold na lewym przycisku (na ziemi), w locie
+  tylko Position Hold → Stable; Position Hold wymusza Auto Alt; kill switch = lewy drążek 0,5 s;
+  oznaczenia trybu, fallbacku i błędów na ekranie (`joystick/src/flight_mode.*`).
+- Logika pilota w `common/stampfly_link/src/joystick_logic.hpp` z testami `native` (12 przypadków).
+- Telemetria: `rc_proto_ok`, `rc_flight_mode`, `rc_kill`.
+- Position Hold w tej gałęzi jest latany jako Stable + Auto Alt (regulator w następnej gałęzi).
+
 ## `feat/position-estimator`
 
 - Sterownik PMW3901MB (`drone/src/pmw3901.*`): drugie urządzenie na SPI2 (CS G12),
