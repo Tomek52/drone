@@ -123,4 +123,8 @@ Mapowanie przycisków (UP, `NEW_ATOM_JOY`): indeks 0 = lewy przycisk przedni,
   3,8–3,9 V. Firmware pilota (UP) piszczy na ekranie startowym, gdy napięcie
   baterii w slocie osiągnie ok. 3,85 V — przydatne przy rozładowywaniu do przechowania.
 - Ładowanie w slotach CH1/CH2 pilota po podłączeniu kabla USB; dioda czerwona =
-  ładowanie, zielona = naładowana (4,35 V).
+  ładowanie, zielona = naładowana (4,35 V). Ładowanie (5 V/1 A) ok. 55 min.
+
+Dodatkowe zalecenia z README firmware'u autora (M5Fly-Kanazawa/StampFly2024June):
+wtyk baterii wkładać ostrożnie — przesunięty wtyk może spalić elektronikę i grozi
+zapłonem baterii; przy pracy w pobliżu śmigieł używać okularów ochronnych.

@@ -6,15 +6,16 @@
 .
 ├── drone/            # firmware StampFly (git subtree z m5stack/M5StampFly)
 │   ├── src/          #   kod upstreamu + nasze „haczyki” oznaczone [POSHOLD]
-│   ├── lib/poshold/  #   NASZ kod niezależny od sprzętu (estymator, regulator, pomocnicze)
+│   ├── lib/poshold/  #   NASZ kod niezależny od sprzętu (estymator, regulator, nadzorca, konfiguracja)
 │   └── test/         #   testy jednostkowe `native`
 ├── joystick/         # firmware pilota (git subtree z m5stack/Atom-JoyStick/examples/StampFlyController)
+├── common/           # NASZE wspólne definicje dron ⇄ pilot ⇄ PC (protokół v2, ramki telemetrii, logika pilota)
 ├── tools/            # skrypty Pythona: telemetria, wykresy, analiza logów
 ├── docs/             # ta dokumentacja
 └── .github/workflows # CI: kompilacja obu projektów + testy native
 ```
 
-Zasada: nasze zmiany żyją w osobnych plikach (`lib/poshold/`, nowe pliki w `src/`),
+Zasada: nasze zmiany żyją w osobnych plikach (`lib/poshold/`, `common/`, nowe pliki w `src/`),
 a w plikach upstreamu są tylko krótkie wywołania oznaczone komentarzem `[POSHOLD]`.
 Dzięki temu `git subtree pull` z upstreamu daje konflikty tylko w tych miejscach.
 
@@ -94,6 +95,30 @@ flowchart LR
 
 Zmiany wprowadzane przez ten projekt są opisane w [06-position-hold.md](06-position-hold.md)
 i w ADR-ach.
+
+## Nasze moduły w firmware drona
+
+```mermaid
+flowchart TD
+    L["loop_400Hz() (upstream)"] --> SR["sensor_read() (upstream)"]
+    SR --> EST["poshold_update_estimation()<br/>PMW3901 100 Hz + estymator"]
+    EST --> RCL["rc_link_update()<br/>kill, wersja protokołu, status 5 Hz"]
+    RCL --> SUP["poshold_safety_update()<br/>nadzorca, failsafe'y, regulator"]
+    SUP --> SM{"maszyna stanów upstreamu"}
+    SM -->|FLIGHT| GC["get_command() → poshold_after_get_command()"]
+    GC --> AC["angle_control() + poshold_override_attitude()"]
+    AC --> RC["rate_control() (upstream)"]
+    SM --> TEL["telemetry() + telemetry_stream_update()"]
+```
+
+| Plik | Rola |
+|---|---|
+| `src/pmw3901.*` | sterownik optical flow |
+| `src/poshold_glue.*` | połączenie z globalnymi zmiennymi i pętlą upstreamu |
+| `src/rc_link.*` | protokół v2 po stronie drona, kill switch, status |
+| `src/alerts.*` | nieblokujący buzzer, nadpisywanie LED |
+| `src/telemetry_stream.*` | telemetria binarna, nieblokujące komunikaty tekstowe |
+| `lib/poshold/src/*` | estymator, regulator, nadzorca, konfiguracja (testy `native`) |
 
 ## Firmware pilota (stan upstreamu)
 
