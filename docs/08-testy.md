@@ -1,5 +1,34 @@
 # 08. Testy
 
+## Podsumowanie kampanii testowej (2026-10-14 … 2026-10-17)
+
+Sprzęt: StampFly v1.0 + Atom JoyStick (AtomS3), korytarz z płytkami z fugami (dobra tekstura dla optical flow;
+pokój z jednolitymi panelami dawał `squal` 8–50 i przechodzenie w Stable). Logi w `logs/`, wpisy parametrów
+w [07-strojenie.md](07-strojenie.md), otwarte sprawy w [10-plany.md](10-plany.md).
+
+| Obszar | Wynik |
+|---|---|
+| Wgrywanie, parowanie, protokół v2, tryby | ✅ działa; po wgraniu dron wymaga restartu zasilania |
+| KILL (lewy drążek ≥ 0,5 s) w powietrzu | ✅ działa |
+| Kalibracja optical flow | ✅ `swap=true`, `signX=−1`, `signY=+1`, 0,00175 rad/zliczenie, `kFlowAxesVerified=true` |
+| Position Hold, poziom (XY) | ✅ odchylenie std. 3–5 cm w zawisie, powrót po popchnięciu 1–4 s, bez kołysania; `kPosKp`, `kVelKp`, `kVelKi` bez zmian |
+| Hamowanie po puszczeniu drążka | ✅ `kBrakeTau` 0,30 → 0,45, przeregulowanie za nowy punkt 3–6 cm |
+| Wysokość przy dobrej baterii (≥ 3,8 V) | ✅ `alt_kp` 0,50, `z_dot_kp` 0,06; przeregulowanie po starcie 13 cm, odchylenie std. 3–5 cm |
+| Wysokość poniżej ok. 3,6 V | ⚠️ wahania ±0,15 m (okres ~4,5 s), przyczyna nieznana (wykluczone: ToF, sprzężenie napięcia, wzmocnienie ciągu) |
+| Utrata łączności | ✅ po poprawce: zawis 3 s, `ph_reason` = 7, lądowanie; wcześniej lądował po 0,1 s (błąd nadzorcy, naprawiony) |
+| Niska bateria: automatyczne lądowanie | ✅ przy 3,34 V filtrowanego; ⚠️ przy słabszej baterii dron traci wysokość już przy ok. 3,40 V |
+| Niska bateria: ostrzeżenie | ⚠️ buzzer drona niesłyszalny w locie, także po zmianie tonu 600 → 2500 Hz (test 2026-10-17); ostrzeżenie w pilocie (pik + `LOW BATT`) dodane, jeszcze nielatane |
+| Ochrona OverG (> 2 g) | ✅ za mocne uderzenie w drona wyłącza silniki (upstream, zamierzone) |
+| Awaria czujnika po jednym rozruchu (PMW3901 martwy) | ✅ ponowna inicjalizacja 3 razy, komunikat w logu, wymaga cyklu zasilania |
+
+**Ograniczenia, które zostają:**
+- Position Hold testowany tylko w korytarzu z teksturowaną podłogą, bez zakłóceń zewnętrznych poza popchnięciem linijką.
+- Zawis dobrze trzymany do ok. 3,6 V pod obciążeniem (ok. 3 min lotu od 4,2 V); poniżej tego lepiej lądować ręcznie.
+- Dystans z przenoszenia (1 m ±15%) jest nieweryfikowalny ręcznie; skala potwierdzona żyroskopem.
+- Dron zawsze latał z baterią 1S LiHV; progi 3,50 / 3,35 V zostawione z firmware'u, na decyzję właściciela.
+- Nie sprawdzono: ostrzeżenia w pilocie w locie, lotu dłuższego niż jedna bateria, innych podłóg i oświetlenia,
+  yaw z magnetometru, wysokości bezwzględnej nad przeszkodami.
+
 ## Testy jednostkowe na komputerze (`native`)
 
 Kod niezależny od sprzętu leży w `drone/lib/poshold/` i jest kompilowany zarówno
