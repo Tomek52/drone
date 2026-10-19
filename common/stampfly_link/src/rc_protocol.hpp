@@ -51,12 +51,12 @@ enum class FlightMode : uint8_t {
     kStable  = 0,
     kSport   = 1,
     kPosHold = 2,
-    kStableAbs = 3,  // Stable + Auto Altitude, height from the barometer (no ToF dependence)
 };
-constexpr uint8_t kFlightModeCount = 4;
+constexpr uint8_t kFlightModeCount = 3;
 
 // Flags (byte 26).
-constexpr uint8_t kRcFlagKill = 0x01;  // stop the motors immediately
+constexpr uint8_t kRcFlagKill   = 0x01;  // stop the motors immediately
+constexpr uint8_t kRcFlagAbsAlt = 0x02;  // Auto Altitude with the height from the barometer (Stable ABS)
 
 enum class RcDecode : uint8_t {
     kOk              = 0,

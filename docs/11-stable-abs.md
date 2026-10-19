@@ -5,16 +5,17 @@ został oślepiony, a dron wzniósł się na 20–30 m ([10-plany.md](10-plany.m
 
 ## Co robi
 
-Czwarty tryb lotu pilota: **Stable ABS**. To Stable z Auto Altitude, ale wysokość nie pochodzi z dolnego
-ToF, tylko z barometru BMP280. Tryb nie wymaga podłogi z teksturą ani ToF-a w zasięgu, więc nadaje się
-tam, gdzie Position Hold nie działa (teren otwarty, słońce, przeszkody pod dronem). Pozycji w poziomie
-nie trzyma (brak optical flow).
+Trzeci stan **wysokości** w pilocie: prawy przycisk przełącza **Auto → Manual → ABS** (lewy wybiera tryb
+sterowania Stable / Sport / Position Hold). ABS to Auto Altitude, w którym wysokość nie pochodzi z dolnego ToF,
+tylko z barometru BMP280. Nie wymaga podłogi z teksturą ani ToF-a w zasięgu, więc nadaje się tam, gdzie
+Position Hold nie działa (teren otwarty, słońce, przeszkody pod dronem). Pozycji w poziomie nie trzyma.
 
-Przełączanie na ziemi tym samym przyciskiem co dotychczas: Stable → Sport → Position Hold → **Stable ABS**.
-Tryb wymusza Auto Altitude (jak Position Hold). Na ekranie: zielony napis `STB ABS`. Jeśli dron nie ma
-barometru, pilot pokazuje `STB NO BARO` i dron leci jako zwykły Stable.
-
-Starsze firmware'y: nieznany numer trybu (3) jest traktowany jako Stable.
+- ABS łączy się ze Stable i Sport. Position Hold potrzebuje wysokości z ToF, więc wybór Position Hold ustawia
+  Auto, a przełączenie wysokości na ABS (lub Manual) w Position Hold przechodzi na Stable.
+- Na ekranie ustawień na prawej połowie pojawia się zielony napis `ALT ABS`, a w locie na lewym panelu
+  `STB ABS` / `SPT ABS`. Jeśli dron nie ma barometru: `ABS N/A` i `ABS NO BARO`, a dron leci jak Auto z ToF.
+- Protokół: flaga `kRcFlagAbsAlt` (bit 1 bajtu 26 pakietu sterującego). Starsze firmware'y ją ignorują
+  (lecą z ToF, bez ABS).
 
 ## Jak liczona jest wysokość (`abs_height.hpp`)
 

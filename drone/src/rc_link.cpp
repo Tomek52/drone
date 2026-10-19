@@ -140,6 +140,10 @@ FlightMode rc_link_requested_mode(void) {
     return g_proto_ok ? (FlightMode)g_mode : FlightMode::kStable;
 }
 
+bool rc_link_abs_alt_requested(void) {
+    return g_proto_ok && (g_flags & kRcFlagAbsAlt);
+}
+
 bool rc_link_kill_active(void) {
     return g_proto_ok && (g_flags & kRcFlagKill);
 }

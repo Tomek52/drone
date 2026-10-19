@@ -44,6 +44,7 @@ bool g_btn_swallow  = false;
 volatile bool g_mode_beep = false;
 
 lv_obj_t *g_setup_badge = nullptr;
+lv_obj_t *g_alt_badge   = nullptr;
 
 void sync_upstream_modes() {
     Mode    = g_sel.control_mode_byte();
@@ -103,7 +104,8 @@ void flight_mode_update(float dt) {
 }
 
 size_t flight_mode_build_packet(const uint8_t *v1_bytes, uint8_t *out) {
-    return encode_rc_v2(v1_bytes, g_sel.mode(), g_kill_flag ? kRcFlagKill : 0, out);
+    const uint8_t flags = (g_kill_flag ? kRcFlagKill : 0) | (g_sel.alt_abs() ? kRcFlagAbsAlt : 0);
+    return encode_rc_v2(v1_bytes, g_sel.mode(), flags, out);
 }
 
 // --- ESP-NOW -------------------------------------------------------------------
@@ -160,18 +162,33 @@ void flight_mode_ui_attach_setup(lv_obj_t *screen) {
     lv_obj_set_style_text_font(g_setup_badge, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(g_setup_badge, 18, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_flag(g_setup_badge, LV_OBJ_FLAG_HIDDEN);
+
+    // Same over the right half (altitude picture): shown for Stable ABS.
+    g_alt_badge = lv_label_create(screen);
+    lv_obj_set_pos(g_alt_badge, 64, 0);
+    lv_obj_set_size(g_alt_badge, 64, 75);
+    lv_label_set_long_mode(g_alt_badge, LV_LABEL_LONG_WRAP);
+    lv_obj_set_style_text_align(g_alt_badge, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(g_alt_badge, &lv_font_montserratMedium_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(g_alt_badge, 18, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_flag(g_alt_badge, LV_OBJ_FLAG_HIDDEN);
 }
 
 void flight_mode_ui_update_setup(void) {
     if (g_setup_badge == nullptr) return;
+    if (g_alt_badge != nullptr) {
+        if (g_sel.alt_abs()) {
+            const bool unavailable = status_fresh() && g_status.reason == (uint8_t)Reason::kBaroMissing;
+            style_badge(g_alt_badge, unavailable ? kColWarn : kColAbs, kColWhite);
+            lv_label_set_text(g_alt_badge, unavailable ? "ABS\nN/A" : "ALT\nABS");
+            lv_obj_clear_flag(g_alt_badge, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(g_alt_badge, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
     if (protocol_error()) {
         style_badge(g_setup_badge, kColError, kColWhite);
         lv_label_set_text(g_setup_badge, "DRONE\nFW?");
-        lv_obj_clear_flag(g_setup_badge, LV_OBJ_FLAG_HIDDEN);
-    } else if (g_sel.mode() == FlightMode::kStableAbs) {
-        const bool unavailable = status_fresh() && g_status.reason == (uint8_t)Reason::kBaroMissing;
-        style_badge(g_setup_badge, unavailable ? kColWarn : kColAbs, kColWhite);
-        lv_label_set_text(g_setup_badge, unavailable ? "ABS\nN/A" : "STB\nABS");
         lv_obj_clear_flag(g_setup_badge, LV_OBJ_FLAG_HIDDEN);
     } else if (g_sel.mode() == FlightMode::kPosHold) {
         const bool unavailable = status_fresh() && !(g_status.flags & kStatusFlowAvailable);
@@ -233,17 +250,15 @@ void flight_mode_ui_update_running(void) {
             bg = kColPosHold;
             fg = kColWhite;
         }
-    } else if (g_sel.mode() == FlightMode::kStableAbs) {
-        if (status_fresh() && g_status.active_mode != FlightMode::kStableAbs &&
-            g_status.reason != (uint8_t)Reason::kNone) {
-            snprintf(text, sizeof(text), "STB %s", reason_short(g_status.reason));
+    } else if (g_sel.alt_abs()) {
+        if (status_fresh() && g_status.reason == (uint8_t)Reason::kBaroMissing) {
+            snprintf(text, sizeof(text), "ABS NO BARO");
             bg = kColWarn;
-            fg = kColWhite;
         } else {
-            snprintf(text, sizeof(text), "STB ABS");
+            snprintf(text, sizeof(text), g_sel.mode() == FlightMode::kSport ? "SPT ABS" : "STB ABS");
             bg = kColAbs;
-            fg = kColWhite;
         }
+        fg = kColWhite;
     } else if (g_sel.mode() == FlightMode::kSport) {
         snprintf(text, sizeof(text), "SPORT");
     } else {

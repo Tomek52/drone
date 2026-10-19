@@ -195,8 +195,6 @@ void report_status(const poshold::SupervisorOutput& o) {
     FlightMode active;
     if (o.poshold_active) {
         active = FlightMode::kPosHold;
-    } else if (requested == FlightMode::kStableAbs && baro_present()) {
-        active = FlightMode::kStableAbs;
     } else {
         active = requested == FlightMode::kSport ? FlightMode::kSport : FlightMode::kStable;
     }
@@ -212,7 +210,7 @@ void report_status(const poshold::SupervisorOutput& o) {
         if (!pmw3901_present()) reason = Reason::kFlowSensorMissing;
         else if (!poshold::config::kFlowAxesVerified) reason = Reason::kFlowNotCalibrated;
     }
-    if (reason == Reason::kNone && requested == FlightMode::kStableAbs && !baro_present()) reason = Reason::kBaroMissing;
+    if (reason == Reason::kNone && rc_link_abs_alt_requested() && !baro_present()) reason = Reason::kBaroMissing;
     rc_link_set_status(active, flags, reason);
 }
 
@@ -247,7 +245,7 @@ void poshold_safety_update(void) {
         // Stable ABS height; used instead of the ToF range only in that mode.
         g_abs_m = g_abs.update(Interval_time, baro_present(), baro_height_m(), (float)(Thrust_command / BATTERY_VOLTAGE),
                                tof_valid, (float)RawRange * 0.001f, Mode == PARKING_MODE);
-        const bool abs_req             = rc_link_requested_mode() == FlightMode::kStableAbs && baro_present();
+        const bool abs_req             = rc_link_abs_alt_requested() && rc_link_requested_mode() != FlightMode::kPosHold && baro_present();
         const bool landing_near_ground = Mode == AUTO_LANDING_MODE && tof_valid && RawRange < 600;
         g_abs_use = abs_req && (Mode == FLIGHT_MODE || Mode == FLIP_MODE || (Mode == AUTO_LANDING_MODE && !landing_near_ground));
     }

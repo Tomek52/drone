@@ -82,7 +82,7 @@ Bajty 0–23 mają **to samo znaczenie co w wersji 1**, dalej:
 | Bajt | Typ | Zawartość |
 |---|---|---|
 | 24 | u8 | wersja protokołu = **2** |
-| 25 | u8 | tryb lotu: 0 = Stable, 1 = Sport, 2 = Position Hold, 3 = Stable ABS (starsze firmware'y traktują nieznany numer jako Stable) |
+| 25 | u8 | tryb lotu: 0 = Stable, 1 = Sport, 2 = Position Hold |
 | 26 | u8 | flagi: bit 0 = **kill** (natychmiastowe wyłączenie silników) |
 | 27 | u8 | zarezerwowane (0) |
 | 28 | u8 | suma kontrolna = suma bajtów 0–27 (mod 256) |

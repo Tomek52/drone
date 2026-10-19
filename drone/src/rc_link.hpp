@@ -22,6 +22,7 @@ bool rc_link_protocol_ok(void);
 uint8_t rc_link_peer_version(void);
 stampfly_link::FlightMode rc_link_requested_mode(void);
 bool rc_link_kill_active(void);
+bool rc_link_abs_alt_requested(void);  // Stable ABS selected on the joystick
 
 // Set by the Position Hold code: what the drone actually flies and why.
 void rc_link_set_status(stampfly_link::FlightMode active_mode, uint8_t extra_flags, stampfly_link::Reason reason);

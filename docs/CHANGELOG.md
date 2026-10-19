@@ -112,6 +112,6 @@ Gałęzie (każda od poprzedniej, ostatnia zawiera wszystko): `fix/windows-fastl
 - Dron: sterownik barometru BMP280 (`baro.*`), diagnostyka dolnego ToF (status, siła sygnału), monitor wiarygodności ToF
   (`height_monitor.*`, tylko obserwacja), wysokość z barometru (`abs_height.*`) i podmiana wejścia estymatora wysokości
   w trybie Stable ABS.
-- Protokół: czwarty tryb lotu `Stable ABS` (3) i powód `kBaroMissing` (11); pilot pokazuje `STB ABS` / `STB NO BARO`.
+- Protokół: flaga `kRcFlagAbsAlt` (wysokość z barometru, trzeci stan prawego przycisku Auto/Manual/ABS) i powód `kBaroMissing` (11); pilot pokazuje `ALT ABS`, `STB ABS` / `SPT ABS`.
 - Telemetria: nowe pola `baro_pa`, `baro_temp_c`, `tof_status`, `tof_sig_mcps`, `hm_trust`, `hm_pred_m`, `abs_m`;
   usunięte `ctrl_mode`, `alt_flag`, `alt_mode`, `flow_rej_total`, `acc_bias_x`, `dist_m`, `r_ref_dps` (limit ramki).
