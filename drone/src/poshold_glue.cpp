@@ -77,6 +77,12 @@ void poshold_update_estimation(void) {
     if (Mode == PARKING_MODE) {
         g_estimator.reset_position();
         g_estimator.reset_velocity();
+    } else if (Mode == FLIGHT_MODE && Altitude2 < poshold::config::kFlowMinHeight) {
+        // Same on the take-off ramp: the props spin and the drone is still on the ground (flow rejected
+        // below 0.10 m). The accelerometer alone once drifted the position by 4 m in 2.5 s (tilt on the
+        // mat plus vibration) and the geofence ended the take-off (logs/20261019_194111.csv).
+        g_estimator.reset_position();
+        g_estimator.reset_velocity();
     }
 
     g_estimator.predict(Accel_x, Accel_y, Accel_z, Roll_rate, Pitch_rate, Roll_angle - Roll_angle_offset,
