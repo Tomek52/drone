@@ -1,6 +1,6 @@
 # 12. Łagodny regulator wysokości na barometrze (projekt)
 
-Stan: **zaimplementowane za flagą `POSHOLD_ENABLE_SOFT_ALT` (domyślnie 0), nielatane**. Gałąź `feat/soft-altitude`. Cel: lot powyżej zasięgu ToF
+Stan: **zaimplementowane za flagą `POSHOLD_ENABLE_SOFT_ALT` (domyślnie 0); trzy loty nieudane, nie używać**. Gałąź `feat/soft-altitude`. Cel: lot powyżej zasięgu ToF
 (na zewnątrz, 3–20 m) z wysokością trzymaną z dokładnością 1–1,5 m, bez falowania
 ([11-stable-abs.md](11-stable-abs.md) opisuje trzy nieudane podejścia z barometrem w szybkiej pętli).
 
@@ -90,8 +90,18 @@ jest liniowy, brak wiatru poziomego, który zmienia ciśnienie dynamiczne. Dopie
   `kSoftOnM − 0,5 m` (szersza histereza). Symulacja `tools/soft_altitude_sim.py` używa białego szumu 0,12 m i nie odzwierciedla
   tego w pełni; do poprawienia (szum skorelowany ±0,5 m).
 
-## Następne kroki
+## Trzeci lot (2026-10-19, `20261019_232357.csv`, bateria 4,3 V, prędkość z estymatora z akcelerometrem) — nieudany
 
-1. Trzeci lot w korytarzu (bateria ≥ 4,1 V): sprawdzić, czy prędkość z akcelerometru uspokaja pętlę.
-2. Poprawić model szumu w symulacji i dobrać wzmocnienia ponownie.
-3. Dopiero potem zewnątrz na uwięzi i z limitem 5 m.
+- Po przejęciu przez barometr (od 49 s) wysokość z estymatora rozjechała się z ToF o ±0,5–1,4 m, a po 55 s o 2 m
+  (`est` 2,42 m przy ToF 0,42 m; potem `est` 3,23 m przy ToF 1,66 m), `soft_u` nasycone na ±0,08 i prędkość pionowa ±2,5 m/s.
+  Estymator Kalmana (akcelerometr + barometr z szumem 0,4 m) odpłynął, a regulator reagował na jego błąd i się rozkołysał.
+- Bilans czterech prób wykorzystania barometru w pętli wysokości (ABS v1–v3, łagodny regulator) to cztery loty
+  z falowaniem, spadkiem lub uderzeniem w sufit. Sensor w podmuchu śmigieł (±0,5 m, opóźnienie 0,3 s, dryf temperaturowy)
+  jest za słaby do sterowania, także przy łagodnych wzmocnieniach.
+
+## Wniosek
+
+Barometr tego drona nadaje się do obserwacji i zabezpieczeń (monitor ToF, lądowanie `TOF`), a nie do trzymania wysokości.
+Lot powyżej zasięgu ToF wymagałby: barometru poza podmuchem (inny sposób montażu), innego czujnika wysokości (np. dalmierza
+o większym zasięgu, GPS) albo lotu na ręcznym gazie (Manual). Kod zostaje jako eksperymentalny za flagą
+`POSHOLD_ENABLE_SOFT_ALT` (domyślnie 0), bez planów dalszego rozwoju.
