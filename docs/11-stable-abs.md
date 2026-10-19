@@ -156,3 +156,18 @@ Wniosek: barometr nie może być źródłem wysokości od ziemi.
 - Próg: 2,0 m na zewnątrz; do testu w korytarzu (sufit 2,4 m) tymczasowo **1,0 m**, żeby zobaczyć barometr w akcji,
   gdzie ToF nadal jest prawdą. W trybie ABS limity wysokości są podniesione (20 m), więc w teście nie wychodzić
   drążkiem powyżej ok. 1,5 m.
+
+## Lot 2 hybrydy (2026-10-19, `20261019_223034.csv`, przełączenie ToF → barometr przy 1,0 m) — nieudany
+
+- Poniżej 1,0 m (źródło ToF) zawis jak w Auto: 45 s, wysokość 0,5–0,75 m.
+- Powyżej 1,0 m (źródło barometr) estymator odjechał od prawdy o +0,4 m (76–77 s: `est` 2,19 m przy ToF 1,82 m), regulator
+  uznał, że dron jest za wysoko, ciąg spadł do 0,55 i dron opadł z 1,8 do 0,2 m (KILL).
+- Drugi start: zawis, potem w okolicy progu 1,0 m źródło wysokości przełączało się tam i z powrotem, a przełączanie szumu
+  pomiaru (0,004 ↔ 0,4 m) i skok wysokości między źródłami (barometr zawyżony o 0,3–0,5 m) rozkołysały pętlę:
+  `est` 0,37 przy ToF 1,25 m, `vz` −2,5 m/s, potem pojedynczy odczyt ToF 5,08 m i `est` 4,5 m (KILL w 101,6 s).
+
+Wniosek: barometr zamontowany w podmuchu śmigieł (±0,4–0,5 m i opóźnienie) nie nadaje się do utrzymywania wysokości
+w pętli tego drona, także jako źródło „wysoko”. Zostają: ToF z kompensacją krawędzi, monitor wiarygodności i lądowanie
+na barometrze przy niewiarygodnym ToF (to nie wymaga dokładności). Wysokość powyżej zasięgu ToF wymagałaby
+barometru poza podmuchem (inna lokalizacja czujnika), GPS albo lotu na stałym ciągu (Manual). Tryb ABS jest
+eksperymentalny i nie powinien być używany w locie.
