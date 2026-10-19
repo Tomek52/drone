@@ -1,6 +1,6 @@
 # 12. Łagodny regulator wysokości na barometrze (projekt)
 
-Stan: **projekt i symulacja, bez kodu w dronie**. Gałąź `feat/soft-altitude`. Cel: lot powyżej zasięgu ToF
+Stan: **zaimplementowane za flagą `POSHOLD_ENABLE_SOFT_ALT` (domyślnie 0), nielatane**. Gałąź `feat/soft-altitude`. Cel: lot powyżej zasięgu ToF
 (na zewnątrz, 3–20 m) z wysokością trzymaną z dokładnością 1–1,5 m, bez falowania
 ([11-stable-abs.md](11-stable-abs.md) opisuje trzy nieudane podejścia z barometrem w szybkiej pętli).
 
@@ -53,9 +53,21 @@ barometru (dryf 1 cm/s przez cały lot to najgorszy przypadek) i z podmuchów. T
 Ograniczenia modelu: szum barometru jest biały (w rzeczywistości jest skorelowany z turbulencją), wpływ podmuchu
 jest liniowy, brak wiatru poziomego, który zmienia ciśnienie dynamiczne. Dopiero loty zweryfikują model.
 
+## Implementacja
+
+- `drone/lib/poshold/src/soft_alt.*`: regulator (czysty C++, testy `test_soft_alt`).
+- Wysokość: `AbsHeight` (barometr z poprawką podmuchu i offsetem uczonym z ToF), tak jak w [11-stable-abs.md](11-stable-abs.md),
+  ale **tylko jako pomiar** dla łagodnego regulatora; ToF zostaje głównym źródłem poniżej progu `kSoftOnM`.
+- Włączenie: kompilacja z `-DPOSHOLD_ENABLE_SOFT_ALT=1`. Aktywny, gdy Auto Altitude w locie, jest barometr i wysokość z barometru
+  przekracza `kSoftOnM` (histereza −0,3 m). Wejście jest płynne (całka startuje od aktualnego polecenia gazu).
+- Hak w `flight_control.cpp`: w gałęzi Auto Altitude `Thrust_command = trym + u` zamiast pętli ToF (`alt_pid`, `z_dot_pid`
+  zerowane), `Z_dot_ref = 0`.
+- Powyżej zasięgu ToF brak echa nie jest błędem: `Range0flag` (upstream obniżający trym) i zabezpieczenie `TOF` są wtedy wyłączone.
+- Limit zadanej wysokości: `kSoftAltMax` (2,0 m do testu w korytarzu, 5 m do pierwszego testu zewnętrznego).
+- Telemetria: `soft_on`, `soft_u` (w zamian zniknęły `flow_reject` i `abs_m`).
+- Parametry do testu w korytarzu: `kSoftOnM` = 1,0 m, `kSoftAltMax` = 2,0 m; na zewnątrz 3,0 m i 5 m.
+
 ## Następne kroki
 
-1. Implementacja w `drone/lib/poshold` (czysty C++ z testami jednostkowymi) i hak `[POSHOLD]` w pętli gazu w trybie
-   Auto powyżej progu; flaga `POSHOLD_ENABLE_SOFT_ALT` domyślnie wyłączona.
-2. Lot w korytarzu na 1–2 m z ToF tylko jako prawdą do oceny (próg przełączenia obniżony do 1,0 m).
-3. Dopiero potem zewnątrz na uwięzi i z limitem 5 m.
+1. Lot w korytarzu na 1–2 m z ToF tylko jako prawdą do oceny (`tof_raw_mm` wobec wysokości z barometru).
+2. Dopiero potem zewnątrz na uwięzi i z limitem 5 m.

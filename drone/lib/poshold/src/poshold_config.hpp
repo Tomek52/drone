@@ -151,6 +151,16 @@ constexpr float kTofStepPairM     = 0.12f;  // [m] two consecutive same-directio
 constexpr float kTofStepSmallM    = 0.03f;  // [m] smallest jump counted for the pair rule
 constexpr float kTofStepMaxOffset = 1.50f;  // [m] limit of the accumulated offset
 
+// Soft altitude hold on the barometer above the ToF range (soft_alt.hpp, docs/12). Gains from tools/soft_altitude_sim.py.
+constexpr float kSoftKp       = 0.008f;   // [duty/m] outside the dead zone
+constexpr float kSoftKi       = 0.0003f;  // [duty/(m*s)]
+constexpr float kSoftKd       = 0.08f;    // [duty/(m/s)]
+constexpr float kSoftDeadband = 0.5f;     // [m]
+constexpr float kSoftUMax     = 0.08f;    // [duty] authority around the hover trim
+constexpr float kSoftTauV     = 1.0f;     // [s] low-pass of the derivative
+constexpr float kSoftOnM      = 1.0f;     // [m] the barometer takes over above this (3.0 outdoors; 1.0 for the corridor test)
+constexpr float kSoftAltMax   = 2.0f;     // [m] altitude setpoint limit with the soft hold (corridor test; 5.0 for the first outdoor test)
+
 // Stable ABS (abs_height.hpp): height from the barometer.
 constexpr float kAbsPaPerMeter  = 11.5f;  // pressure change per metre near the ground
 constexpr float kAbsWashPa      = 13.0f;  // prop wash pressure drop at full thrust; ~7 Pa at hover (logs/20261019_200020.csv)

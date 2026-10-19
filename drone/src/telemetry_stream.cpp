@@ -74,7 +74,7 @@ const Field kFields[] = {
     {"flow_squal", []() -> float { return (float)poshold_last_flow().squal; }},
     {"flow_shutter", []() -> float { return (float)poshold_last_flow().shutter; }},
     {"flow_valid", []() -> float { return poshold_estimator_state().flow_valid ? 1.0f : 0.0f; }},
-    {"flow_reject", []() -> float { return (float)poshold_estimator_state().reject; }},
+    {"soft_on", []() -> float { return poshold_soft_alt_active() ? 1.0f : 0.0f; }},
     {"flow_rej_mask", []() -> float { return (float)poshold_flow_reject_mask_take(); }},
     {"flow_vx_mps", []() -> float { return poshold_estimator_state().flow_vx; }},
     {"flow_vy_mps", []() -> float { return poshold_estimator_state().flow_vy; }},
@@ -103,7 +103,7 @@ const Field kFields[] = {
     {"tof_sig_mcps", []() -> float { return tof_bottom_diag().signal_mcps; }},
     {"hm_trust", []() -> float { return poshold_height_monitor_output().trusted ? 1.0f : 0.0f; }},
     {"hm_pred_m", []() -> float { return poshold_height_monitor_output().predicted_m; }},
-    {"abs_m", []() -> float { return poshold_abs_height(); }},
+    {"soft_u", []() -> float { return poshold_soft_alt_u(); }},
     {"tof_off_m", []() -> float { return poshold_tof_offset_m(); }},
 };
 constexpr size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);

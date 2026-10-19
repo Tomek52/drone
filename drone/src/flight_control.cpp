@@ -883,11 +883,16 @@ void rate_control(void) {
 
         // Altutude Control
         if (Alt_flag == 1 && Flip_flag == 0) {
-            z_dot_err      = Z_dot_ref - Alt_velocity;
+            z_dot_err = Z_dot_ref - Alt_velocity;
+            if (poshold_soft_alt_active()) {  // [POSHOLD] soft hold on the barometer: trim + small correction
+                z_dot_pid.reset();
+                Thrust_command = Thrust_filtered.update((Thrust0 + poshold_soft_alt_u()) * BATTERY_VOLTAGE, Interval_time);
+            } else {
             Thrust_command = Thrust_filtered.update(
                 (Thrust0 + z_dot_pid.update(z_dot_err, Interval_time)) * BATTERY_VOLTAGE, Interval_time);
             if (Thrust_command / BATTERY_VOLTAGE > Thrust0 * 1.15f) Thrust_command = BATTERY_VOLTAGE * Thrust0 * 1.15f;
             if (Thrust_command / BATTERY_VOLTAGE < Thrust0 * 0.85f) Thrust_command = BATTERY_VOLTAGE * Thrust0 * 0.85f;
+            }
         } else if (Mode == AUTO_LANDING_MODE) {
             z_dot_err      = -0.15 - Alt_velocity;
             Thrust_command = Thrust_filtered.update(
@@ -1012,7 +1017,12 @@ void angle_control(void) {
     } else {
         // Altitude Control PID
         alt_err = Alt_ref - Altitude2;
-        if (Alt_flag >= 1) Z_dot_ref = alt_pid.update(alt_err, Interval_time);
+        if (poshold_soft_alt_active()) {  // [POSHOLD] the soft hold replaces the ToF loops
+            alt_pid.reset();
+            Z_dot_ref = 0.0f;
+        } else if (Alt_flag >= 1) {
+            Z_dot_ref = alt_pid.update(alt_err, Interval_time);
+        }
 
         if (Control_mode == ANGLECONTROL) {
             // Angle Control

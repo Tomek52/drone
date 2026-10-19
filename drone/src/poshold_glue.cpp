@@ -49,6 +49,11 @@ constexpr uint16_t kTakeoffDoneCount = 1000;  // upstream get_command(): ramp le
 constexpr float kLoopPeriod          = 0.0025f;
 
 // Stable ABS is experimental and unusable in flight (docs/11-stable-abs.md): the flag is ignored unless enabled.
+// Soft altitude hold on the barometer above the ToF range (docs/12-lagodny-regulator-wysokosci.md).
+#ifndef POSHOLD_ENABLE_SOFT_ALT
+#define POSHOLD_ENABLE_SOFT_ALT 0
+#endif
+
 #ifndef POSHOLD_ENABLE_ABS
 #define POSHOLD_ENABLE_ABS 0
 #endif
@@ -58,6 +63,9 @@ poshold::HeightMonitor g_height_monitor;
 poshold::HeightMonitorOutput g_hm_out;
 poshold::AbsHeight g_abs;
 poshold::TofStepComp g_tof_step;
+poshold::SoftAlt g_soft;
+bool g_soft_active = false;
+float g_soft_u = 0.0f;
 float g_tof_offset_m = 0.0f;
 float g_abs_m   = 0.0f;
 bool g_abs_use   = false;
@@ -266,11 +274,23 @@ void poshold_safety_update(void) {
 
         // Height from the barometer (with the ToF teaching the offset while the ToF is the source).
         g_abs_m = g_abs.update(Interval_time, baro_present(), baro_height_m(), (float)(Thrust_command / BATTERY_VOLTAGE),
-                               tof_valid, tof_h, Mode == PARKING_MODE, g_tof_primary);
+                               tof_valid, tof_h, Mode == PARKING_MODE, g_tof_primary && !g_soft_active);
+
+#if POSHOLD_ENABLE_SOFT_ALT
+        // Soft hold: above kSoftOnM the thrust is the trim plus a slow correction from the barometer.
+        const bool soft_ok = baro_present() && Alt_flag == 1 && Flip_flag == 0 && Mode == FLIGHT_MODE;
+        if (g_soft_active) {
+            if (!soft_ok || g_abs_m < poshold::config::kSoftOnM - 0.3f) g_soft_active = false;
+        } else if (soft_ok && g_abs_m > poshold::config::kSoftOnM) {
+            g_soft_active = true;
+            g_soft.reset(g_abs_m, (float)(Thrust_command / BATTERY_VOLTAGE - Thrust0));
+        }
+        g_soft_u = g_soft_active ? g_soft.update(Interval_time, g_abs_m, Alt_ref) : 0.0f;
+#endif
 
         // Failsafe (not in ABS, which switches to the barometer by itself): the ToF disagrees with the
         // barometer, e.g. blinded by the sun or stuck: land on the barometer.
-        const bool tof_failsafe        = !g_hm_out.trusted && baro_present() && !abs_req;
+        const bool tof_failsafe        = !g_hm_out.trusted && baro_present() && !abs_req && !g_soft_active;
         in.tof_untrusted               = tof_failsafe;
         const bool landing_near_ground = !tof_failsafe && Mode == AUTO_LANDING_MODE && tof_valid && RawRange < 600;
         const bool baro_source         = (abs_req && !g_tof_primary) || tof_failsafe;
@@ -348,15 +368,37 @@ float poshold_tof_offset_m(void) {
 }
 
 float poshold_alt_ref_max(void) {
-    return g_abs_selected ? poshold::config::kAbsAltMax : 1.8f;
+    if (g_abs_selected) return poshold::config::kAbsAltMax;
+#if POSHOLD_ENABLE_SOFT_ALT
+    return poshold::config::kSoftAltMax;
+#else
+    return 1.8f;
+#endif
 }
 
 float poshold_alt_limit(void) {
-    return g_abs_selected ? poshold::config::kAbsAltMax + 0.5f : 2.0f;
+    if (g_abs_selected) return poshold::config::kAbsAltMax + 0.5f;
+#if POSHOLD_ENABLE_SOFT_ALT
+    return poshold::config::kSoftAltMax + 0.5f;
+#else
+    return 2.0f;
+#endif
 }
 
 float poshold_alt_meas_std(void) {
     return g_abs_use ? poshold::config::kAbsKalmanStd : 0.004f;
+}
+
+bool poshold_soft_alt_active(void) {
+    return g_soft_active;
+}
+
+float poshold_soft_alt_u(void) {
+    return g_soft_u;
+}
+
+bool poshold_tof_loss_expected(void) {
+    return g_abs_selected || g_soft_active;
 }
 
 bool poshold_abs_selected(void) {

@@ -12,6 +12,7 @@
 #include <height_monitor.hpp>
 #include <abs_height.hpp>
 #include <tof_step.hpp>
+#include <soft_alt.hpp>
 
 #include "pmw3901.hpp"
 
@@ -53,6 +54,11 @@ float poshold_abs_height(void);
 float poshold_alt_ref_max(void);  // altitude setpoint limit: 1.8 m with the ToF, higher in Stable ABS
 float poshold_alt_limit(void);    // height above which the upstream code forces a descent
 float poshold_alt_meas_std(void); // measurement noise for the altitude estimator
+
+// Soft altitude hold above the ToF range (POSHOLD_ENABLE_SOFT_ALT).
+bool poshold_soft_alt_active(void);      // the thrust comes from the soft hold instead of the ToF loops
+float poshold_soft_alt_u(void);          // thrust duty offset from the hover trim
+bool poshold_tof_loss_expected(void);    // no ToF echo is normal (ABS or the soft hold above the ToF range)
 
 // ToF obstacle edge compensation (absolute height over obstacles).
 void poshold_tof_step_sample(int16_t range_mm);  // once per new ToF sample, after the outlier filter
