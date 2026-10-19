@@ -173,3 +173,12 @@ w pętli tego drona, także jako źródło „wysoko”. Zostają: ToF z kompens
 na barometrze przy niewiarygodnym ToF (to nie wymaga dokładności). Wysokość powyżej zasięgu ToF wymagałaby
 barometru poza podmuchem (inna lokalizacja czujnika), GPS albo lotu na stałym ciągu (Manual). Tryb ABS jest
 eksperymentalny i nie powinien być używany w locie.
+
+### Test z kartonem pod ToF (2026-10-19, `20261019_233504.csv`, zawis 0,58 m)
+
+- Karton tuż pod czujnikiem (ToF 0,12 m zamiast 0,6 m) to przeszkoda, nie oślepienie: kompensacja trzymała wysokość ciągłą
+  (0,60 → 0,60 m), a zabezpieczenie `TOF` słusznie się nie uruchomiło (ToF ważny i zgodny z barometrem po kompensacji).
+- Przy zabieraniu kartonu odczyty były chaotyczne (1,01; 0,97; 0,83 ze statusem 7; 0,51; 0,00 m) i skumulował się zły offset
+  −0,97 m: `alt_est` spadło do −0,50 m, `vz` −2,1 m/s, ciąg 0,78. Poprawka: skompensowana wysokość nie może być mniejsza
+  niż 0,05 m; w przeciwnym razie offset jest zerowany i zostaje goła wysokość z ToF (`kTofStepMinHeight`).
+- Prawdziwe oślepienie (słońce) da brak echa lub błędne wartości; sprawdzimy je w parku.

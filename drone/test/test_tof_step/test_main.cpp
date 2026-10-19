@@ -72,6 +72,23 @@ void test_no_edge_detection_while_tilted() {
     TEST_ASSERT_FLOAT_WITHIN(0.0001f, 0.0f, off2);  // the new level is the reference
 }
 
+void test_a_negative_compensated_height_falls_back_to_the_plain_tof() {
+    // a wrong edge (+0.6 m) is followed by a gradual slide of the reading that no step detector sees
+    TofStepComp c;
+    for (int i = 0; i < 20; i++) c.update(true, true, 0.60f);
+    c.update(true, true, 1.20f);  // taken for an edge: offset -0.6 m, compensated height 0.6 m
+    TEST_ASSERT_FLOAT_WITHIN(0.0001f, -0.60f, c.offset());
+    float off = c.offset();
+    float tof = 1.20f;
+    for (int i = 0; i < 40; i++) {
+        tof -= 0.02f;  // 0.6 m/s, far from an edge
+        off = c.update(true, true, tof);
+        TEST_ASSERT_TRUE(tof + off >= 0.05f - 1e-5f);
+    }
+    TEST_ASSERT_FLOAT_WITHIN(0.0001f, 0.0f, off);  // fell back to the plain ToF height
+    TEST_ASSERT_TRUE(c.saturated());
+}
+
 void test_a_real_climb_is_not_taken_for_an_edge() {
     // 1 m/s at 30 Hz is 3 cm per sample
     TofStepComp c;
@@ -117,6 +134,7 @@ int main() {
     RUN_TEST(test_an_edge_seen_in_two_steps_is_compensated);
     RUN_TEST(test_two_medium_jumps_in_a_row_are_one_edge);
     RUN_TEST(test_no_edge_detection_while_tilted);
+    RUN_TEST(test_a_negative_compensated_height_falls_back_to_the_plain_tof);
     RUN_TEST(test_a_real_climb_is_not_taken_for_an_edge);
     RUN_TEST(test_invalid_samples_keep_the_offset);
     RUN_TEST(test_inactive_clears_the_offset);

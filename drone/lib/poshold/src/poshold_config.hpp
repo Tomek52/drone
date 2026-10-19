@@ -149,6 +149,7 @@ constexpr float kHmTauBaro     = 0.60f;  // [s] low-pass of the barometer height
 constexpr float kTofStepM         = 0.07f;  // [m] jump between two ToF samples (33 ms) taken for an edge (2 m/s)
 constexpr float kTofStepPairM     = 0.12f;  // [m] two consecutive same-direction jumps (each > kTofStepSmallM) summing to this
 constexpr float kTofStepSmallM    = 0.03f;  // [m] smallest jump counted for the pair rule
+constexpr float kTofStepMinHeight = 0.05f;  // [m] the compensated height cannot go below this (above the take-off point)
 constexpr float kTofStepMaxOffset = 1.50f;  // [m] limit of the accumulated offset
 
 // Stable ABS (abs_height.hpp): height from the barometer.
