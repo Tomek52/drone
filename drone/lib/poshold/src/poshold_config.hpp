@@ -161,7 +161,7 @@ constexpr float kAbsLearnMaxToF = 3.0f;   // [m] ToF range used for learning
 constexpr float kAbsToFMax       = 1.00f;  // [m] ABS: ToF is the height source below this, the barometer above (2.0 outdoors; 1.0 for the corridor test)
 constexpr float kAbsTauDriftFast = 3.0f;   // [s] offset learning while the ToF is the source (keeps the barometer on the ToF)
 constexpr float kAbsKalmanStd   = 0.40f;  // [m] measurement noise of the barometer height in the altitude estimator
-constexpr float kAbsAltMax      = 10.0f;  // [m] altitude setpoint limit in Stable ABS (upstream: 1.8 m with the ToF)
+constexpr float kAbsAltMax      = 20.0f;  // [m] altitude setpoint limit in Stable ABS (upstream: 1.8 m with the ToF)
 
 }  // namespace config
 }  // namespace poshold

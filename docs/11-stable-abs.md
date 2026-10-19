@@ -131,8 +131,8 @@ Upstreamowy estymator wysokości to filtr Kalmana z akcelerometrem, z szumem pom
 (0,004 m). W trybie ABS szum pomiaru ustawiany jest na 0,40 m (`set_measurement_std`, `kAbsKalmanStd`), więc
 akcelerometr niesie krótkie zmiany wysokości, a barometr tylko wolno (rzędu kilku sekund) koryguje dryf.
 
-- W trybie ABS limity wysokości są podniesione: zadana do 10 m (`kAbsAltMax`; upstream 1,8 m z ToF), a upstreamowy
-  mechanizm wymuszający zejście powyżej 2 m (`Range0flag`) działa dopiero powyżej 10,5 m i nie reaguje na brak
+- W trybie ABS limity wysokości są podniesione: zadana do 20 m (`kAbsAltMax`; upstream 1,8 m z ToF), a upstreamowy
+  mechanizm wymuszający zejście powyżej 2 m (`Range0flag`) działa dopiero powyżej 20,5 m i nie reaguje na brak
   echa ToF, który na zewnątrz jest normalny.
 - Lądowanie w ABS kończy się, gdy wysokość z barometru spadnie poniżej 0,25 m (albo ToF ma poprawny odczyt poniżej 0,6 m).
 - Zabezpieczenie `kToFUnreliable` nie działa w ABS (tam ToF nie jest źródłem wysokości).
@@ -154,5 +154,5 @@ Wniosek: barometr nie może być źródłem wysokości od ziemi.
   (szum pomiaru 0,4 m w estymatorze). Offset barometru jest uczony z ToF-a szybko (3 s), dopóki ToF jest źródłem,
   więc przełączenie jest ciągłe.
 - Próg: 2,0 m na zewnątrz; do testu w korytarzu (sufit 2,4 m) tymczasowo **1,0 m**, żeby zobaczyć barometr w akcji,
-  gdzie ToF nadal jest prawdą. W trybie ABS limity wysokości są podniesione (10 m), więc w teście nie wychodzić
+  gdzie ToF nadal jest prawdą. W trybie ABS limity wysokości są podniesione (20 m), więc w teście nie wychodzić
   drążkiem powyżej ok. 1,5 m.
