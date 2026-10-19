@@ -9,7 +9,7 @@
 namespace poshold {
 
 float AbsHeight::update(float dt, bool baro_ok, float baro_h_m, float thrust, bool tof_valid, float tof_m,
-                        bool parked) {
+                        bool parked, bool fast_learn) {
     if (!baro_ok) {
         abs_ = tof_valid ? tof_m : abs_;
         return abs_;
@@ -29,7 +29,8 @@ float AbsHeight::update(float dt, bool baro_ok, float baro_h_m, float thrust, bo
         if (tof_valid) off_ = tof_m - basis;
     } else if (tof_valid && tof_m < p_.learn_max) {
         const float innov = tof_m - (basis + off_);
-        if (fabsf(innov) < p_.learn_gate) off_ += innov * (dt / (p_.tau_drift_s + dt));
+        const float tau = fast_learn ? p_.tau_fast_s : p_.tau_drift_s;
+        if (fabsf(innov) < p_.learn_gate) off_ += innov * (dt / (tau + dt));
     }
     abs_ = basis + off_;
     return abs_;

@@ -138,3 +138,21 @@ akcelerometr niesie krótkie zmiany wysokości, a barometr tylko wolno (rzędu k
 - Zabezpieczenie `kToFUnreliable` nie działa w ABS (tam ToF nie jest źródłem wysokości).
 - Przewidywana dokładność: po nauczeniu się offsetu błąd stały do ok. 0,3 m (podmuch), bez falowania. Do sprawdzenia w locie.
 - Pierwsze testy w mieszkaniu (zawis 0,5–1,5 m, porównanie z ToF), potem na zewnątrz **na uwięzi**.
+
+## Drugi lot ABS (v2, `20261019_215025.csv`) — niebezpieczny, wycofane na rzecz hybrydy
+
+Zawis bez dotykania gazu zamienił się w skoki 0 ↔ 2,7 m (KILL po ok. 13 s). Przyczyna: w rampie startowej na ziemi
+barometr pokazał −0,34 m (podmuch przy ziemi), a estymator z szumem pomiaru 0,4 m nie nadążał za prawdziwym
+wznoszeniem, więc dla regulatora dron był na ziemi (0,03 m) przy pełnym ciągu i wystrzelił do 1,8–2,7 m.
+Wniosek: barometr nie może być źródłem wysokości od ziemi.
+
+## ABS v3: hybryda ToF nisko / barometr wysoko
+
+- Źródłem wysokości jest **ToF** (z kompensacją krawędzi), dopóki jest poprawny, monitor mu ufa i wysokość jest
+  poniżej progu `kAbsToFMax` (z histerezą +0,2 m). Start, zawis nisko i lądowanie są więc takie jak w Auto.
+- Powyżej progu albo gdy ToF jest niewiarygodny (oślepiony, bez echa) źródłem jest **barometr** z akcelerometrem
+  (szum pomiaru 0,4 m w estymatorze). Offset barometru jest uczony z ToF-a szybko (3 s), dopóki ToF jest źródłem,
+  więc przełączenie jest ciągłe.
+- Próg: 2,0 m na zewnątrz; do testu w korytarzu (sufit 2,4 m) tymczasowo **1,0 m**, żeby zobaczyć barometr w akcji,
+  gdzie ToF nadal jest prawdą. W trybie ABS limity wysokości są podniesione (10 m), więc w teście nie wychodzić
+  drążkiem powyżej ok. 1,5 m.

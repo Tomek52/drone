@@ -46,7 +46,8 @@ bool poshold_link_loss_landing_allowed(void);
 const poshold::SupervisorOutput& poshold_supervisor_output(void);
 
 // Stable ABS: height from the barometer replaces the ToF range in the altitude estimator.
-bool poshold_abs_active(void);
+bool poshold_abs_active(void);    // the barometer is the height source right now
+bool poshold_abs_selected(void);  // ALT ABS selected on the joystick
 int16_t poshold_abs_range_mm(void);
 float poshold_abs_height(void);
 float poshold_alt_ref_max(void);  // altitude setpoint limit: 1.8 m with the ToF, higher in Stable ABS

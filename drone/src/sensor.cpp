@@ -331,7 +331,7 @@ float sensor_read(void) {
         Altitude2 = EstimatedAltitude.Altitude;
         // MAX_ALTを超えたら高度下げる（自動着陸）
         // [POSHOLD] Stable ABS: the limit is higher and a ToF without echo (outdoors) is normal
-        if ((Altitude2 > poshold_alt_limit() && Alt_flag >= 1 && Flip_flag == 0) || (RawRange == 0 && !poshold_abs_active()))
+        if ((Altitude2 > poshold_alt_limit() && Alt_flag >= 1 && Flip_flag == 0) || (RawRange == 0 && !poshold_abs_selected()))
             Range0flag++;
         else
             Range0flag = 0;

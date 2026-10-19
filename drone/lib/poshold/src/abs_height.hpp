@@ -22,6 +22,7 @@ struct AbsHeightParams {
     float wash_pa     = config::kAbsWashPa;
     float tau_baro_s  = config::kAbsTauBaro;
     float tau_drift_s = config::kAbsTauDrift;
+    float tau_fast_s  = config::kAbsTauDriftFast;
     float learn_gate  = config::kAbsLearnGate;
     float learn_max   = config::kAbsLearnMaxToF;
 };
@@ -32,7 +33,9 @@ public:
 
     // baro_h_m: barometer height relative to the ground reference (raw); thrust: duty 0..1.
     // parked: the drone stands on the ground. Returns the height [m].
-    float update(float dt, bool baro_ok, float baro_h_m, float thrust, bool tof_valid, float tof_m, bool parked);
+    // fast_learn: the ToF is the height source at the moment, so the offset follows it quickly.
+    float update(float dt, bool baro_ok, float baro_h_m, float thrust, bool tof_valid, float tof_m, bool parked,
+                 bool fast_learn = false);
 
     float height() const { return abs_; }
     float offset() const { return off_; }

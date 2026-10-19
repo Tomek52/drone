@@ -56,6 +56,8 @@ poshold::TofStepComp g_tof_step;
 float g_tof_offset_m = 0.0f;
 float g_abs_m   = 0.0f;
 bool g_abs_use   = false;
+bool g_abs_selected = false;  // ALT ABS selected on the joystick
+bool g_tof_primary  = true;   // the ToF is the height source (ABS: below kAbsToFMax)
 bool g_tof_failsafe_landing = false;
 poshold::PositionController g_controller;
 poshold::SupervisorOutput g_sup;
@@ -246,16 +248,28 @@ void poshold_safety_update(void) {
         g_hm_out = g_height_monitor.update(Interval_time, tof_valid, (float)RawRange * 0.001f + g_tof_offset_m, baro_present(),
                                            baro_height_m());
 
-        // Stable ABS height; used instead of the ToF range only in that mode.
-        g_abs_m = g_abs.update(Interval_time, baro_present(), baro_height_m(), (float)(Thrust_command / BATTERY_VOLTAGE),
-                               tof_valid, (float)RawRange * 0.001f, Mode == PARKING_MODE);
+        // ABS: the ToF is the height source while it is valid, trusted and within range (hysteresis),
+        // the barometer above that and when the ToF is not trusted.
         const bool abs_req = rc_link_abs_alt_requested() && rc_link_requested_mode() != FlightMode::kPosHold && baro_present();
-        // Failsafe: the ToF disagrees with the barometer (blinded by the sun, stuck): land on the barometer.
+        const float tof_h  = (float)RawRange * 0.001f + g_tof_offset_m;  // absolute ToF height
+        if (g_tof_primary) {
+            if (!tof_valid || !g_hm_out.trusted || tof_h > poshold::config::kAbsToFMax + 0.2f) g_tof_primary = false;
+        } else if (tof_valid && g_hm_out.trusted && tof_h < poshold::config::kAbsToFMax) {
+            g_tof_primary = true;
+        }
+        g_abs_selected = abs_req;
+
+        // Height from the barometer (with the ToF teaching the offset while the ToF is the source).
+        g_abs_m = g_abs.update(Interval_time, baro_present(), baro_height_m(), (float)(Thrust_command / BATTERY_VOLTAGE),
+                               tof_valid, tof_h, Mode == PARKING_MODE, g_tof_primary);
+
+        // Failsafe (not in ABS, which switches to the barometer by itself): the ToF disagrees with the
+        // barometer, e.g. blinded by the sun or stuck: land on the barometer.
         const bool tof_failsafe        = !g_hm_out.trusted && baro_present() && !abs_req;
         in.tof_untrusted               = tof_failsafe;
         const bool landing_near_ground = !tof_failsafe && Mode == AUTO_LANDING_MODE && tof_valid && RawRange < 600;
-        g_abs_use = (abs_req || tof_failsafe) &&
-                    (Mode == FLIGHT_MODE || Mode == FLIP_MODE || (Mode == AUTO_LANDING_MODE && !landing_near_ground));
+        const bool baro_source         = (abs_req && !g_tof_primary) || tof_failsafe;
+        g_abs_use = baro_source && (Mode == FLIGHT_MODE || Mode == FLIP_MODE || (Mode == AUTO_LANDING_MODE && !landing_near_ground));
         g_tof_failsafe_landing = tof_failsafe && Mode == AUTO_LANDING_MODE;
     }
 
@@ -326,15 +340,19 @@ float poshold_tof_offset_m(void) {
 }
 
 float poshold_alt_ref_max(void) {
-    return g_abs_use ? poshold::config::kAbsAltMax : 1.8f;
+    return g_abs_selected ? poshold::config::kAbsAltMax : 1.8f;
 }
 
 float poshold_alt_limit(void) {
-    return g_abs_use ? poshold::config::kAbsAltMax + 0.5f : 2.0f;
+    return g_abs_selected ? poshold::config::kAbsAltMax + 0.5f : 2.0f;
 }
 
 float poshold_alt_meas_std(void) {
     return g_abs_use ? poshold::config::kAbsKalmanStd : 0.004f;
+}
+
+bool poshold_abs_selected(void) {
+    return g_abs_selected;
 }
 
 bool poshold_abs_active(void) {
