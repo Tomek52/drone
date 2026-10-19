@@ -128,8 +128,9 @@ void test_poshold_and_abs_are_exclusive() {
     TEST_ASSERT_FALSE(m.alt_abs());
     m.toggle_alt_on_ground();  // Manual requested -> Stable
     TEST_ASSERT_EQUAL((int)FlightMode::kStable, (int)m.mode());
-    m.set(FlightMode::kSport, true);
-    m.toggle_alt_on_ground();  // Abs
+    m.set(FlightMode::kSport, true);  // Manual -> Auto
+    m.toggle_alt_on_ground();         // Manual
+    m.toggle_alt_on_ground();         // Abs
     TEST_ASSERT_TRUE(m.alt_abs());
     m.set(FlightMode::kSport, true);  // keeps ABS
     TEST_ASSERT_TRUE(m.alt_abs());
