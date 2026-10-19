@@ -12,6 +12,7 @@ void HeightMonitor::reset() {
     initialised_ = false;
     trusted_     = true;
     offset_      = 0.0f;
+    baro_f_init_ = false;
     bad_time_    = 0.0f;
     good_time_   = 0.0f;
 }
@@ -24,6 +25,14 @@ HeightMonitorOutput HeightMonitor::update(float dt, bool tof_valid, float tof_m,
         out.trusted = true;
         return out;
     }
+    if (!baro_f_init_) {
+        baro_f_      = baro_m;
+        baro_f_init_ = true;
+    } else {
+        baro_f_ += (baro_m - baro_f_) * (dt / (p_.tau_baro_s + dt));
+    }
+    baro_m = baro_f_;
+
     if (!initialised_) {
         if (tof_valid) {
             offset_      = tof_m - baro_m;

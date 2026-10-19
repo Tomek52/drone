@@ -24,6 +24,7 @@ struct HeightMonitorParams {
     float regain_gate_m = config::kHmRegainGate;   // agreement needed to trust the ToF again ...
     float regain_s      = config::kHmRegain;       // ... for this long
     float tau_offset_s  = config::kHmTauOffset;    // time constant of the offset while trusted
+    float tau_baro_s    = config::kHmTauBaro;      // low-pass of the barometer height
 };
 
 struct HeightMonitorOutput {
@@ -52,6 +53,8 @@ private:
     bool initialised_ = false;
     bool trusted_     = true;
     float offset_     = 0.0f;
+    float baro_f_     = 0.0f;
+    bool baro_f_init_ = false;
     float bad_time_   = 0.0f;
     float good_time_  = 0.0f;
 };

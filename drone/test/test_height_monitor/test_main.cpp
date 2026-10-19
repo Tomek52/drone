@@ -30,6 +30,19 @@ void test_stays_trusted_when_sensors_agree() {
     TEST_ASSERT_FLOAT_WITHIN(0.02f, 0.50f, o.predicted_m);
 }
 
+void test_noisy_barometer_does_not_cause_false_alarms() {
+    // single barometer samples are ~12 cm noisy; the ToF is steady at 0.5 m
+    HeightMonitor m;
+    HeightMonitorOutput o;
+    unsigned seed = 12345u;
+    for (float t = 0.0f; t < 30.0f; t += kDt) {
+        seed          = seed * 1664525u + 1013904223u;
+        const float n = ((int)((seed >> 16) & 0xFFFF) - 32768) / 32768.0f * 0.30f;  // +-0.30 m uniform
+        o             = m.update(kDt, true, 0.50f, true, 0.50f + n);
+        TEST_ASSERT_TRUE(o.trusted);
+    }
+}
+
 void test_slow_barometer_drift_is_absorbed() {
     // thermal drift of 1.2 cm/s for 60 s, the ToF stays at 0.5 m
     HeightMonitor m;
@@ -109,6 +122,7 @@ void test_not_initialised_until_a_valid_tof_sample() {
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_stays_trusted_when_sensors_agree);
+    RUN_TEST(test_noisy_barometer_does_not_cause_false_alarms);
     RUN_TEST(test_slow_barometer_drift_is_absorbed);
     RUN_TEST(test_tof_stuck_while_drone_climbs_becomes_untrusted);
     RUN_TEST(test_missing_tof_samples_become_untrusted_after_hold_time);

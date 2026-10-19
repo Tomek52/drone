@@ -143,6 +143,7 @@ constexpr float kHmHold        = 0.30f;  // [s] disagreement for this long -> To
 constexpr float kHmRegainGate  = 0.12f;  // [m] agreement needed to trust the ToF again ...
 constexpr float kHmRegain      = 1.00f;  // [s] ... for this long
 constexpr float kHmTauOffset   = 3.00f;  // [s] offset tracking while trusted (absorbs thermal drift)
+constexpr float kHmTauBaro     = 0.60f;  // [s] low-pass of the barometer height (single samples are ~12 cm noisy)
 
 }  // namespace config
 }  // namespace poshold
