@@ -27,6 +27,7 @@
 #include "imu.hpp"
 #include "tof.hpp"
 #include "baro.hpp"  // [POSHOLD]
+#include "poshold_glue.hpp"  // [POSHOLD]
 #include "flight_control.hpp"
 
 Madgwick Drone_ahrs;
@@ -318,6 +319,8 @@ float sensor_read(void) {
         } else
             dcnt++;
 
+        // [POSHOLD] Stable ABS: the height comes from the barometer instead of the ToF
+        if (poshold_abs_active()) Range = poshold_abs_range_mm();
         Altitude = alt_filter.update((float)Range / 1000.0, Interval_time);
         if (first_flag == 1)
             EstimatedAltitude.update(Altitude, Az, Interval_time);

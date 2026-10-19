@@ -43,7 +43,6 @@ struct Field {
 // from the schema frame.
 const Field kFields[] = {
     {"mode", []() -> float { return (float)Mode; }},
-    {"alt_mode", []() -> float { return (float)Throttle_control_mode; }},
     {"roll_deg", []() -> float { return (Roll_angle - Roll_angle_offset) * kRadToDeg; }},
     {"pitch_deg", []() -> float { return (Pitch_angle - Pitch_angle_offset) * kRadToDeg; }},
     {"yaw_deg", []() -> float { return (Yaw_angle - Yaw_angle_offset) * kRadToDeg; }},
@@ -105,6 +104,7 @@ const Field kFields[] = {
     {"tof_sig_mcps", []() -> float { return tof_bottom_diag().signal_mcps; }},
     {"hm_trust", []() -> float { return poshold_height_monitor_output().trusted ? 1.0f : 0.0f; }},
     {"hm_pred_m", []() -> float { return poshold_height_monitor_output().predicted_m; }},
+    {"abs_m", []() -> float { return poshold_abs_height(); }},
 };
 constexpr size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);
 static_assert(kFieldCount <= stampfly_link::kMaxDataFields, "too many telemetry fields for one frame");

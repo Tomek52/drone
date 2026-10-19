@@ -51,8 +51,9 @@ enum class FlightMode : uint8_t {
     kStable  = 0,
     kSport   = 1,
     kPosHold = 2,
+    kStableAbs = 3,  // Stable + Auto Altitude, height from the barometer (no ToF dependence)
 };
-constexpr uint8_t kFlightModeCount = 3;
+constexpr uint8_t kFlightModeCount = 4;
 
 // Flags (byte 26).
 constexpr uint8_t kRcFlagKill = 0x01;  // stop the motors immediately
@@ -134,6 +135,7 @@ enum class Reason : uint8_t {
     kLowBattery         = 8,
     kKill               = 9,  // motors stopped from the joystick
     kProtocolMismatch   = 10,
+    kBaroMissing        = 11,  // Stable ABS requested but no barometer
 };
 
 struct DroneStatus {

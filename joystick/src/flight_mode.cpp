@@ -21,6 +21,7 @@ constexpr uint32_t kOldFirmwareAfterMs = 3000;  // upstream telemetry but no sta
 
 // Colours (RGB hex) used on the screen.
 constexpr uint32_t kColPosHold = 0x2A78D6;  // blue, same hue as the drone LED in Position Hold
+constexpr uint32_t kColAbs     = 0x2E8B57;  // green: Stable ABS
 constexpr uint32_t kColWarn    = 0xEB6834;  // orange: fallback / not available
 constexpr uint32_t kColError   = 0xC1001D;  // red: protocol error, kill
 constexpr uint32_t kColWhite   = 0xFFFFFF;
@@ -79,6 +80,7 @@ const char *reason_short(uint8_t r) {
         case Reason::kGeofence: return "FENCE";
         case Reason::kLinkLost: return "LINK";
         case Reason::kLowBattery: return "BATT";
+        case Reason::kBaroMissing: return "NO BARO";
         case Reason::kKill: return "KILL";
         default: return "";
     }
@@ -166,6 +168,11 @@ void flight_mode_ui_update_setup(void) {
         style_badge(g_setup_badge, kColError, kColWhite);
         lv_label_set_text(g_setup_badge, "DRONE\nFW?");
         lv_obj_clear_flag(g_setup_badge, LV_OBJ_FLAG_HIDDEN);
+    } else if (g_sel.mode() == FlightMode::kStableAbs) {
+        const bool unavailable = status_fresh() && g_status.reason == (uint8_t)Reason::kBaroMissing;
+        style_badge(g_setup_badge, unavailable ? kColWarn : kColAbs, kColWhite);
+        lv_label_set_text(g_setup_badge, unavailable ? "ABS\nN/A" : "STB\nABS");
+        lv_obj_clear_flag(g_setup_badge, LV_OBJ_FLAG_HIDDEN);
     } else if (g_sel.mode() == FlightMode::kPosHold) {
         const bool unavailable = status_fresh() && !(g_status.flags & kStatusFlowAvailable);
         style_badge(g_setup_badge, unavailable ? kColWarn : kColPosHold, kColWhite);
@@ -224,6 +231,17 @@ void flight_mode_ui_update_running(void) {
         } else {
             snprintf(text, sizeof(text), "POS HOLD");
             bg = kColPosHold;
+            fg = kColWhite;
+        }
+    } else if (g_sel.mode() == FlightMode::kStableAbs) {
+        if (status_fresh() && g_status.active_mode != FlightMode::kStableAbs &&
+            g_status.reason != (uint8_t)Reason::kNone) {
+            snprintf(text, sizeof(text), "STB %s", reason_short(g_status.reason));
+            bg = kColWarn;
+            fg = kColWhite;
+        } else {
+            snprintf(text, sizeof(text), "STB ABS");
+            bg = kColAbs;
             fg = kColWhite;
         }
     } else if (g_sel.mode() == FlightMode::kSport) {

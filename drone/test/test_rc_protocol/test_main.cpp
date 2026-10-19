@@ -100,7 +100,25 @@ void test_mode_cycle_on_ground() {
     TEST_ASSERT_EQUAL((int)FlightMode::kPosHold, (int)m.mode());
     TEST_ASSERT_EQUAL(kCtrlAngle, m.control_mode_byte());  // old drones see Stable
     m.cycle_mode_on_ground();
+    TEST_ASSERT_EQUAL((int)FlightMode::kStableAbs, (int)m.mode());
+    TEST_ASSERT_EQUAL(kCtrlAngle, m.control_mode_byte());
+    m.cycle_mode_on_ground();
     TEST_ASSERT_EQUAL((int)FlightMode::kStable, (int)m.mode());
+}
+
+void test_stable_abs_forces_auto_altitude() {
+    FlightModeSelector m;
+    m.toggle_alt_on_ground();  // manual altitude
+    m.cycle_mode_on_ground();
+    m.cycle_mode_on_ground();
+    m.cycle_mode_on_ground();  // -> Stable ABS
+    TEST_ASSERT_EQUAL((int)FlightMode::kStableAbs, (int)m.mode());
+    TEST_ASSERT_TRUE(m.alt_auto());
+    m.toggle_alt_on_ground();  // manual altitude requested -> back to Stable
+    TEST_ASSERT_EQUAL((int)FlightMode::kStable, (int)m.mode());
+    m.set(FlightMode::kStableAbs, false);
+    TEST_ASSERT_TRUE(m.alt_auto());
+    TEST_ASSERT_FALSE(m.left_button_in_flight());  // not consumed: upstream action
 }
 
 void test_poshold_forces_auto_altitude() {
@@ -157,6 +175,7 @@ int main(int, char**) {
     RUN_TEST(test_status_roundtrip);
     RUN_TEST(test_status_does_not_collide_with_other_packets);
     RUN_TEST(test_mode_cycle_on_ground);
+    RUN_TEST(test_stable_abs_forces_auto_altitude);
     RUN_TEST(test_poshold_forces_auto_altitude);
     RUN_TEST(test_in_flight_only_poshold_to_stable);
     RUN_TEST(test_kill_switch_needs_hold_and_lingers);

@@ -145,6 +145,14 @@ constexpr float kHmRegain      = 1.00f;  // [s] ... for this long
 constexpr float kHmTauOffset   = 10.0f;  // [s] offset tracking while trusted (absorbs thermal drift)
 constexpr float kHmTauBaro     = 0.60f;  // [s] low-pass of the barometer height (single samples are ~12 cm noisy)
 
+// Stable ABS (abs_height.hpp): height from the barometer.
+constexpr float kAbsPaPerMeter  = 11.5f;  // pressure change per metre near the ground
+constexpr float kAbsWashPa      = 13.0f;  // prop wash pressure drop at full thrust; ~7 Pa at hover (logs/20261019_200020.csv)
+constexpr float kAbsTauBaro     = 0.60f;  // [s] low-pass of the barometer height
+constexpr float kAbsTauDrift    = 20.0f;  // [s] learning of the slow barometer drift from the ToF
+constexpr float kAbsLearnGate   = 0.30f;  // [m] the ToF teaches the drift only when it is this close (obstacles are ignored)
+constexpr float kAbsLearnMaxToF = 3.0f;   // [m] ToF range used for learning
+
 }  // namespace config
 }  // namespace poshold
 

@@ -82,7 +82,7 @@ Bajty 0–23 mają **to samo znaczenie co w wersji 1**, dalej:
 | Bajt | Typ | Zawartość |
 |---|---|---|
 | 24 | u8 | wersja protokołu = **2** |
-| 25 | u8 | tryb lotu: 0 = Stable, 1 = Sport, 2 = Position Hold |
+| 25 | u8 | tryb lotu: 0 = Stable, 1 = Sport, 2 = Position Hold, 3 = Stable ABS (starsze firmware'y traktują nieznany numer jako Stable) |
 | 26 | u8 | flagi: bit 0 = **kill** (natychmiastowe wyłączenie silników) |
 | 27 | u8 | zarezerwowane (0) |
 | 28 | u8 | suma kontrolna = suma bajtów 0–27 (mod 256) |
@@ -114,6 +114,7 @@ W Position Hold bajt 21 (tryb sterowania) = 0 (Stable), a bajt 22 = 4 (Auto Alt)
 | 8 | niska bateria | `STB BATT` |
 | 9 | silniki wyłączone z pilota | `KILL` |
 | 10 | niezgodność wersji protokołu | `PROTO ERR` / `DRONE FW?` |
+| 11 | Stable ABS zażądany, ale dron nie ma barometru | `STB NO BARO` |
 
 ### Zgodność wersji
 

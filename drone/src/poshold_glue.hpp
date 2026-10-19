@@ -10,6 +10,7 @@
 #include <position_estimator.hpp>
 #include <poshold_supervisor.hpp>
 #include <height_monitor.hpp>
+#include <abs_height.hpp>
 
 #include "pmw3901.hpp"
 
@@ -42,6 +43,11 @@ void poshold_override_attitude(volatile float* roll_ref, volatile float* pitch_r
 bool poshold_link_loss_landing_allowed(void);
 
 const poshold::SupervisorOutput& poshold_supervisor_output(void);
+
+// Stable ABS: height from the barometer replaces the ToF range in the altitude estimator.
+bool poshold_abs_active(void);
+int16_t poshold_abs_range_mm(void);
+float poshold_abs_height(void);
 const poshold::HeightMonitorOutput& poshold_height_monitor_output(void);  // ToF vs barometer, observe-only
 const poshold::ControllerOutput& poshold_controller_output(void);
 

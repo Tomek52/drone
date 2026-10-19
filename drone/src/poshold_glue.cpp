@@ -51,6 +51,9 @@ constexpr float kLoopPeriod          = 0.0025f;
 poshold::PosHoldSupervisor g_supervisor;
 poshold::HeightMonitor g_height_monitor;
 poshold::HeightMonitorOutput g_hm_out;
+poshold::AbsHeight g_abs;
+float g_abs_m   = 0.0f;
+bool g_abs_use   = false;
 poshold::PositionController g_controller;
 poshold::SupervisorOutput g_sup;
 poshold::ControllerOutput g_ctrl;
@@ -192,6 +195,8 @@ void report_status(const poshold::SupervisorOutput& o) {
     FlightMode active;
     if (o.poshold_active) {
         active = FlightMode::kPosHold;
+    } else if (requested == FlightMode::kStableAbs && baro_present()) {
+        active = FlightMode::kStableAbs;
     } else {
         active = requested == FlightMode::kSport ? FlightMode::kSport : FlightMode::kStable;
     }
@@ -207,6 +212,7 @@ void report_status(const poshold::SupervisorOutput& o) {
         if (!pmw3901_present()) reason = Reason::kFlowSensorMissing;
         else if (!poshold::config::kFlowAxesVerified) reason = Reason::kFlowNotCalibrated;
     }
+    if (reason == Reason::kNone && requested == FlightMode::kStableAbs && !baro_present()) reason = Reason::kBaroMissing;
     rc_link_set_status(active, flags, reason);
 }
 
@@ -237,6 +243,13 @@ void poshold_safety_update(void) {
         const bool tof_valid = td.status == 0 && RawRange > 20;
         g_hm_out = g_height_monitor.update(Interval_time, tof_valid, (float)RawRange * 0.001f, baro_present(),
                                            baro_height_m());
+
+        // Stable ABS height; used instead of the ToF range only in that mode.
+        g_abs_m = g_abs.update(Interval_time, baro_present(), baro_height_m(), (float)(Thrust_command / BATTERY_VOLTAGE),
+                               tof_valid, (float)RawRange * 0.001f, Mode == PARKING_MODE);
+        const bool abs_req             = rc_link_requested_mode() == FlightMode::kStableAbs && baro_present();
+        const bool landing_near_ground = Mode == AUTO_LANDING_MODE && tof_valid && RawRange < 600;
+        g_abs_use = abs_req && (Mode == FLIGHT_MODE || Mode == FLIP_MODE || (Mode == AUTO_LANDING_MODE && !landing_near_ground));
     }
 
     g_sup = g_supervisor.update(in);
@@ -289,6 +302,21 @@ void poshold_override_attitude(volatile float* roll_ref, volatile float* pitch_r
 
 bool poshold_link_loss_landing_allowed(void) {
     return g_sup.allow_link_landing;
+}
+
+bool poshold_abs_active(void) {
+    return g_abs_use;
+}
+
+int16_t poshold_abs_range_mm(void) {
+    float mm = g_abs_m * 1000.0f;
+    if (mm < 21.0f) mm = 21.0f;  // the upstream code treats <= 20 as 'no reading'
+    if (mm > 5000.0f) mm = 5000.0f;
+    return (int16_t)mm;
+}
+
+float poshold_abs_height(void) {
+    return g_abs_m;
 }
 
 const poshold::HeightMonitorOutput& poshold_height_monitor_output(void) {

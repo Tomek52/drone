@@ -30,12 +30,12 @@ class FlightModeSelector {
 
     void cycle_mode_on_ground() {
         mode_ = (FlightMode)(((uint8_t)mode_ + 1) % kFlightModeCount);
-        if (mode_ == FlightMode::kPosHold) alt_auto_ = true;
+        if (mode_ == FlightMode::kPosHold || mode_ == FlightMode::kStableAbs) alt_auto_ = true;
     }
 
     void toggle_alt_on_ground() {
         alt_auto_ = !alt_auto_;
-        if (!alt_auto_ && mode_ == FlightMode::kPosHold) mode_ = FlightMode::kStable;
+        if (!alt_auto_ && (mode_ == FlightMode::kPosHold || mode_ == FlightMode::kStableAbs)) mode_ = FlightMode::kStable;
     }
 
     // Left front button pressed while flying. Returns true if the press was
@@ -49,7 +49,7 @@ class FlightModeSelector {
     // Lets the UI restore a mode (e.g. after reading the drone status).
     void set(FlightMode m, bool alt_auto) {
         mode_     = m;
-        alt_auto_ = alt_auto || m == FlightMode::kPosHold;
+        alt_auto_ = alt_auto || m == FlightMode::kPosHold || m == FlightMode::kStableAbs;
     }
 
    private:
