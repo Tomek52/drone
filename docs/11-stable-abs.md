@@ -1,6 +1,8 @@
 # 11. Stable ABS (wysokość z barometru)
 
-Stan: **zaimplementowane, pierwszy lot nieudany (patrz niżej), nie używać**. Gałąź `feat/baro-abs`. Powód powstania: w parku dolny ToF
+Stan: **wyłączone** (`POSHOLD_ENABLE_ABS` = 0 w pilocie i dronie; prawy przycisk przełącza tylko Auto ↔ Manual). Dwa loty
+hybrydy zakończyły się upadkiem i uderzeniem w sufit (patrz niżej). Następny krok: łagodny regulator wysokości na
+barometrze (`feat/soft-altitude`, patrz [10-plany.md](10-plany.md)). Flagę można włączyć kompilując z `-DPOSHOLD_ENABLE_ABS=1`. Gałąź `feat/baro-abs`. Powód powstania: w parku dolny ToF
 został oślepiony, a dron wzniósł się na 20–30 m ([10-plany.md](10-plany.md)).
 
 ## Co robi

@@ -117,3 +117,4 @@ Gałęzie (każda od poprzedniej, ostatnia zawiera wszystko): `fix/windows-fastl
   usunięte `ctrl_mode`, `alt_flag`, `alt_mode`, `flow_rej_total`, `acc_bias_x`, `dist_m`, `r_ref_dps` (limit ramki).
 - Dron: kompensacja krawędzi przeszkód dla dolnego ToF (`tof_step.*`), wysokość bezwzględna w Auto Altitude; pole `tof_off_m`
   w telemetrii (w zamian zniknęło `loop_dt_s`).
+- Stable ABS wyłączony flagą `POSHOLD_ENABLE_ABS` (domyślnie 0) po nieudanych lotach; martwa strefa obrotu w pilocie przy wysokim gazie.

@@ -118,6 +118,15 @@ void test_altitude_cycles_auto_manual_abs() {
     TEST_ASSERT_FALSE(m.alt_abs());
 }
 
+void test_altitude_without_abs_cycles_auto_manual_only() {
+    FlightModeSelector m(false);
+    m.toggle_alt_on_ground();  // manual
+    TEST_ASSERT_FALSE(m.alt_auto());
+    m.toggle_alt_on_ground();  // back to auto, never ABS
+    TEST_ASSERT_TRUE(m.alt_auto());
+    TEST_ASSERT_FALSE(m.alt_abs());
+}
+
 void test_poshold_and_abs_are_exclusive() {
     FlightModeSelector m;
     m.toggle_alt_on_ground();
@@ -191,6 +200,7 @@ int main(int, char**) {
     RUN_TEST(test_status_does_not_collide_with_other_packets);
     RUN_TEST(test_mode_cycle_on_ground);
     RUN_TEST(test_altitude_cycles_auto_manual_abs);
+    RUN_TEST(test_altitude_without_abs_cycles_auto_manual_only);
     RUN_TEST(test_poshold_and_abs_are_exclusive);
     RUN_TEST(test_poshold_forces_auto_altitude);
     RUN_TEST(test_in_flight_only_poshold_to_stable);

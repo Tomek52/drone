@@ -27,7 +27,11 @@ constexpr uint32_t kColError   = 0xC1001D;  // red: protocol error, kill
 constexpr uint32_t kColWhite   = 0xFFFFFF;
 constexpr uint32_t kColBlack   = 0x000000;
 
-FlightModeSelector g_sel;
+// Stable ABS (height from the barometer) is experimental and unusable in flight (docs/11-stable-abs.md).
+#ifndef POSHOLD_ENABLE_ABS
+#define POSHOLD_ENABLE_ABS 0
+#endif
+FlightModeSelector g_sel(POSHOLD_ENABLE_ABS != 0);
 KillSwitch g_kill;
 volatile bool g_kill_flag = false;
 volatile bool g_kill_beep = false;

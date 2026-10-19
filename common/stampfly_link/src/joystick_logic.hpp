@@ -24,6 +24,9 @@ enum class AltSelect : uint8_t { kAuto = 0, kManual = 1, kAbs = 2 };
 
 class FlightModeSelector {
    public:
+    // abs_available = false: the right button only cycles Auto <-> Manual (Stable ABS is experimental).
+    explicit FlightModeSelector(bool abs_available = true) : abs_available_(abs_available) {}
+
     FlightMode mode() const { return mode_; }
     // Upstream altitude control is on for Auto and Abs (the barometer only replaces the height source).
     bool alt_auto() const { return alt_ != AltSelect::kManual; }
@@ -39,7 +42,7 @@ class FlightModeSelector {
 
     // Auto -> Manual -> ABS -> Auto. Position Hold needs the ToF height, so it falls back to Stable.
     void toggle_alt_on_ground() {
-        alt_ = (AltSelect)(((uint8_t)alt_ + 1) % 3);
+        alt_ = (AltSelect)(((uint8_t)alt_ + 1) % (abs_available_ ? 3 : 2));
         if (alt_ != AltSelect::kAuto && mode_ == FlightMode::kPosHold) mode_ = FlightMode::kStable;
     }
 
@@ -60,6 +63,7 @@ class FlightModeSelector {
     }
 
    private:
+    bool abs_available_ = true;
     FlightMode mode_ = FlightMode::kStable;
     AltSelect alt_   = AltSelect::kAuto;  // upstream default: Auto altitude
 };

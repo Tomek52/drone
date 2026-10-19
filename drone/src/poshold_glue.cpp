@@ -48,6 +48,11 @@ constexpr int16_t kMinRawRangeMm = 20;
 constexpr uint16_t kTakeoffDoneCount = 1000;  // upstream get_command(): ramp length in loops
 constexpr float kLoopPeriod          = 0.0025f;
 
+// Stable ABS is experimental and unusable in flight (docs/11-stable-abs.md): the flag is ignored unless enabled.
+#ifndef POSHOLD_ENABLE_ABS
+#define POSHOLD_ENABLE_ABS 0
+#endif
+
 poshold::PosHoldSupervisor g_supervisor;
 poshold::HeightMonitor g_height_monitor;
 poshold::HeightMonitorOutput g_hm_out;
@@ -250,7 +255,7 @@ void poshold_safety_update(void) {
 
         // ABS: the ToF is the height source while it is valid, trusted and within range (hysteresis),
         // the barometer above that and when the ToF is not trusted.
-        const bool abs_req = rc_link_abs_alt_requested() && rc_link_requested_mode() != FlightMode::kPosHold && baro_present();
+        const bool abs_req = POSHOLD_ENABLE_ABS && rc_link_abs_alt_requested() && rc_link_requested_mode() != FlightMode::kPosHold && baro_present();
         const float tof_h  = (float)RawRange * 0.001f + g_tof_offset_m;  // absolute ToF height
         if (g_tof_primary) {
             if (!tof_valid || !g_hm_out.trusted || tof_h > poshold::config::kAbsToFMax + 0.2f) g_tof_primary = false;

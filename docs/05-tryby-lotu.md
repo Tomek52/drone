@@ -87,5 +87,5 @@ nadpisuje je tylko w Position Hold. Szczegóły failsafe'ów: [06-position-hold.
 
 ## Wysokość: Auto / Manual / ABS
 
-Prawy przycisk przednie na ekranie ustawień przełącza źródło wysokości: **Auto** (ToF, domyślne), **Manual**
+Prawy przycisk przedni na ekranie ustawień przełącza źródło wysokości: **Auto** (ToF, domyślne), **Manual**
 (gaz wprost) i **ABS** (Auto Altitude z barometru, [11-stable-abs.md](11-stable-abs.md)). Position Hold wymaga Auto.

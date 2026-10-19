@@ -574,6 +574,10 @@ void loop() {
     Theta = (float)(_theta - Theta_bias) / (float)(RESO10BIT * 0.5);
     Psi   = (float)(_psi - Psi_bias) / (float)(RESO10BIT * 0.5);
 
+    // [POSHOLD] Pushing the left stick fully up deflects it sideways by ~0.2, which turned the drone at
+    // 60-80 deg/s while climbing (logs/20261019_223034.csv): a wider yaw dead zone while the throttle is high.
+    if (fabsf(Throttle) > 0.5f && fabsf(Psi) < 0.3f) Psi = 0.0f;
+
     uint8_t *d_int;
 
     // ブロードキャストの混信を防止するためこの機体のMACアドレスに送られてきたものか判断する
