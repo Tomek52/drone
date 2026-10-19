@@ -1,6 +1,6 @@
 # 11. Stable ABS (wysokość z barometru)
 
-Stan: **zaimplementowane, jeszcze nielatane**. Gałąź `feat/baro-abs`. Powód powstania: w parku dolny ToF
+Stan: **zaimplementowane, pierwszy lot nieudany (patrz niżej), nie używać**. Gałąź `feat/baro-abs`. Powód powstania: w parku dolny ToF
 został oślepiony, a dron wzniósł się na 20–30 m ([10-plany.md](10-plany.md)).
 
 ## Co robi
@@ -63,3 +63,20 @@ Ramka telemetrii jest na limicie 58 pól; w zamian zniknęły `ctrl_mode`, `alt_
 2. Przelot nad łóżkiem (53 cm): wysokość nad podłogą ma zostać stała, `alt_tof_m` ma skoczyć w dół.
 3. Zasłonięcie ToF kartonem na 1–2 s: dron ma dalej trzymać wysokość.
 4. Dopiero po tym: lot w terenie, na uwięzi i z KILL pod ręką.
+
+## Wynik pierwszego lotu (2026-10-19, `20261019_203135.csv`) — nieudany
+
+Dwa starty w Stable + ABS na baterii 4,2 V. Dron mocno falował w pionie (wysokość z ToF 0,04 → 1,1 m w kilka sekund,
+gaz 0,53 ↔ 0,75 co ok. 1 s) i wymagał poprawek w poziomie (Stable bez Position Hold).
+
+- Barometr w tym miejscu płytki zmienia ciśnienie o ±6–8 Pa (±0,5–0,7 m) w ciągu pół sekundy, w rytmie gazu.
+  Sam model podmuchu (gaz²) nie wystarcza: czujnik ma własne opóźnienie (IIR ×4, oversampling), więc przy zmianie
+  gazu ciśnienie reaguje po ok. 0,3 s i regulator dostaje błędną wysokość z opóźnieniem. Pętla wysokości jest
+  dostrojona do ToF (szum 5 mm), nie do czujnika z szumem 0,3–0,5 m.
+- Na rampie startowej na ziemi (ToF 0,01 m) `abs_m` pokazywało 0,5 m, bo podmuch przy gazie 0,6–0,7 obniża ciśnienie
+  mocniej, niż przewiduje model; regulator uznał, że dron jest już w powietrzu.
+
+Wniosek: **wysokość z samego barometru jako wejście do dotychczasowej pętli nie działa**. Możliwe drogi:
+(a) osobny estymator z akcelerometrem (filtr komplementarny o niskim przecięciu, barometr tylko koryguje powoli),
+(b) barometr tylko jako zabezpieczenie: ToF zostaje głównym źródłem, a monitor wiarygodności przełącza na barometr
+tylko do kontrolowanego lądowania. Do czasu wyboru tryb ABS na pilocie jest eksperymentalny.
