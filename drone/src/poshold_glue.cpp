@@ -238,7 +238,8 @@ void poshold_safety_update(void) {
     // ToF vs barometer plausibility (observe-only: the result is only logged).
     {
         const TofDiag td = tof_bottom_diag();
-        const bool tof_valid = td.status == 0 && RawRange > 20;
+        // A reading of 1-20 mm is real on the ground (the sensor sits ~2 cm above the floor); only 0 means "nothing".
+        const bool tof_valid = td.status == 0 && RawRange > 0;
         g_hm_out = g_height_monitor.update(Interval_time, tof_valid, (float)RawRange * 0.001f, baro_present(),
                                            baro_height_m());
 
