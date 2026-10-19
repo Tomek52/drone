@@ -67,7 +67,18 @@ jest liniowy, brak wiatru poziomego, który zmienia ciśnienie dynamiczne. Dopie
 - Telemetria: `soft_on`, `soft_u` (w zamian zniknęły `flow_reject` i `abs_m`).
 - Parametry do testu w korytarzu: `kSoftOnM` = 1,0 m, `kSoftAltMax` = 2,0 m; na zewnątrz 3,0 m i 5 m.
 
+## Pierwszy lot (2026-10-19, `20261019_230743.csv`, korytarz, próg 1,0 m, zadana do 2,0 m)
+
+- Zawis na ToF poniżej progu: czysty, jak w Auto.
+- Po przejęciu przez barometr (ref 1,47 m) dron nie falował, ale **wznosił się spokojnie o ok. 0,1 m/s do 2,0 m**, czyli o 0,5 m powyżej
+  zadanej, aż do KILL przy suficie. Przyczyna: wysokość barometru była zaniżona o ok. 0,4–0,5 m względem ToF w chwili przejęcia
+  (poprawka podmuchu nie jest dokładna), więc regulator mierzył błąd +0,66 m (poza martwą strefą 0,5 m) i dolewał ciąg, aż
+  barometr dogonił zadaną. Poprawka: przy przejęciu `AbsHeight::align()` ustawia wysokość barometru równą ToF.
+- Drugi start: regulator włączył się przy prawdziwej wysokości 0,6 m, bo barometr pokazał ponad 1,0 m; dron opadł do 0,05 m.
+  Poprawka: decyzja o przejęciu i o wyjściu zapada na podstawie ToF, dopóki ToF jest ważny i monitor mu ufa.
+- Wniosek: pętla jest stabilna (brak falowania), błąd bezwzględny biorą się z offsetu barometru przy przejęciu.
+
 ## Następne kroki
 
-1. Lot w korytarzu na 1–2 m z ToF tylko jako prawdą do oceny (`tof_raw_mm` wobec wysokości z barometru).
+1. Drugi lot w korytarzu z wyrównaniem przy przejęciu i decyzją według ToF (bateria ≥ 4,1 V).
 2. Dopiero potem zewnątrz na uwięzi i z limitem 5 m.

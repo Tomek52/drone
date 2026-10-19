@@ -40,6 +40,12 @@ public:
     float height() const { return abs_; }
     float offset() const { return off_; }
 
+    // Makes the height equal to a trusted value now (the hand-over from the ToF to the barometer).
+    void align(float truth_m) {
+        off_ += truth_m - abs_;
+        abs_ = truth_m;
+    }
+
 private:
     AbsHeightParams p_;
     bool init_    = false;

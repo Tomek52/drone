@@ -279,10 +279,19 @@ void poshold_safety_update(void) {
 #if POSHOLD_ENABLE_SOFT_ALT
         // Soft hold: above kSoftOnM the thrust is the trim plus a slow correction from the barometer.
         const bool soft_ok = baro_present() && Alt_flag == 1 && Flip_flag == 0 && Mode == FLIGHT_MODE;
+        // Decide with the ToF while it is trusted (the barometer is off by 0.3-0.5 m near the ground).
+        const bool tof_ok  = tof_valid && g_hm_out.trusted;
+        const float h_src  = tof_ok ? tof_h : g_abs_m;
         if (g_soft_active) {
-            if (!soft_ok || g_abs_m < poshold::config::kSoftOnM - 0.3f) g_soft_active = false;
-        } else if (soft_ok && g_abs_m > poshold::config::kSoftOnM) {
+            if (!soft_ok || h_src < poshold::config::kSoftOnM - 0.3f) g_soft_active = false;
+        } else if (soft_ok && h_src > poshold::config::kSoftOnM) {
             g_soft_active = true;
+            // Hand-over: the barometer height is made equal to the ToF height now, so the controller does
+            // not start with an error (the first flight climbed 0.5 m above the setpoint).
+            if (tof_ok) {
+                g_abs.align(tof_h);
+                g_abs_m = g_abs.height();
+            }
             g_soft.reset(g_abs_m, (float)(Thrust_command / BATTERY_VOLTAGE - Thrust0));
         }
         g_soft_u = g_soft_active ? g_soft.update(Interval_time, g_abs_m, Alt_ref) : 0.0f;
