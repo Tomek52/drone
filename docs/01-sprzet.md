@@ -59,7 +59,7 @@ zostanie wyłączony, a tryb Position Hold będzie niedostępny).
 |---|---|---|---|
 | INA3221 (napięcie/prąd) | 0x40 | DOC, UP | tak — tylko napięcie kanału 2 |
 | BMM150 (magnetometr) | 0x10 | DOC | **nie** |
-| BMP280 (barometr) | 0x76 | DOC | **nie** |
+| BMP280 (barometr) | 0x76 | DOC | tylko odczyt i telemetria (`baro_pa`, `baro_temp_c`), regulator z niego nie korzysta |
 | VL53L3 dolny (ToF) | 0x29 | DOC, UP | tak — wysokość |
 | VL53L3 przedni (ToF) | 0x29 → zmieniany na 0x2A | UP | tak — tylko w trybie parkowania |
 

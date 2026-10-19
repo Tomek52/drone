@@ -106,3 +106,15 @@ Gałęzie (każda od poprzedniej, ostatnia zawiera wszystko): `fix/windows-fastl
 - Import `m5stack/M5StampFly@fa7b6a5` do `drone/` (git subtree, pełna historia).
 - Import `m5stack/Atom-JoyStick@e9f53fb` (`examples/StampFlyController`) do `joystick/`.
 - Bez zmian w kodzie upstreamu.
+
+## feat/baro-abs
+
+- Dron: sterownik barometru BMP280 (`baro.*`), diagnostyka dolnego ToF (status, siła sygnału), monitor wiarygodności ToF
+  (`height_monitor.*`, tylko obserwacja), wysokość z barometru (`abs_height.*`) i podmiana wejścia estymatora wysokości
+  w trybie Stable ABS.
+- Protokół: flaga `kRcFlagAbsAlt` (wysokość z barometru, trzeci stan prawego przycisku Auto/Manual/ABS) i powód `kBaroMissing` (11); pilot pokazuje `ALT ABS`, `STB ABS` / `SPT ABS`.
+- Telemetria: nowe pola `baro_pa`, `baro_temp_c`, `tof_status`, `tof_sig_mcps`, `hm_trust`, `hm_pred_m`, `abs_m`;
+  usunięte `ctrl_mode`, `alt_flag`, `alt_mode`, `flow_rej_total`, `acc_bias_x`, `dist_m`, `r_ref_dps` (limit ramki).
+- Dron: kompensacja krawędzi przeszkód dla dolnego ToF (`tof_step.*`), wysokość bezwzględna w Auto Altitude; pole `tof_off_m`
+  w telemetrii (w zamian zniknęło `loop_dt_s`).
+- Stable ABS wyłączony flagą `POSHOLD_ENABLE_ABS` (domyślnie 0) po nieudanych lotach; martwa strefa obrotu w pilocie przy wysokim gazie.

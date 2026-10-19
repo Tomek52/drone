@@ -137,6 +137,32 @@ constexpr float kBatteryWarnVolt   = 3.50f;  // [V] warning beeps
 constexpr float kBatteryLandVolt   = 3.35f;  // [V] automatic landing ...
 constexpr float kBatteryLandTime   = 2.0f;   // [s] ... when below for this long
 
+// ToF plausibility check against the barometer (height_monitor.hpp), observe-only for now.
+constexpr float kHmGate        = 1.50f;  // [m] ToF vs barometer disagreement (prop wash shifts the barometer by ~0.5 m +-0.5 m)
+constexpr float kHmHold        = 1.50f;  // [s] disagreement for this long -> ToF untrusted
+constexpr float kHmRegainGate  = 0.50f;  // [m] agreement needed to trust the ToF again ...
+constexpr float kHmRegain      = 1.00f;  // [s] ... for this long
+constexpr float kHmTauOffset   = 10.0f;  // [s] offset tracking while trusted (absorbs thermal drift)
+constexpr float kHmTauBaro     = 0.60f;  // [s] low-pass of the barometer height (single samples are ~12 cm noisy)
+
+// Obstacle edge compensation of the ToF (tof_step.hpp): absolute height over beds and tables.
+constexpr float kTofStepM         = 0.07f;  // [m] jump between two ToF samples (33 ms) taken for an edge (2 m/s)
+constexpr float kTofStepPairM     = 0.12f;  // [m] two consecutive same-direction jumps (each > kTofStepSmallM) summing to this
+constexpr float kTofStepSmallM    = 0.03f;  // [m] smallest jump counted for the pair rule
+constexpr float kTofStepMaxOffset = 1.50f;  // [m] limit of the accumulated offset
+
+// Stable ABS (abs_height.hpp): height from the barometer.
+constexpr float kAbsPaPerMeter  = 11.5f;  // pressure change per metre near the ground
+constexpr float kAbsWashPa      = 13.0f;  // prop wash pressure drop at full thrust; ~7 Pa at hover (logs/20261019_200020.csv)
+constexpr float kAbsTauBaro     = 0.60f;  // [s] low-pass of the barometer height
+constexpr float kAbsTauDrift    = 20.0f;  // [s] learning of the slow barometer drift from the ToF
+constexpr float kAbsLearnGate   = 0.30f;  // [m] the ToF teaches the drift only when it is this close (obstacles are ignored)
+constexpr float kAbsLearnMaxToF = 3.0f;   // [m] ToF range used for learning
+constexpr float kAbsToFMax       = 1.00f;  // [m] ABS: ToF is the height source below this, the barometer above (2.0 outdoors; 1.0 for the corridor test)
+constexpr float kAbsTauDriftFast = 3.0f;   // [s] offset learning while the ToF is the source (keeps the barometer on the ToF)
+constexpr float kAbsKalmanStd   = 0.40f;  // [m] measurement noise of the barometer height in the altitude estimator
+constexpr float kAbsAltMax      = 20.0f;  // [m] altitude setpoint limit in Stable ABS (upstream: 1.8 m with the ToF)
+
 }  // namespace config
 }  // namespace poshold
 

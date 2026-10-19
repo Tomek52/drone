@@ -84,3 +84,8 @@ Panel lotu pokazuje tryb w miejscu, gdzie upstream wyświetlał odległość z p
 
 Kolory upstreamu (żółty, purpurowy, zielony itd.) działają jak wcześniej; niebieski
 nadpisuje je tylko w Position Hold. Szczegóły failsafe'ów: [06-position-hold.md](06-position-hold.md#nadzorca-i-bezpieczeństwo).
+
+## Wysokość: Auto / Manual / ABS
+
+Prawy przycisk przedni na ekranie ustawień przełącza źródło wysokości: **Auto** (ToF, domyślne), **Manual**
+(gaz wprost) i **ABS** (Auto Altitude z barometru, [11-stable-abs.md](11-stable-abs.md)). Position Hold wymaga Auto.

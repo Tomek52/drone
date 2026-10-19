@@ -9,6 +9,9 @@
 #include <position_controller.hpp>
 #include <position_estimator.hpp>
 #include <poshold_supervisor.hpp>
+#include <height_monitor.hpp>
+#include <abs_height.hpp>
+#include <tof_step.hpp>
 
 #include "pmw3901.hpp"
 
@@ -41,6 +44,21 @@ void poshold_override_attitude(volatile float* roll_ref, volatile float* pitch_r
 bool poshold_link_loss_landing_allowed(void);
 
 const poshold::SupervisorOutput& poshold_supervisor_output(void);
+
+// Stable ABS: height from the barometer replaces the ToF range in the altitude estimator.
+bool poshold_abs_active(void);    // the barometer is the height source right now
+bool poshold_abs_selected(void);  // ALT ABS selected on the joystick
+int16_t poshold_abs_range_mm(void);
+float poshold_abs_height(void);
+float poshold_alt_ref_max(void);  // altitude setpoint limit: 1.8 m with the ToF, higher in Stable ABS
+float poshold_alt_limit(void);    // height above which the upstream code forces a descent
+float poshold_alt_meas_std(void); // measurement noise for the altitude estimator
+
+// ToF obstacle edge compensation (absolute height over obstacles).
+void poshold_tof_step_sample(int16_t range_mm);  // once per new ToF sample, after the outlier filter
+int16_t poshold_tof_offset_mm(void);             // added to the range fed to the altitude estimator
+float poshold_tof_offset_m(void);
+const poshold::HeightMonitorOutput& poshold_height_monitor_output(void);  // ToF vs barometer, observe-only
 const poshold::ControllerOutput& poshold_controller_output(void);
 
 #endif

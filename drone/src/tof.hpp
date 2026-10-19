@@ -42,4 +42,13 @@ void tof_test_ranging(VL53LX_DEV dev);
 int16_t tof_bottom_get_range();
 int16_t tof_front_get_range();
 
+// [POSHOLD] Diagnostics of the last bottom ToF measurement (first detected object).
+// status: VL53LX range status (0 = valid), 255 = no object found.
+struct TofDiag {
+    uint8_t objects;
+    uint8_t status;
+    float signal_mcps;
+};
+TofDiag tof_bottom_diag(void);
+
 #endif

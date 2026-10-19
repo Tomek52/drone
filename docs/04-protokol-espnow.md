@@ -114,6 +114,7 @@ W Position Hold bajt 21 (tryb sterowania) = 0 (Stable), a bajt 22 = 4 (Auto Alt)
 | 8 | niska bateria | `STB BATT` |
 | 9 | silniki wyłączone z pilota | `KILL` |
 | 10 | niezgodność wersji protokołu | `PROTO ERR` / `DRONE FW?` |
+| 11 | Stable ABS zażądany, ale dron nie ma barometru | `STB NO BARO` |
 
 ### Zgodność wersji
 

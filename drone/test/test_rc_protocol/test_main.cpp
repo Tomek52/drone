@@ -103,6 +103,48 @@ void test_mode_cycle_on_ground() {
     TEST_ASSERT_EQUAL((int)FlightMode::kStable, (int)m.mode());
 }
 
+void test_altitude_cycles_auto_manual_abs() {
+    FlightModeSelector m;
+    TEST_ASSERT_TRUE(m.alt_auto());
+    TEST_ASSERT_FALSE(m.alt_abs());
+    m.toggle_alt_on_ground();  // manual
+    TEST_ASSERT_FALSE(m.alt_auto());
+    TEST_ASSERT_FALSE(m.alt_abs());
+    m.toggle_alt_on_ground();  // ABS: upstream altitude control stays on
+    TEST_ASSERT_TRUE(m.alt_auto());
+    TEST_ASSERT_TRUE(m.alt_abs());
+    m.toggle_alt_on_ground();  // back to auto
+    TEST_ASSERT_TRUE(m.alt_auto());
+    TEST_ASSERT_FALSE(m.alt_abs());
+}
+
+void test_altitude_without_abs_cycles_auto_manual_only() {
+    FlightModeSelector m(false);
+    m.toggle_alt_on_ground();  // manual
+    TEST_ASSERT_FALSE(m.alt_auto());
+    m.toggle_alt_on_ground();  // back to auto, never ABS
+    TEST_ASSERT_TRUE(m.alt_auto());
+    TEST_ASSERT_FALSE(m.alt_abs());
+}
+
+void test_poshold_and_abs_are_exclusive() {
+    FlightModeSelector m;
+    m.toggle_alt_on_ground();
+    m.toggle_alt_on_ground();  // ABS
+    m.cycle_mode_on_ground();
+    m.cycle_mode_on_ground();  // -> Position Hold forces Auto altitude
+    TEST_ASSERT_EQUAL((int)FlightMode::kPosHold, (int)m.mode());
+    TEST_ASSERT_FALSE(m.alt_abs());
+    m.toggle_alt_on_ground();  // Manual requested -> Stable
+    TEST_ASSERT_EQUAL((int)FlightMode::kStable, (int)m.mode());
+    m.set(FlightMode::kSport, true);  // Manual -> Auto
+    m.toggle_alt_on_ground();         // Manual
+    m.toggle_alt_on_ground();         // Abs
+    TEST_ASSERT_TRUE(m.alt_abs());
+    m.set(FlightMode::kSport, true);  // keeps ABS
+    TEST_ASSERT_TRUE(m.alt_abs());
+}
+
 void test_poshold_forces_auto_altitude() {
     FlightModeSelector m;
     m.toggle_alt_on_ground();  // manual altitude
@@ -157,6 +199,9 @@ int main(int, char**) {
     RUN_TEST(test_status_roundtrip);
     RUN_TEST(test_status_does_not_collide_with_other_packets);
     RUN_TEST(test_mode_cycle_on_ground);
+    RUN_TEST(test_altitude_cycles_auto_manual_abs);
+    RUN_TEST(test_altitude_without_abs_cycles_auto_manual_only);
+    RUN_TEST(test_poshold_and_abs_are_exclusive);
     RUN_TEST(test_poshold_forces_auto_altitude);
     RUN_TEST(test_in_flight_only_poshold_to_stable);
     RUN_TEST(test_kill_switch_needs_hold_and_lingers);

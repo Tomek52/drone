@@ -54,6 +54,11 @@ SupervisorOutput PosHoldSupervisor::update(const SupervisorInput& in) {
         landing_reason_  = Reason::kLowBattery;
     }
 
+    if (!landing_latched_ && in.flying && in.tof_untrusted) {
+        landing_latched_ = true;
+        landing_reason_  = Reason::kToFUnreliable;
+    }
+
     // --- Position Hold state machine ---------------------------------------------------
     const bool requested     = in.poshold_requested;
     const bool height_ok     = in.height >= p_.min_height && in.height <= p_.max_height;

@@ -675,7 +675,7 @@ void get_command(void) {
         // Get Altitude ref
         if ((-0.2 < thlo) && (thlo < 0.2)) thlo = 0.0f;  // 不感帯
         Alt_ref = Alt_ref + thlo * 0.001;
-        if (Alt_ref > ALT_REF_MAX) Alt_ref = ALT_REF_MAX;
+        if (Alt_ref > poshold_alt_ref_max()) Alt_ref = poshold_alt_ref_max();  // [POSHOLD]
         if (Alt_ref < ALT_REF_MIN) Alt_ref = ALT_REF_MIN;
         if ((Range0flag > OladRange0flag) || (Range0flag == RNAGE0FLAG_MAX)) {
             Thrust0        = Thrust0 - 0.02;
@@ -760,7 +760,7 @@ void get_command(void) {
         // Get Altitude ref
         if ((-0.2 < thlo) && (thlo < 0.2)) thlo = 0.0f;  // 不感帯
         Alt_ref = Alt_ref + thlo * 0.001;
-        if (Alt_ref > ALT_REF_MAX) Alt_ref = ALT_REF_MAX;
+        if (Alt_ref > poshold_alt_ref_max()) Alt_ref = poshold_alt_ref_max();  // [POSHOLD]
         if (Alt_ref < ALT_REF_MIN) Alt_ref = ALT_REF_MIN;
         if ((Range0flag > OladRange0flag) || (Range0flag == RNAGE0FLAG_MAX)) {
             Thrust0        = Thrust0 - 0.02;

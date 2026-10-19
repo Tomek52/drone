@@ -26,6 +26,8 @@
 #include "sensor.hpp"
 #include "imu.hpp"
 #include "tof.hpp"
+#include "baro.hpp"  // [POSHOLD]
+#include "poshold_glue.hpp"  // [POSHOLD]
 #include "flight_control.hpp"
 
 Madgwick Drone_ahrs;
@@ -140,6 +142,7 @@ void sensor_init() {
     imu_init();
     Drone_ahrs.begin(400.0);
     ina3221.begin(&Wire1);
+    baro_init();  // [POSHOLD] read-only for now
     ina3221.reset();
     voltage_filter.set_parameter(0.005, 0.0025);
 
@@ -310,20 +313,25 @@ float sensor_read(void) {
                     old_range[1]    = Range;
                 }
 
+                poshold_tof_step_sample(Range);  // [POSHOLD] obstacle edge compensation
                 // USBSerial.printf("%9.6f, %9.6f, %9.6f, %9.6f, %9.6f\r\n",Elapsed_time,Altitude/1000.0,  Altitude2,
                 // Alt_velocity,-(Accel_z_raw - Accel_z_offset)*9.81/(-Accel_z_offset));
             }
         } else
             dcnt++;
 
-        Altitude = alt_filter.update((float)Range / 1000.0, Interval_time);
+        // [POSHOLD] Stable ABS: the height comes from the barometer instead of the ToF
+        if (poshold_abs_active()) Range = poshold_abs_range_mm();
+        Altitude = alt_filter.update((float)(Range + poshold_tof_offset_mm()) / 1000.0, Interval_time);  // [POSHOLD] + step offset
+        EstimatedAltitude.set_measurement_std(poshold_alt_meas_std());  // [POSHOLD]
         if (first_flag == 1)
             EstimatedAltitude.update(Altitude, Az, Interval_time);
         else
             first_flag = 1;
         Altitude2 = EstimatedAltitude.Altitude;
         // MAX_ALTを超えたら高度下げる（自動着陸）
-        if ((Altitude2 > ALT_LIMIT && Alt_flag >= 1 && Flip_flag == 0) || RawRange == 0)
+        // [POSHOLD] Stable ABS: the limit is higher and a ToF without echo (outdoors) is normal
+        if ((Altitude2 > poshold_alt_limit() && Alt_flag >= 1 && Flip_flag == 0) || (RawRange == 0 && !poshold_abs_selected()))
             Range0flag++;
         else
             Range0flag = 0;
@@ -341,6 +349,9 @@ float sensor_read(void) {
         OverG_flag = 1;
         if (Over_g == 0.0) Over_g = acc_norm;
     }
+
+    baro_set_parked(Mode == PARKING_MODE);  // [POSHOLD]
+    baro_update();
 
     // Battery voltage check
     Voltage   = ina3221.getVoltage(INA3221_CH2);

@@ -14,6 +14,8 @@
 #include <math_utils.hpp>
 
 #include "alerts.hpp"
+#include "baro.hpp"
+#include "tof.hpp"
 #include "telemetry_stream.hpp"
 #include "flight_control.hpp"
 #include "led.hpp"
@@ -46,7 +48,22 @@ constexpr int16_t kMinRawRangeMm = 20;
 constexpr uint16_t kTakeoffDoneCount = 1000;  // upstream get_command(): ramp length in loops
 constexpr float kLoopPeriod          = 0.0025f;
 
+// Stable ABS is experimental and unusable in flight (docs/11-stable-abs.md): the flag is ignored unless enabled.
+#ifndef POSHOLD_ENABLE_ABS
+#define POSHOLD_ENABLE_ABS 0
+#endif
+
 poshold::PosHoldSupervisor g_supervisor;
+poshold::HeightMonitor g_height_monitor;
+poshold::HeightMonitorOutput g_hm_out;
+poshold::AbsHeight g_abs;
+poshold::TofStepComp g_tof_step;
+float g_tof_offset_m = 0.0f;
+float g_abs_m   = 0.0f;
+bool g_abs_use   = false;
+bool g_abs_selected = false;  // ALT ABS selected on the joystick
+bool g_tof_primary  = true;   // the ToF is the height source (ABS: below kAbsToFMax)
+bool g_tof_failsafe_landing = false;
 poshold::PositionController g_controller;
 poshold::SupervisorOutput g_sup;
 poshold::ControllerOutput g_ctrl;
@@ -110,7 +127,7 @@ void poshold_update_estimation(void) {
     s.squal   = g_last_flow.squal;
 
     // Altitude2: Kalman-filtered bottom ToF distance (slant range, not tilt compensated).
-    const float range = (RawRange > kMinRawRangeMm) ? (float)Altitude2 : -1.0f;
+    const float range = (RawRange > kMinRawRangeMm) ? (float)Altitude2 - g_tof_offset_m : -1.0f;  // height above the floor
     g_estimator.update_flow(s, range, dt);
 
     const uint8_t reason = (uint8_t)g_estimator.state().reject;
@@ -203,6 +220,7 @@ void report_status(const poshold::SupervisorOutput& o) {
         if (!pmw3901_present()) reason = Reason::kFlowSensorMissing;
         else if (!poshold::config::kFlowAxesVerified) reason = Reason::kFlowNotCalibrated;
     }
+    if (reason == Reason::kNone && rc_link_abs_alt_requested() && !baro_present()) reason = Reason::kBaroMissing;
     rc_link_set_status(active, flags, reason);
 }
 
@@ -226,6 +244,39 @@ void poshold_safety_update(void) {
     in.link_age          = Connect_flag * kLoopPeriod;  // loops since the last packet (counted in FLIGHT_MODE)
     in.vbat              = Voltage;
     in.dt                = Interval_time;
+
+    // ToF vs barometer plausibility (observe-only: the result is only logged).
+    {
+        const TofDiag td = tof_bottom_diag();
+        // A reading of 1-20 mm is real on the ground (the sensor sits ~2 cm above the floor); only 0 means "nothing".
+        const bool tof_valid = td.status == 0 && RawRange > 0;
+        g_hm_out = g_height_monitor.update(Interval_time, tof_valid, (float)RawRange * 0.001f + g_tof_offset_m, baro_present(),
+                                           baro_height_m());
+
+        // ABS: the ToF is the height source while it is valid, trusted and within range (hysteresis),
+        // the barometer above that and when the ToF is not trusted.
+        const bool abs_req = POSHOLD_ENABLE_ABS && rc_link_abs_alt_requested() && rc_link_requested_mode() != FlightMode::kPosHold && baro_present();
+        const float tof_h  = (float)RawRange * 0.001f + g_tof_offset_m;  // absolute ToF height
+        if (g_tof_primary) {
+            if (!tof_valid || !g_hm_out.trusted || tof_h > poshold::config::kAbsToFMax + 0.2f) g_tof_primary = false;
+        } else if (tof_valid && g_hm_out.trusted && tof_h < poshold::config::kAbsToFMax) {
+            g_tof_primary = true;
+        }
+        g_abs_selected = abs_req;
+
+        // Height from the barometer (with the ToF teaching the offset while the ToF is the source).
+        g_abs_m = g_abs.update(Interval_time, baro_present(), baro_height_m(), (float)(Thrust_command / BATTERY_VOLTAGE),
+                               tof_valid, tof_h, Mode == PARKING_MODE, g_tof_primary);
+
+        // Failsafe (not in ABS, which switches to the barometer by itself): the ToF disagrees with the
+        // barometer, e.g. blinded by the sun or stuck: land on the barometer.
+        const bool tof_failsafe        = !g_hm_out.trusted && baro_present() && !abs_req;
+        in.tof_untrusted               = tof_failsafe;
+        const bool landing_near_ground = !tof_failsafe && Mode == AUTO_LANDING_MODE && tof_valid && RawRange < 600;
+        const bool baro_source         = (abs_req && !g_tof_primary) || tof_failsafe;
+        g_abs_use = baro_source && (Mode == FLIGHT_MODE || Mode == FLIP_MODE || (Mode == AUTO_LANDING_MODE && !landing_near_ground));
+        g_tof_failsafe_landing = tof_failsafe && Mode == AUTO_LANDING_MODE;
+    }
 
     g_sup = g_supervisor.update(in);
 
@@ -277,6 +328,61 @@ void poshold_override_attitude(volatile float* roll_ref, volatile float* pitch_r
 
 bool poshold_link_loss_landing_allowed(void) {
     return g_sup.allow_link_landing;
+}
+
+void poshold_tof_step_sample(int16_t range_mm) {
+    // Active in flight only (the drone is on the ground in PARKING and lands to the floor in AUTO_LANDING).
+    const bool active = (Mode == FLIGHT_MODE || Mode == FLIP_MODE) && !g_abs_use;
+    // No edge detection while tilted more than ~11 deg: the slant range jumps without any obstacle
+    // (logs/20261019_215744.csv: +0.17 m at roll -16 deg taken for an edge).
+    const bool level = fabsf(Roll_angle - Roll_angle_offset) < 0.2f && fabsf(Pitch_angle - Pitch_angle_offset) < 0.2f;
+    g_tof_offset_m    = g_tof_step.update(active, range_mm > 20, (float)range_mm * 0.001f, level);
+}
+
+int16_t poshold_tof_offset_mm(void) {
+    return g_abs_use ? 0 : (int16_t)(g_tof_offset_m * 1000.0f);
+}
+
+float poshold_tof_offset_m(void) {
+    return g_tof_offset_m;
+}
+
+float poshold_alt_ref_max(void) {
+    return g_abs_selected ? poshold::config::kAbsAltMax : 1.8f;
+}
+
+float poshold_alt_limit(void) {
+    return g_abs_selected ? poshold::config::kAbsAltMax + 0.5f : 2.0f;
+}
+
+float poshold_alt_meas_std(void) {
+    return g_abs_use ? poshold::config::kAbsKalmanStd : 0.004f;
+}
+
+bool poshold_abs_selected(void) {
+    return g_abs_selected;
+}
+
+bool poshold_abs_active(void) {
+    return g_abs_use;
+}
+
+int16_t poshold_abs_range_mm(void) {
+    float mm = g_abs_m * 1000.0f;
+    // Landing on the barometer: below 0.25 m the barometer cannot be trusted any more (prop wash), so the
+    // estimator is told the drone is on the ground and the upstream landing ends.
+    if ((g_tof_failsafe_landing || (g_abs_use && Mode == AUTO_LANDING_MODE)) && g_abs_m < 0.25f) mm = 21.0f;
+    if (mm < 21.0f) mm = 21.0f;  // the upstream code treats <= 20 as 'no reading'
+    if (mm > 5000.0f) mm = 5000.0f;
+    return (int16_t)mm;
+}
+
+float poshold_abs_height(void) {
+    return g_abs_m;
+}
+
+const poshold::HeightMonitorOutput& poshold_height_monitor_output(void) {
+    return g_hm_out;
 }
 
 const poshold::SupervisorOutput& poshold_supervisor_output(void) {

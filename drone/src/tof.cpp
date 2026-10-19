@@ -34,6 +34,13 @@ VL53LX_DEV ToF_bottom = &tof_bottom;
 
 volatile uint8_t ToF_bottom_data_ready_flag;
 
+// [POSHOLD] see TofDiag in tof.hpp
+static TofDiag g_bottom_diag = {0, 255, 0.0f};
+
+TofDiag tof_bottom_diag(void) {
+    return g_bottom_diag;
+}
+
 void IRAM_ATTR tof_int() {
     ToF_bottom_data_ready_flag = 1;
 }
@@ -127,6 +134,16 @@ int16_t tof_range_get(VL53LX_DEV dev) {
     // USBSerial.printf("ToF Time%f\n", (float)(end_time - start_time)*1.0e-6);
     uint8_t no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
     // USBSerial.printf("Total N=%d ",no_of_object_found);
+    if (dev == ToF_bottom) {  // [POSHOLD]
+        g_bottom_diag.objects = no_of_object_found;
+        if (no_of_object_found > 0) {
+            g_bottom_diag.status      = MultiRangingData.RangeData[0].RangeStatus;
+            g_bottom_diag.signal_mcps = MultiRangingData.RangeData[0].SignalRateRtnMegaCps / 65536.0f;
+        } else {
+            g_bottom_diag.status      = 255;
+            g_bottom_diag.signal_mcps = 0.0f;
+        }
+    }
     range_min = 10000;
     range_max = 0;
     range_ave = 0;
