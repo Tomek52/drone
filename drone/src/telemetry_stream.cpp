@@ -16,6 +16,8 @@
 #include "rc_link.hpp"
 #include "rc.hpp"
 #include "sensor.hpp"
+#include "baro.hpp"
+#include "tof.hpp"
 
 using stampfly_link::encode_data;
 using stampfly_link::encode_schema_chunk;
@@ -41,9 +43,7 @@ struct Field {
 // from the schema frame.
 const Field kFields[] = {
     {"mode", []() -> float { return (float)Mode; }},
-    {"ctrl_mode", []() -> float { return (float)Control_mode; }},
     {"alt_mode", []() -> float { return (float)Throttle_control_mode; }},
-    {"alt_flag", []() -> float { return (float)Alt_flag; }},
     {"roll_deg", []() -> float { return (Roll_angle - Roll_angle_offset) * kRadToDeg; }},
     {"pitch_deg", []() -> float { return (Pitch_angle - Pitch_angle_offset) * kRadToDeg; }},
     {"yaw_deg", []() -> float { return (Yaw_angle - Yaw_angle_offset) * kRadToDeg; }},
@@ -79,7 +79,6 @@ const Field kFields[] = {
     {"flow_valid", []() -> float { return poshold_estimator_state().flow_valid ? 1.0f : 0.0f; }},
     {"flow_reject", []() -> float { return (float)poshold_estimator_state().reject; }},
     {"flow_rej_mask", []() -> float { return (float)poshold_flow_reject_mask_take(); }},
-    {"flow_rej_total", []() -> float { return (float)poshold_flow_reject_total(); }},
     {"flow_vx_mps", []() -> float { return poshold_estimator_state().flow_vx; }},
     {"flow_vy_mps", []() -> float { return poshold_estimator_state().flow_vy; }},
     {"vel_x_mps", []() -> float { return poshold_estimator_state().vx; }},
@@ -87,7 +86,6 @@ const Field kFields[] = {
     {"pos_x_m", []() -> float { return poshold_estimator_state().px; }},
     {"pos_y_m", []() -> float { return poshold_estimator_state().py; }},
     {"height_m", []() -> float { return poshold_estimator_state().height; }},
-    {"acc_bias_x", []() -> float { return poshold_estimator_state().bias_x; }},
     {"thrust0", []() -> float { return (float)Thrust0; }},
     // Control link v2 (feat/joystick-mode)
     {"rc_proto_ok", []() -> float { return rc_link_protocol_ok() ? 1.0f : 0.0f; }},
@@ -104,6 +102,12 @@ const Field kFields[] = {
          return sqrtf(e.px * e.px + e.py * e.py);
      }},
     {"vbat_filt_v", []() -> float { return poshold_supervisor_output().vbat_filtered; }},
+    // Barometer and bottom ToF diagnostics (feat/baro-abs); replace ctrl_mode, alt_flag,
+    // flow_rej_total and acc_bias_x to stay within the frame size
+    {"baro_pa", []() -> float { return baro_pressure_pa(); }},
+    {"baro_temp_c", []() -> float { return baro_temperature_c(); }},
+    {"tof_status", []() -> float { return (float)tof_bottom_diag().status; }},
+    {"tof_sig_mcps", []() -> float { return tof_bottom_diag().signal_mcps; }},
 };
 constexpr size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);
 static_assert(kFieldCount <= stampfly_link::kMaxDataFields, "too many telemetry fields for one frame");

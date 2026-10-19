@@ -26,6 +26,7 @@
 #include "sensor.hpp"
 #include "imu.hpp"
 #include "tof.hpp"
+#include "baro.hpp"  // [POSHOLD]
 #include "flight_control.hpp"
 
 Madgwick Drone_ahrs;
@@ -140,6 +141,7 @@ void sensor_init() {
     imu_init();
     Drone_ahrs.begin(400.0);
     ina3221.begin(&Wire1);
+    baro_init();  // [POSHOLD] read-only for now
     ina3221.reset();
     voltage_filter.set_parameter(0.005, 0.0025);
 
@@ -341,6 +343,9 @@ float sensor_read(void) {
         OverG_flag = 1;
         if (Over_g == 0.0) Over_g = acc_norm;
     }
+
+    baro_set_parked(Mode == PARKING_MODE);  // [POSHOLD]
+    baro_update();
 
     // Battery voltage check
     Voltage   = ina3221.getVoltage(INA3221_CH2);
