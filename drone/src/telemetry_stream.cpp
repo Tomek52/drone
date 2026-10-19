@@ -66,7 +66,6 @@ const Field kFields[] = {
     {"stick_pitch", []() -> float { return (float)Stick[ELEVATOR]; }},
     {"stick_yaw", []() -> float { return (float)Stick[RUDDER]; }},
     {"rc_age_loops", []() -> float { return (float)Connect_flag; }},
-    {"loop_dt_s", []() -> float { return (float)Interval_time; }},
     // Position estimator (feat/position-estimator)
     {"flow_dx", []() -> float { return (float)poshold_last_flow().dx; }},
     {"flow_dy", []() -> float { return (float)poshold_last_flow().dy; }},
@@ -105,6 +104,7 @@ const Field kFields[] = {
     {"hm_trust", []() -> float { return poshold_height_monitor_output().trusted ? 1.0f : 0.0f; }},
     {"hm_pred_m", []() -> float { return poshold_height_monitor_output().predicted_m; }},
     {"abs_m", []() -> float { return poshold_abs_height(); }},
+    {"tof_off_m", []() -> float { return poshold_tof_offset_m(); }},
 };
 constexpr size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);
 static_assert(kFieldCount <= stampfly_link::kMaxDataFields, "too many telemetry fields for one frame");

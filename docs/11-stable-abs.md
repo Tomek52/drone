@@ -80,3 +80,21 @@ Wniosek: **wysokość z samego barometru jako wejście do dotychczasowej pętli 
 (a) osobny estymator z akcelerometrem (filtr komplementarny o niskim przecięciu, barometr tylko koryguje powoli),
 (b) barometr tylko jako zabezpieczenie: ToF zostaje głównym źródłem, a monitor wiarygodności przełącza na barometr
 tylko do kontrolowanego lądowania. Do czasu wyboru tryb ABS na pilocie jest eksperymentalny.
+
+## Wysokość bezwzględna z samego ToF: kompensacja krawędzi przeszkód (`tof_step.hpp`)
+
+Zamiast (lub obok) barometru: ToF próbkuje co 33 ms, a dron nie zmieni wysokości o więcej niż kilka
+centymetrów w jednej próbce, więc skok o więcej niż 15 cm między dwiema kolejnymi próbkami to krawędź
+przeszkody (łóżko, stół), a nie wznoszenie. Offset pochłania skok, więc wysokość (nad punktem startu)
+pozostaje ciągła i regulator nie zmienia ciągu. Zjazd z przeszkody cofa offset. Pojedynczy błędny odczyt
+(skok tam i z powrotem) znosi się sam. Offset jest zerowany na ziemi i przy automatycznym lądowaniu
+(lądowanie ma dojść do tego, co dron faktycznie ma pod sobą) i ograniczony do ±1,5 m.
+
+- Działa w Auto Altitude w każdym trybie, także w Position Hold. Optical flow dostaje prawdziwą
+  odległość od podłogi (wysokość bezwzględna minus offset), bo skala flow zależy od AGL.
+- Monitor wiarygodności porównuje skompensowaną wysokość ToF z barometrem (drugie źródło prawdy).
+- Telemetria: `tof_off_m` (offset). Hak `[POSHOLD]` w `sensor.cpp`: wykrycie skoku po filtrze odstających
+  (`poshold_tof_step_sample`) i dodanie offsetu do zakresu podawanego estymatorowi.
+- Ograniczenie: łagodne zbocze (rampa, schody) nie jest skokiem, więc nie jest kompensowane.
+- Test: zawis na ≥ 1,0 m, przelot nad przeszkodą 30–50 cm; `alt_est_m` ma pozostać ciągłe, a `tof_raw_mm`
+  skoczyć w dół; `tof_off_m` rośnie o wysokość przeszkody i wraca do zera po przelocie.

@@ -145,6 +145,10 @@ constexpr float kHmRegain      = 1.00f;  // [s] ... for this long
 constexpr float kHmTauOffset   = 10.0f;  // [s] offset tracking while trusted (absorbs thermal drift)
 constexpr float kHmTauBaro     = 0.60f;  // [s] low-pass of the barometer height (single samples are ~12 cm noisy)
 
+// Obstacle edge compensation of the ToF (tof_step.hpp): absolute height over beds and tables.
+constexpr float kTofStepM         = 0.15f;  // [m] jump between two ToF samples (33 ms) taken for an edge
+constexpr float kTofStepMaxOffset = 1.50f;  // [m] limit of the accumulated offset
+
 // Stable ABS (abs_height.hpp): height from the barometer.
 constexpr float kAbsPaPerMeter  = 11.5f;  // pressure change per metre near the ground
 constexpr float kAbsWashPa      = 13.0f;  // prop wash pressure drop at full thrust; ~7 Pa at hover (logs/20261019_200020.csv)

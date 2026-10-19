@@ -52,6 +52,8 @@ poshold::PosHoldSupervisor g_supervisor;
 poshold::HeightMonitor g_height_monitor;
 poshold::HeightMonitorOutput g_hm_out;
 poshold::AbsHeight g_abs;
+poshold::TofStepComp g_tof_step;
+float g_tof_offset_m = 0.0f;
 float g_abs_m   = 0.0f;
 bool g_abs_use   = false;
 poshold::PositionController g_controller;
@@ -117,7 +119,7 @@ void poshold_update_estimation(void) {
     s.squal   = g_last_flow.squal;
 
     // Altitude2: Kalman-filtered bottom ToF distance (slant range, not tilt compensated).
-    const float range = (RawRange > kMinRawRangeMm) ? (float)Altitude2 : -1.0f;
+    const float range = (RawRange > kMinRawRangeMm) ? (float)Altitude2 - g_tof_offset_m : -1.0f;  // height above the floor
     g_estimator.update_flow(s, range, dt);
 
     const uint8_t reason = (uint8_t)g_estimator.state().reject;
@@ -240,7 +242,7 @@ void poshold_safety_update(void) {
         const TofDiag td = tof_bottom_diag();
         // A reading of 1-20 mm is real on the ground (the sensor sits ~2 cm above the floor); only 0 means "nothing".
         const bool tof_valid = td.status == 0 && RawRange > 0;
-        g_hm_out = g_height_monitor.update(Interval_time, tof_valid, (float)RawRange * 0.001f, baro_present(),
+        g_hm_out = g_height_monitor.update(Interval_time, tof_valid, (float)RawRange * 0.001f + g_tof_offset_m, baro_present(),
                                            baro_height_m());
 
         // Stable ABS height; used instead of the ToF range only in that mode.
@@ -301,6 +303,20 @@ void poshold_override_attitude(volatile float* roll_ref, volatile float* pitch_r
 
 bool poshold_link_loss_landing_allowed(void) {
     return g_sup.allow_link_landing;
+}
+
+void poshold_tof_step_sample(int16_t range_mm) {
+    // Active in flight only (the drone is on the ground in PARKING and lands to the floor in AUTO_LANDING).
+    const bool active = (Mode == FLIGHT_MODE || Mode == FLIP_MODE) && !g_abs_use;
+    g_tof_offset_m    = g_tof_step.update(active, range_mm > 20, (float)range_mm * 0.001f);
+}
+
+int16_t poshold_tof_offset_mm(void) {
+    return g_abs_use ? 0 : (int16_t)(g_tof_offset_m * 1000.0f);
+}
+
+float poshold_tof_offset_m(void) {
+    return g_tof_offset_m;
 }
 
 bool poshold_abs_active(void) {

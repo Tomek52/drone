@@ -313,6 +313,7 @@ float sensor_read(void) {
                     old_range[1]    = Range;
                 }
 
+                poshold_tof_step_sample(Range);  // [POSHOLD] obstacle edge compensation
                 // USBSerial.printf("%9.6f, %9.6f, %9.6f, %9.6f, %9.6f\r\n",Elapsed_time,Altitude/1000.0,  Altitude2,
                 // Alt_velocity,-(Accel_z_raw - Accel_z_offset)*9.81/(-Accel_z_offset));
             }
@@ -321,7 +322,7 @@ float sensor_read(void) {
 
         // [POSHOLD] Stable ABS: the height comes from the barometer instead of the ToF
         if (poshold_abs_active()) Range = poshold_abs_range_mm();
-        Altitude = alt_filter.update((float)Range / 1000.0, Interval_time);
+        Altitude = alt_filter.update((float)(Range + poshold_tof_offset_mm()) / 1000.0, Interval_time);  // [POSHOLD] + step offset
         if (first_flag == 1)
             EstimatedAltitude.update(Altitude, Az, Interval_time);
         else

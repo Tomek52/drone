@@ -11,6 +11,7 @@
 #include <poshold_supervisor.hpp>
 #include <height_monitor.hpp>
 #include <abs_height.hpp>
+#include <tof_step.hpp>
 
 #include "pmw3901.hpp"
 
@@ -48,6 +49,11 @@ const poshold::SupervisorOutput& poshold_supervisor_output(void);
 bool poshold_abs_active(void);
 int16_t poshold_abs_range_mm(void);
 float poshold_abs_height(void);
+
+// ToF obstacle edge compensation (absolute height over obstacles).
+void poshold_tof_step_sample(int16_t range_mm);  // once per new ToF sample, after the outlier filter
+int16_t poshold_tof_offset_mm(void);             // added to the range fed to the altitude estimator
+float poshold_tof_offset_m(void);
 const poshold::HeightMonitorOutput& poshold_height_monitor_output(void);  // ToF vs barometer, observe-only
 const poshold::ControllerOutput& poshold_controller_output(void);
 
