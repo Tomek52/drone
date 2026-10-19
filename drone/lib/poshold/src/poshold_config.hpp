@@ -137,6 +137,13 @@ constexpr float kBatteryWarnVolt   = 3.50f;  // [V] warning beeps
 constexpr float kBatteryLandVolt   = 3.35f;  // [V] automatic landing ...
 constexpr float kBatteryLandTime   = 2.0f;   // [s] ... when below for this long
 
+// ToF plausibility check against the barometer (height_monitor.hpp), observe-only for now.
+constexpr float kHmGate        = 0.25f;  // [m] ToF vs barometer disagreement
+constexpr float kHmHold        = 0.30f;  // [s] disagreement for this long -> ToF untrusted
+constexpr float kHmRegainGate  = 0.12f;  // [m] agreement needed to trust the ToF again ...
+constexpr float kHmRegain      = 1.00f;  // [s] ... for this long
+constexpr float kHmTauOffset   = 3.00f;  // [s] offset tracking while trusted (absorbs thermal drift)
+
 }  // namespace config
 }  // namespace poshold
 

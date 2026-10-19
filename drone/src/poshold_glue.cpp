@@ -14,6 +14,8 @@
 #include <math_utils.hpp>
 
 #include "alerts.hpp"
+#include "baro.hpp"
+#include "tof.hpp"
 #include "telemetry_stream.hpp"
 #include "flight_control.hpp"
 #include "led.hpp"
@@ -47,6 +49,8 @@ constexpr uint16_t kTakeoffDoneCount = 1000;  // upstream get_command(): ramp le
 constexpr float kLoopPeriod          = 0.0025f;
 
 poshold::PosHoldSupervisor g_supervisor;
+poshold::HeightMonitor g_height_monitor;
+poshold::HeightMonitorOutput g_hm_out;
 poshold::PositionController g_controller;
 poshold::SupervisorOutput g_sup;
 poshold::ControllerOutput g_ctrl;
@@ -221,6 +225,14 @@ void poshold_safety_update(void) {
     in.vbat              = Voltage;
     in.dt                = Interval_time;
 
+    // ToF vs barometer plausibility (observe-only: the result is only logged).
+    {
+        const TofDiag td = tof_bottom_diag();
+        const bool tof_valid = td.status == 0 && RawRange > 20;
+        g_hm_out = g_height_monitor.update(Interval_time, tof_valid, (float)RawRange * 0.001f, baro_present(),
+                                           baro_height_m());
+    }
+
     g_sup = g_supervisor.update(in);
 
     if (g_sup.neutral_sticks) set_neutral_sticks();
@@ -271,6 +283,10 @@ void poshold_override_attitude(volatile float* roll_ref, volatile float* pitch_r
 
 bool poshold_link_loss_landing_allowed(void) {
     return g_sup.allow_link_landing;
+}
+
+const poshold::HeightMonitorOutput& poshold_height_monitor_output(void) {
+    return g_hm_out;
 }
 
 const poshold::SupervisorOutput& poshold_supervisor_output(void) {
