@@ -18,6 +18,8 @@ namespace poshold {
 
 struct TofStepParams {
     float step_m       = config::kTofStepM;
+    float pair_m       = config::kTofStepPairM;
+    float small_m      = config::kTofStepSmallM;
     float max_offset_m = config::kTofStepMaxOffset;
 };
 
@@ -36,6 +38,7 @@ private:
     TofStepParams p_;
     bool prev_valid_ = false;
     float prev_m_    = 0.0f;
+    float prev_d_    = 0.0f;  // last jump that was not taken for an edge (pair rule)
     float offset_    = 0.0f;
     bool saturated_  = false;
 };

@@ -98,3 +98,14 @@ pozostaje ciągła i regulator nie zmienia ciągu. Zjazd z przeszkody cofa offse
 - Ograniczenie: łagodne zbocze (rampa, schody) nie jest skokiem, więc nie jest kompensowane.
 - Test: zawis na ≥ 1,0 m, przelot nad przeszkodą 30–50 cm; `alt_est_m` ma pozostać ciągłe, a `tof_raw_mm`
   skoczyć w dół; `tof_off_m` rośnie o wysokość przeszkody i wraca do zera po przelocie.
+
+### Pierwszy lot nad przeszkodą (2026-10-19, `20261019_205655.csv`, krzesło 45 cm, zawis ok. 0,8–0,9 m)
+
+- Wejście nad siedzisko: ToF 738 → 0 (jedna próbka bez echa) → 360 mm; offset +0,38 m, `alt_est` pozostało ciągłe
+  (0,74 → 0,68 m), ciąg prawie bez zmiany. Kompensacja działa.
+- Zjazd z krzesła nie został wykryty: ToF rósł łagodnie (340 → 870 mm w 1,8 s), a potem spadł 789 → 669 → 625 → 594 mm
+  (pierwszy skok 0,12 m < dawnego progu 0,15 m, kolejne 0,03–0,04 m). Offset został +0,38 m, regulator widział
+  zejście z prędkością 1,5 m/s, podniósł ciąg do 0,80 i dron się wzniósł (`alt_est` 1,28 m wobec zadanej 0,82).
+- Position Hold wypadł z powodem 4 (flow) nad krzesłem (`squal` 13–30, siedzisko bez tekstury) i przeszedł w Stable.
+- Poprawka: próg pojedynczego skoku 0,07 m i reguła pary (dwa kolejne skoki > 0,03 m w tę samą stronę o sumie > 0,12 m).
+  Łagodnych zboczy i krzesła z niejednolitą krawędzią nie da się w pełni wykryć progiem; lepszy test na równym pudle.
