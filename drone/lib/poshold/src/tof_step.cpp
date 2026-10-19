@@ -21,7 +21,7 @@ float TofStepComp::update(bool active, bool tof_valid, float tof_m, bool detect)
         prev_m_     = tof_m;
         prev_valid_ = true;
         prev_d_     = 0.0f;
-        return offset_;
+        return check_height(tof_m);
     }
     if (prev_valid_) {
         const float d = tof_m - prev_m_;
@@ -52,6 +52,17 @@ float TofStepComp::update(bool active, bool tof_valid, float tof_m, bool detect)
     }
     prev_m_     = tof_m;
     prev_valid_ = true;
+    return check_height(tof_m);
+}
+
+// The height above the take-off point cannot be negative: a compensated height below the minimum means that
+// noisy edges (a hand-held card pulled out under the sensor, logs/20261019_233504.csv) have piled up a wrong
+// offset. Fall back to the plain ToF height.
+float TofStepComp::check_height(float tof_m) {
+    if (tof_m + offset_ < p_.min_height_m) {
+        offset_    = 0.0f;
+        saturated_ = true;
+    }
     return offset_;
 }
 
