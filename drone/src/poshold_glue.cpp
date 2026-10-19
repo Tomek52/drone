@@ -328,7 +328,10 @@ bool poshold_link_loss_landing_allowed(void) {
 void poshold_tof_step_sample(int16_t range_mm) {
     // Active in flight only (the drone is on the ground in PARKING and lands to the floor in AUTO_LANDING).
     const bool active = (Mode == FLIGHT_MODE || Mode == FLIP_MODE) && !g_abs_use;
-    g_tof_offset_m    = g_tof_step.update(active, range_mm > 20, (float)range_mm * 0.001f);
+    // No edge detection while tilted more than ~11 deg: the slant range jumps without any obstacle
+    // (logs/20261019_215744.csv: +0.17 m at roll -16 deg taken for an edge).
+    const bool level = fabsf(Roll_angle - Roll_angle_offset) < 0.2f && fabsf(Pitch_angle - Pitch_angle_offset) < 0.2f;
+    g_tof_offset_m    = g_tof_step.update(active, range_mm > 20, (float)range_mm * 0.001f, level);
 }
 
 int16_t poshold_tof_offset_mm(void) {

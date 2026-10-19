@@ -29,7 +29,9 @@ public:
 
     // One new ToF sample [m] (after the upstream outlier filter). active = false (on the ground, landing)
     // clears the offset. Returns the offset to add to the ToF height [m].
-    float update(bool active, bool tof_valid, float tof_m);
+    // detect = false (e.g. the drone is tilted: the slant range jumps without an edge) keeps the offset and
+    // follows the samples without looking for edges.
+    float update(bool active, bool tof_valid, float tof_m, bool detect = true);
 
     float offset() const { return offset_; }
     bool saturated() const { return saturated_; }  // the offset hit its limit: the ToF is not trustworthy

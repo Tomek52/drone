@@ -8,7 +8,7 @@
 
 namespace poshold {
 
-float TofStepComp::update(bool active, bool tof_valid, float tof_m) {
+float TofStepComp::update(bool active, bool tof_valid, float tof_m, bool detect) {
     if (!active) {
         offset_     = 0.0f;
         prev_d_     = 0.0f;
@@ -17,6 +17,12 @@ float TofStepComp::update(bool active, bool tof_valid, float tof_m) {
         return 0.0f;
     }
     if (!tof_valid) return offset_;  // keep the offset, wait for a real sample
+    if (!detect) {
+        prev_m_     = tof_m;
+        prev_valid_ = true;
+        prev_d_     = 0.0f;
+        return offset_;
+    }
     if (prev_valid_) {
         const float d = tof_m - prev_m_;
         float edge    = 0.0f;

@@ -62,6 +62,16 @@ void test_two_medium_jumps_in_a_row_are_one_edge() {
     TEST_ASSERT_FLOAT_WITHIN(0.0001f, 0.125f, off);
 }
 
+void test_no_edge_detection_while_tilted() {
+    TofStepComp c;
+    for (int i = 0; i < 20; i++) c.update(true, true, 0.30f);
+    const float off = c.update(true, true, 0.47f, false);  // +0.17 m at a large tilt: not an edge
+    TEST_ASSERT_FLOAT_WITHIN(0.0001f, 0.0f, off);
+    c.update(true, true, 0.47f, true);
+    const float off2 = c.update(true, true, 0.47f, true);
+    TEST_ASSERT_FLOAT_WITHIN(0.0001f, 0.0f, off2);  // the new level is the reference
+}
+
 void test_a_real_climb_is_not_taken_for_an_edge() {
     // 1 m/s at 30 Hz is 3 cm per sample
     TofStepComp c;
@@ -106,6 +116,7 @@ int main() {
     RUN_TEST(test_a_single_wrong_sample_cancels_itself);
     RUN_TEST(test_an_edge_seen_in_two_steps_is_compensated);
     RUN_TEST(test_two_medium_jumps_in_a_row_are_one_edge);
+    RUN_TEST(test_no_edge_detection_while_tilted);
     RUN_TEST(test_a_real_climb_is_not_taken_for_an_edge);
     RUN_TEST(test_invalid_samples_keep_the_offset);
     RUN_TEST(test_inactive_clears_the_offset);
