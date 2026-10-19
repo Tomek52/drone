@@ -325,6 +325,18 @@ float poshold_tof_offset_m(void) {
     return g_tof_offset_m;
 }
 
+float poshold_alt_ref_max(void) {
+    return g_abs_use ? poshold::config::kAbsAltMax : 1.8f;
+}
+
+float poshold_alt_limit(void) {
+    return g_abs_use ? poshold::config::kAbsAltMax + 0.5f : 2.0f;
+}
+
+float poshold_alt_meas_std(void) {
+    return g_abs_use ? poshold::config::kAbsKalmanStd : 0.004f;
+}
+
 bool poshold_abs_active(void) {
     return g_abs_use;
 }
@@ -333,7 +345,7 @@ int16_t poshold_abs_range_mm(void) {
     float mm = g_abs_m * 1000.0f;
     // Landing on the barometer: below 0.25 m the barometer cannot be trusted any more (prop wash), so the
     // estimator is told the drone is on the ground and the upstream landing ends.
-    if (g_tof_failsafe_landing && g_abs_m < 0.25f) mm = 21.0f;
+    if ((g_tof_failsafe_landing || (g_abs_use && Mode == AUTO_LANDING_MODE)) && g_abs_m < 0.25f) mm = 21.0f;
     if (mm < 21.0f) mm = 21.0f;  // the upstream code treats <= 20 as 'no reading'
     if (mm > 5000.0f) mm = 5000.0f;
     return (int16_t)mm;

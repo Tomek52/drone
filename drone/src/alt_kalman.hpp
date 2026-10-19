@@ -86,6 +86,9 @@ class Alt_kalman {
     Alt_kalman();
     void update(float z_sens, float accel, float h);
     void set_vel(float v);
+    // [POSHOLD] 0.004 m for the ToF (default); ~0.4 m for the barometer in Stable ABS, so that the
+    // accelerometer carries the short term and the barometer only corrects slowly.
+    void set_measurement_std(float std_m) { R = std_m * std_m; }
     void reset(void);
 };
 

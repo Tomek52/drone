@@ -49,6 +49,9 @@ const poshold::SupervisorOutput& poshold_supervisor_output(void);
 bool poshold_abs_active(void);
 int16_t poshold_abs_range_mm(void);
 float poshold_abs_height(void);
+float poshold_alt_ref_max(void);  // altitude setpoint limit: 1.8 m with the ToF, higher in Stable ABS
+float poshold_alt_limit(void);    // height above which the upstream code forces a descent
+float poshold_alt_meas_std(void); // measurement noise for the altitude estimator
 
 // ToF obstacle edge compensation (absolute height over obstacles).
 void poshold_tof_step_sample(int16_t range_mm);  // once per new ToF sample, after the outlier filter

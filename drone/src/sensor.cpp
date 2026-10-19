@@ -323,13 +323,15 @@ float sensor_read(void) {
         // [POSHOLD] Stable ABS: the height comes from the barometer instead of the ToF
         if (poshold_abs_active()) Range = poshold_abs_range_mm();
         Altitude = alt_filter.update((float)(Range + poshold_tof_offset_mm()) / 1000.0, Interval_time);  // [POSHOLD] + step offset
+        EstimatedAltitude.set_measurement_std(poshold_alt_meas_std());  // [POSHOLD]
         if (first_flag == 1)
             EstimatedAltitude.update(Altitude, Az, Interval_time);
         else
             first_flag = 1;
         Altitude2 = EstimatedAltitude.Altitude;
         // MAX_ALTを超えたら高度下げる（自動着陸）
-        if ((Altitude2 > ALT_LIMIT && Alt_flag >= 1 && Flip_flag == 0) || RawRange == 0)
+        // [POSHOLD] Stable ABS: the limit is higher and a ToF without echo (outdoors) is normal
+        if ((Altitude2 > poshold_alt_limit() && Alt_flag >= 1 && Flip_flag == 0) || (RawRange == 0 && !poshold_abs_active()))
             Range0flag++;
         else
             Range0flag = 0;

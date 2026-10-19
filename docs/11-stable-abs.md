@@ -123,3 +123,18 @@ estymator wysokości dostaje wysokość z barometru (`abs_height`, z korektą po
   przelot nad krzesłem) `hm_trust` nie spadło.
 - Test w mieszkaniu: w zawisie na ok. 0,8 m zasłonić ToF kartonem na 3 s; po ok. 1,5 s `hm_trust` = 0, `ph_reason` = 12,
   lądowanie na barometrze. KILL pod kciukiem.
+
+## ABS v2: akcelerometr trzyma krótki czas, barometr koryguje wolno (do lotów na zewnątrz)
+
+Pierwszy lot wykazał, że barometr z szumem ±0,5 m nie może wchodzić do pętli wysokości z wagą jak ToF (szum 5 mm).
+Upstreamowy estymator wysokości to filtr Kalmana z akcelerometrem, z szumem pomiaru wpisanym na stałe dla ToF
+(0,004 m). W trybie ABS szum pomiaru ustawiany jest na 0,40 m (`set_measurement_std`, `kAbsKalmanStd`), więc
+akcelerometr niesie krótkie zmiany wysokości, a barometr tylko wolno (rzędu kilku sekund) koryguje dryf.
+
+- W trybie ABS limity wysokości są podniesione: zadana do 10 m (`kAbsAltMax`; upstream 1,8 m z ToF), a upstreamowy
+  mechanizm wymuszający zejście powyżej 2 m (`Range0flag`) działa dopiero powyżej 10,5 m i nie reaguje na brak
+  echa ToF, który na zewnątrz jest normalny.
+- Lądowanie w ABS kończy się, gdy wysokość z barometru spadnie poniżej 0,25 m (albo ToF ma poprawny odczyt poniżej 0,6 m).
+- Zabezpieczenie `kToFUnreliable` nie działa w ABS (tam ToF nie jest źródłem wysokości).
+- Przewidywana dokładność: po nauczeniu się offsetu błąd stały do ok. 0,3 m (podmuch), bez falowania. Do sprawdzenia w locie.
+- Pierwsze testy w mieszkaniu (zawis 0,5–1,5 m, porównanie z ToF), potem na zewnątrz **na uwięzi**.
