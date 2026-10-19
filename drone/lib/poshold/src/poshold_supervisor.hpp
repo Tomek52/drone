@@ -51,6 +51,7 @@ struct SupervisorInput {
     bool flying            = false;  // upstream FLIGHT_MODE
     bool landing           = false;  // upstream AUTO_LANDING_MODE
     bool auto_alt          = false;  // upstream altitude controller active (Alt_flag)
+    bool tof_untrusted     = false;  // height monitor: the ToF disagrees with the barometer
     bool takeoff_done      = false;  // upstream automatic take-off ramp finished
     bool flow_sensor_ok    = false;  // PMW3901 detected at boot
     bool flow_calibrated   = false;  // config::kFlowAxesVerified

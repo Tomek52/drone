@@ -109,3 +109,17 @@ pozostaje ciągła i regulator nie zmienia ciągu. Zjazd z przeszkody cofa offse
 - Position Hold wypadł z powodem 4 (flow) nad krzesłem (`squal` 13–30, siedzisko bez tekstury) i przeszedł w Stable.
 - Poprawka: próg pojedynczego skoku 0,07 m i reguła pary (dwa kolejne skoki > 0,03 m w tę samą stronę o sumie > 0,12 m).
   Łagodnych zboczy i krzesła z niejednolitą krawędzią nie da się w pełni wykryć progiem; lepszy test na równym pudle.
+
+## Zabezpieczenie: lądowanie na barometrze przy niewiarygodnym ToF
+
+Gdy monitor (`height_monitor`) uznaje ToF za niewiarygodny (rozjazd z barometrem > 1,5 m przez 1,5 s albo brak echa),
+nadzorca zatrzaskuje żądanie lądowania z powodem `kToFUnreliable` (12, na pilocie `TOF`) w każdym trybie, w którym
+wysokość pochodzi z ToF (nie dotyczy trybu ABS, który z definicji używa barometru). Podczas takiego lądowania
+estymator wysokości dostaje wysokość z barometru (`abs_height`, z korektą podmuchu) zamiast ToF; poniżej 0,25 m
+(barometr nie jest już wiarygodny) estymator dostaje informację o ziemi, żeby upstreamowe lądowanie się zakończyło.
+
+- Zapobiega scenariuszowi z parku (oślepiony ToF, dron wznosi się bez końca).
+- Ryzyko: fałszywy alarm = niespodziewane lądowanie. W dotychczasowych lotach (łącznie ok. 5 minut w zawisie, w tym
+  przelot nad krzesłem) `hm_trust` nie spadło.
+- Test w mieszkaniu: w zawisie na ok. 0,8 m zasłonić ToF kartonem na 3 s; po ok. 1,5 s `hm_trust` = 0, `ph_reason` = 12,
+  lądowanie na barometrze. KILL pod kciukiem.

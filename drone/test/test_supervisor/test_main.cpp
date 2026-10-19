@@ -208,6 +208,19 @@ void test_low_battery_requests_landing_in_any_mode() {
     TEST_ASSERT_TRUE(o.request_landing);
 }
 
+void test_untrusted_tof_requests_landing_and_latches() {
+    PosHoldSupervisor s;
+    SupervisorInput in = flying_ok();
+    run(s, in, 1.0f);
+    in.tof_untrusted     = true;
+    SupervisorOutput o   = s.update(in);
+    TEST_ASSERT_TRUE(o.request_landing);
+    TEST_ASSERT_EQUAL((int)Reason::kToFUnreliable, (int)o.reason);
+    in.tof_untrusted = false;  // the ToF seems fine again: the landing stays requested
+    o                = run(s, in, 1.0f);
+    TEST_ASSERT_TRUE(o.request_landing);
+}
+
 void test_short_voltage_dip_does_not_land() {
     PosHoldSupervisor s;
     SupervisorInput in = flying_ok();
@@ -260,6 +273,7 @@ int main(int, char**) {
     RUN_TEST(test_link_loss_landing_blocked_at_upstream_timeout);
     RUN_TEST(test_link_loss_manual_alt_lands_immediately);
     RUN_TEST(test_low_battery_requests_landing_in_any_mode);
+    RUN_TEST(test_untrusted_tof_requests_landing_and_latches);
     RUN_TEST(test_short_voltage_dip_does_not_land);
     RUN_TEST(test_geofence_lands);
     RUN_TEST(test_landing_near_ground_deactivates_silently);

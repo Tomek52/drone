@@ -136,6 +136,7 @@ enum class Reason : uint8_t {
     kKill               = 9,  // motors stopped from the joystick
     kProtocolMismatch   = 10,
     kBaroMissing        = 11,  // Stable ABS requested but no barometer
+    kToFUnreliable      = 12,  // the ToF disagrees with the barometer: landing on the barometer
 };
 
 struct DroneStatus {

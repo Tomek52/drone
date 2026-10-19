@@ -82,6 +82,7 @@ const char *reason_short(uint8_t r) {
         case Reason::kLinkLost: return "LINK";
         case Reason::kLowBattery: return "BATT";
         case Reason::kBaroMissing: return "NO BARO";
+        case Reason::kToFUnreliable: return "TOF";
         case Reason::kKill: return "KILL";
         default: return "";
     }

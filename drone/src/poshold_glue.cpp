@@ -56,6 +56,7 @@ poshold::TofStepComp g_tof_step;
 float g_tof_offset_m = 0.0f;
 float g_abs_m   = 0.0f;
 bool g_abs_use   = false;
+bool g_tof_failsafe_landing = false;
 poshold::PositionController g_controller;
 poshold::SupervisorOutput g_sup;
 poshold::ControllerOutput g_ctrl;
@@ -248,9 +249,14 @@ void poshold_safety_update(void) {
         // Stable ABS height; used instead of the ToF range only in that mode.
         g_abs_m = g_abs.update(Interval_time, baro_present(), baro_height_m(), (float)(Thrust_command / BATTERY_VOLTAGE),
                                tof_valid, (float)RawRange * 0.001f, Mode == PARKING_MODE);
-        const bool abs_req             = rc_link_abs_alt_requested() && rc_link_requested_mode() != FlightMode::kPosHold && baro_present();
-        const bool landing_near_ground = Mode == AUTO_LANDING_MODE && tof_valid && RawRange < 600;
-        g_abs_use = abs_req && (Mode == FLIGHT_MODE || Mode == FLIP_MODE || (Mode == AUTO_LANDING_MODE && !landing_near_ground));
+        const bool abs_req = rc_link_abs_alt_requested() && rc_link_requested_mode() != FlightMode::kPosHold && baro_present();
+        // Failsafe: the ToF disagrees with the barometer (blinded by the sun, stuck): land on the barometer.
+        const bool tof_failsafe        = !g_hm_out.trusted && baro_present() && !abs_req;
+        in.tof_untrusted               = tof_failsafe;
+        const bool landing_near_ground = !tof_failsafe && Mode == AUTO_LANDING_MODE && tof_valid && RawRange < 600;
+        g_abs_use = (abs_req || tof_failsafe) &&
+                    (Mode == FLIGHT_MODE || Mode == FLIP_MODE || (Mode == AUTO_LANDING_MODE && !landing_near_ground));
+        g_tof_failsafe_landing = tof_failsafe && Mode == AUTO_LANDING_MODE;
     }
 
     g_sup = g_supervisor.update(in);
@@ -325,6 +331,9 @@ bool poshold_abs_active(void) {
 
 int16_t poshold_abs_range_mm(void) {
     float mm = g_abs_m * 1000.0f;
+    // Landing on the barometer: below 0.25 m the barometer cannot be trusted any more (prop wash), so the
+    // estimator is told the drone is on the ground and the upstream landing ends.
+    if (g_tof_failsafe_landing && g_abs_m < 0.25f) mm = 21.0f;
     if (mm < 21.0f) mm = 21.0f;  // the upstream code treats <= 20 as 'no reading'
     if (mm > 5000.0f) mm = 5000.0f;
     return (int16_t)mm;
