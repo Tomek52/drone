@@ -138,11 +138,11 @@ constexpr float kBatteryLandVolt   = 3.35f;  // [V] automatic landing ...
 constexpr float kBatteryLandTime   = 2.0f;   // [s] ... when below for this long
 
 // ToF plausibility check against the barometer (height_monitor.hpp), observe-only for now.
-constexpr float kHmGate        = 0.25f;  // [m] ToF vs barometer disagreement
-constexpr float kHmHold        = 0.30f;  // [s] disagreement for this long -> ToF untrusted
-constexpr float kHmRegainGate  = 0.12f;  // [m] agreement needed to trust the ToF again ...
+constexpr float kHmGate        = 1.50f;  // [m] ToF vs barometer disagreement (prop wash shifts the barometer by ~0.5 m +-0.5 m)
+constexpr float kHmHold        = 1.50f;  // [s] disagreement for this long -> ToF untrusted
+constexpr float kHmRegainGate  = 0.50f;  // [m] agreement needed to trust the ToF again ...
 constexpr float kHmRegain      = 1.00f;  // [s] ... for this long
-constexpr float kHmTauOffset   = 3.00f;  // [s] offset tracking while trusted (absorbs thermal drift)
+constexpr float kHmTauOffset   = 10.0f;  // [s] offset tracking while trusted (absorbs thermal drift)
 constexpr float kHmTauBaro     = 0.60f;  // [s] low-pass of the barometer height (single samples are ~12 cm noisy)
 
 }  // namespace config

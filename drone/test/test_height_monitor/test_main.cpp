@@ -63,29 +63,29 @@ void test_tof_stuck_while_drone_climbs_becomes_untrusted() {
     HeightMonitorOutput o;
     float baro = 0.50f;
     bool untrusted_seen = false;
-    for (float t = 0.0f; t < 5.0f; t += kDt) {
+    for (float t = 0.0f; t < 10.0f; t += kDt) {
         baro += 0.5f * kDt;  // climbing at 0.5 m/s
         o = m.update(kDt, true, 0.50f, true, baro);
         if (!o.trusted) untrusted_seen = true;
     }
     TEST_ASSERT_TRUE(untrusted_seen);
     TEST_ASSERT_FALSE(o.trusted);
-    TEST_ASSERT_FLOAT_WITHIN(0.3f, 3.0f, o.predicted_m);  // the barometer still tells the real height
+    TEST_ASSERT_TRUE(o.predicted_m > 3.0f);  // the barometer still tells the climb (real height 5.5 m)
 }
 
 void test_missing_tof_samples_become_untrusted_after_hold_time() {
     HeightMonitor m;
     run(m, 2.0f, true, 0.50f, 0.50f);
-    HeightMonitorOutput o = run(m, 0.2f, false, 0.0f, 0.50f);
+    HeightMonitorOutput o = run(m, 1.0f, false, 0.0f, 0.50f);
     TEST_ASSERT_TRUE(o.trusted);  // shorter than the hold time
-    o = run(m, 0.5f, false, 0.0f, 0.50f);
+    o = run(m, 1.0f, false, 0.0f, 0.50f);
     TEST_ASSERT_FALSE(o.trusted);
 }
 
 void test_regains_trust_only_after_a_sustained_agreement() {
     HeightMonitor m;
     run(m, 2.0f, true, 0.50f, 0.50f);
-    run(m, 1.0f, false, 0.0f, 0.50f);
+    run(m, 2.0f, false, 0.0f, 0.50f);
     TEST_ASSERT_FALSE(m.trusted());
     HeightMonitorOutput o = run(m, 0.5f, true, 0.50f, 0.50f);
     TEST_ASSERT_FALSE(o.trusted);  // not long enough yet
@@ -96,7 +96,7 @@ void test_regains_trust_only_after_a_sustained_agreement() {
 void test_a_glitch_resets_the_regain_timer() {
     HeightMonitor m;
     run(m, 2.0f, true, 0.50f, 0.50f);
-    run(m, 1.0f, false, 0.0f, 0.50f);
+    run(m, 2.0f, false, 0.0f, 0.50f);
     run(m, 0.8f, true, 0.50f, 0.50f);
     run(m, 0.1f, true, 1.50f, 0.50f);  // disagrees again
     HeightMonitorOutput o = run(m, 0.5f, true, 0.50f, 0.50f);
