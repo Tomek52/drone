@@ -283,7 +283,7 @@ void poshold_safety_update(void) {
         const bool tof_ok  = tof_valid && g_hm_out.trusted;
         const float h_src  = tof_ok ? tof_h : g_abs_m;
         if (g_soft_active) {
-            if (!soft_ok || h_src < poshold::config::kSoftOnM - 0.3f) g_soft_active = false;
+            if (!soft_ok || h_src < poshold::config::kSoftOnM - 0.5f) g_soft_active = false;
         } else if (soft_ok && h_src > poshold::config::kSoftOnM) {
             g_soft_active = true;
             // Hand-over: the barometer height is made equal to the ToF height now, so the controller does
@@ -294,7 +294,7 @@ void poshold_safety_update(void) {
             }
             g_soft.reset(g_abs_m, (float)(Thrust_command / BATTERY_VOLTAGE - Thrust0));
         }
-        g_soft_u = g_soft_active ? g_soft.update(Interval_time, g_abs_m, Alt_ref) : 0.0f;
+        g_soft_u = g_soft_active ? g_soft.update(Interval_time, g_abs_m, Alt_ref, (float)Alt_velocity) : 0.0f;
 #endif
 
         // Failsafe (not in ABS, which switches to the barometer by itself): the ToF disagrees with the
@@ -369,7 +369,7 @@ void poshold_tof_step_sample(int16_t range_mm) {
 }
 
 int16_t poshold_tof_offset_mm(void) {
-    return g_abs_use ? 0 : (int16_t)(g_tof_offset_m * 1000.0f);
+    return (g_abs_use || g_soft_active) ? 0 : (int16_t)(g_tof_offset_m * 1000.0f);
 }
 
 float poshold_tof_offset_m(void) {
@@ -395,7 +395,7 @@ float poshold_alt_limit(void) {
 }
 
 float poshold_alt_meas_std(void) {
-    return g_abs_use ? poshold::config::kAbsKalmanStd : 0.004f;
+    return (g_abs_use || g_soft_active) ? poshold::config::kAbsKalmanStd : 0.004f;
 }
 
 bool poshold_soft_alt_active(void) {
@@ -415,7 +415,7 @@ bool poshold_abs_selected(void) {
 }
 
 bool poshold_abs_active(void) {
-    return g_abs_use;
+    return g_abs_use || g_soft_active;
 }
 
 int16_t poshold_abs_range_mm(void) {

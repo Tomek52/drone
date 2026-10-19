@@ -30,18 +30,18 @@ struct Plant {
 void test_inside_the_dead_zone_the_output_stays_zero() {
     SoftAlt c;
     float u = 1.0f;
-    for (int i = 0; i < 1000; i++) u = c.update(kDt, 5.3f, 5.0f);  // 0.3 m below, dead zone is 0.5 m
+    for (int i = 0; i < 1000; i++) u = c.update(kDt, 5.3f, 5.0f, 0.0f);  // 0.3 m below, dead zone is 0.5 m
     TEST_ASSERT_FLOAT_WITHIN(0.0001f, 0.0f, u);
 }
 
 void test_the_sign_follows_the_error_and_is_limited() {
     SoftAlt c;
     float u = 0.0f;
-    for (int i = 0; i < 3000; i++) u = c.update(kDt, 2.0f, 8.0f);  // far below the setpoint
+    for (int i = 0; i < 3000; i++) u = c.update(kDt, 2.0f, 8.0f, 0.0f);  // far below the setpoint
     TEST_ASSERT_TRUE(u > 0.0f);
     TEST_ASSERT_TRUE(u <= config::kSoftUMax + 1e-6f);
     SoftAlt d;
-    for (int i = 0; i < 3000; i++) u = d.update(kDt, 9.0f, 3.0f);
+    for (int i = 0; i < 3000; i++) u = d.update(kDt, 9.0f, 3.0f, 0.0f);
     TEST_ASSERT_TRUE(u < 0.0f);
     TEST_ASSERT_TRUE(u >= -config::kSoftUMax - 1e-6f);
 }
@@ -49,11 +49,11 @@ void test_the_sign_follows_the_error_and_is_limited() {
 void test_bumpless_entry_starts_at_the_previous_command() {
     SoftAlt c;
     c.reset(5.0f, 0.03f);
-    const float u = c.update(kDt, 5.0f, 5.0f);
+    const float u = c.update(kDt, 5.0f, 5.0f, 0.0f);
     TEST_ASSERT_FLOAT_WITHIN(0.005f, 0.03f, u);
     SoftAlt d;
     d.reset(5.0f, 0.5f);  // an out of range request is limited
-    TEST_ASSERT_TRUE(d.update(kDt, 5.0f, 5.0f) <= config::kSoftUMax + 1e-6f);
+    TEST_ASSERT_TRUE(d.update(kDt, 5.0f, 5.0f, 0.0f) <= config::kSoftUMax + 1e-6f);
 }
 
 void test_closed_loop_holds_the_setpoint_with_a_trim_error() {
@@ -65,7 +65,7 @@ void test_closed_loop_holds_the_setpoint_with_a_trim_error() {
     c.reset(p.h, 0.0f);
     float worst = 0.0f;
     for (int i = 0; i < 16000; i++) {
-        const float u = c.update(kDt, p.h, 5.0f);
+        const float u = c.update(kDt, p.h, 5.0f, p.v);
         p.step(u, 0.0f);
         if (i > 12000) worst = fmaxf(worst, fabsf(p.h - 5.0f));
     }
@@ -82,7 +82,7 @@ void test_closed_loop_follows_a_step_without_oscillating() {
     float peak = 0.0f;
     for (int i = 0; i < 20000; i++) {
         if (i == 2000) ref = 8.0f;
-        const float u = c.update(kDt, p.h, ref);
+        const float u = c.update(kDt, p.h, ref, p.v);
         p.step(u, 0.0f);
         if (i > 14000) peak = fmaxf(peak, fabsf(p.h - ref));
     }

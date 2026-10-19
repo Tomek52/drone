@@ -21,21 +21,17 @@ float deadzone(float e, float db) {
 }  // namespace
 
 void SoftAlt::reset(float h, float u_init) {
-    init_   = true;
-    h_prev_ = h;
-    vf_     = 0.0f;
-    i_u_    = clampf(u_init, -p_.umax, p_.umax);
-    u_      = i_u_;
+    (void)h;
+    init_ = true;
+    i_u_  = clampf(u_init, -p_.umax, p_.umax);
+    u_    = i_u_;
 }
 
-float SoftAlt::update(float dt, float h, float ref) {
+float SoftAlt::update(float dt, float h, float ref, float v) {
     if (!init_) reset(h, 0.0f);
-    const float d = dt > 0.0f ? (h - h_prev_) / dt : 0.0f;
-    h_prev_       = h;
-    vf_ += (d - vf_) * dt / (p_.tau_v + dt);
     const float ed = deadzone(ref - h, p_.deadband);
     i_u_           = clampf(i_u_ + p_.ki * ed * dt, -p_.umax, p_.umax);
-    u_             = clampf(p_.kp * ed + i_u_ - p_.kd * vf_, -p_.umax, p_.umax);
+    u_             = clampf(p_.kp * ed + i_u_ - p_.kd * v, -p_.umax, p_.umax);
     return u_;
 }
 

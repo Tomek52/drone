@@ -78,7 +78,20 @@ jest liniowy, brak wiatru poziomego, który zmienia ciśnienie dynamiczne. Dopie
   Poprawka: decyzja o przejęciu i o wyjściu zapada na podstawie ToF, dopóki ToF jest ważny i monitor mu ufa.
 - Wniosek: pętla jest stabilna (brak falowania), błąd bezwzględny biorą się z offsetu barometru przy przejęciu.
 
+## Drugi lot (2026-10-19, `20261019_231635.csv`, po wyrównaniu przy przejęciu, bateria 3,85 → 3,45 V) — nie w porządku
+
+- Regulator włączał się i wyłączał na progu sześć razy w 30 s, dron falował od 0,5 do 1,5 m, wysokość z barometru i z ToF
+  rozjeżdżały się o 0,3–0,6 m w ciągu sekund, a na końcu dron powoli wzniósł się do 2,3–2,5 m (zadana 1,59 m).
+- Przyczyna: symulacja zaniżyła szum ciśnienia. Prawdziwy barometr zmienia się o ±0,5 m w ciągu sekundy (skorelowane z
+  podmuchem), a człon tłumiący brał prędkość z pochodnej barometru, więc to szarpanie wchodziło prosto w ciąg
+  (`soft_u` od −0,07 do +0,06).
+- Poprawka: prędkość do tłumienia pochodzi z estymatora z akcelerometrem (`Alt_velocity`), który w trybie miękkim dostaje
+  wysokość z barometru z małą wagą (szum pomiaru 0,4 m); regulator nie różniczkuje barometru. Wyjście z trybu przy
+  `kSoftOnM − 0,5 m` (szersza histereza). Symulacja `tools/soft_altitude_sim.py` używa białego szumu 0,12 m i nie odzwierciedla
+  tego w pełni; do poprawienia (szum skorelowany ±0,5 m).
+
 ## Następne kroki
 
-1. Drugi lot w korytarzu z wyrównaniem przy przejęciu i decyzją według ToF (bateria ≥ 4,1 V).
-2. Dopiero potem zewnątrz na uwięzi i z limitem 5 m.
+1. Trzeci lot w korytarzu (bateria ≥ 4,1 V): sprawdzić, czy prędkość z akcelerometru uspokaja pętlę.
+2. Poprawić model szumu w symulacji i dobrać wzmocnienia ponownie.
+3. Dopiero potem zewnątrz na uwięzi i z limitem 5 m.

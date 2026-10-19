@@ -24,7 +24,6 @@ struct SoftAltParams {
     float kd       = config::kSoftKd;        // duty per m/s
     float deadband = config::kSoftDeadband;  // [m]
     float umax     = config::kSoftUMax;      // [duty]
-    float tau_v    = config::kSoftTauV;      // [s] low-pass of the derivative
 };
 
 class SoftAlt {
@@ -34,16 +33,15 @@ public:
     // Bumpless entry: u_init is the offset from the trim that the previous controller was commanding.
     void reset(float h, float u_init);
 
-    // h: height from the barometer [m], ref: setpoint [m]. Returns u, the thrust duty offset from the trim.
-    float update(float dt, float h, float ref);
+    // h: height from the barometer [m], ref: setpoint [m], v: vertical velocity [m/s] from the accelerometer-based
+    // estimator (smooth; the derivative of the barometer is far too noisy). Returns u, the thrust duty offset.
+    float update(float dt, float h, float ref, float v);
 
     float u() const { return u_; }
 
 private:
     SoftAltParams p_;
     bool init_   = false;
-    float h_prev_ = 0.0f;
-    float vf_     = 0.0f;
     float i_u_    = 0.0f;
     float u_      = 0.0f;
 };

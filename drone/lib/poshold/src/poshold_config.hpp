@@ -157,7 +157,6 @@ constexpr float kSoftKi       = 0.0003f;  // [duty/(m*s)]
 constexpr float kSoftKd       = 0.08f;    // [duty/(m/s)]
 constexpr float kSoftDeadband = 0.5f;     // [m]
 constexpr float kSoftUMax     = 0.08f;    // [duty] authority around the hover trim
-constexpr float kSoftTauV     = 1.0f;     // [s] low-pass of the derivative
 constexpr float kSoftOnM      = 1.0f;     // [m] the barometer takes over above this (3.0 outdoors; 1.0 for the corridor test)
 constexpr float kSoftAltMax   = 2.0f;     // [m] altitude setpoint limit with the soft hold (corridor test; 5.0 for the first outdoor test)
 
