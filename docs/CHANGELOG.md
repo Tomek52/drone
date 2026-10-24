@@ -2,6 +2,12 @@
 
 Zmiany według gałęzi / PR (najnowsze na górze).
 
+## `feat/phone-telemetry`
+
+- Pilot: opcjonalny punkt dostępowy Wi-Fi i strona z podglądem telemetrii oraz zapisem CSV na telefonie
+  (przytrzymanie przycisku ekranu 2 s na ekranie ustawień, domyślnie wyłączone). Zob. `13-telemetria-telefon.md`.
+- `tools/gen_phone_page.py`, `tools/test_phone_page.py` (dekoder JS kontra dekoder Python w headless Chrome/Edge).
+
 ## Pierwsze testy na sprzęcie (Windows 11, 2026-10-14)
 
 Gałęzie (każda od poprzedniej, ostatnia zawiera wszystko): `fix/windows-fastled-sd` →

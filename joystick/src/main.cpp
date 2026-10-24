@@ -43,6 +43,7 @@
 
 #include "app_lvgl.h"
 #include "telemetry_forward.h"  // [POSHOLD]
+#include "phone_telemetry.h"   // [POSHOLD]
 #include "flight_mode.h"        // [POSHOLD]
 #include <rc_protocol.hpp>        // [POSHOLD]
 
@@ -543,6 +544,21 @@ void loop() {
 
     if (M5.Btn.pressedFor(400) == true) {
         Timer_state = 2;
+    }
+
+    // [POSHOLD] Phone telemetry: hold the screen button for 2 s on the setup screen (before the flight) to open the
+    // Wi-Fi access point; the same hold again restarts the joystick, which switches it off.
+    {
+        static bool phone_latch = false;
+        if (!M5.Btn.isPressed()) phone_latch = false;
+        if (page_nums == PAGE_SETUP && !phone_latch && M5.Btn.pressedFor(2000)) {
+            phone_latch = true;
+            if (phone_telemetry_active()) {
+                esp_restart();
+            } else if (phone_telemetry_start(Channel)) {
+                beep();
+            }
+        }
     }
 
     if (Timer_state == 1) {

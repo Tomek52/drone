@@ -18,6 +18,7 @@ są oznaczone: **⚠️ do weryfikacji na sprzęcie**.
 | [10-plany.md](10-plany.md) | Rzeczy na później (m.in. wysokość bezwzględna nad przeszkodami) i otwarte sprawy po testach na sprzęcie |
 | [11-stable-abs.md](11-stable-abs.md) | Tryb Stable ABS: wysokość z barometru, model podmuchu, plan testów |
 | [12-lagodny-regulator-wysokosci.md](12-lagodny-regulator-wysokosci.md) | Projekt i symulacja łagodnego regulatora wysokości na barometrze (lot powyżej zasięgu ToF) |
+| [13-telemetria-telefon.md](13-telemetria-telefon.md) | Podgląd i zapis telemetrii na telefonie przez Wi-Fi pilota |
 | [decyzje/](decyzje/) | Architecture Decision Records (ADR) — jedna decyzja = jeden plik |
 | [CHANGELOG.md](CHANGELOG.md) | Zmiany według gałęzi / PR |
 
