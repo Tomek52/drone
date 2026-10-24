@@ -4,8 +4,10 @@ Pilot (Atom JoyStick) potrafi otworzyć własną sieć Wi-Fi i pokazać na telef
 na żywo, a jednocześnie zapisywać ją do pliku CSV w formacie `tools/telemetry_logger.py`. Dzięki temu w parku
 nie jest potrzebny laptop, a `plot_log.py` czyta plik z telefonu bez zmian.
 
-**Status:** zaimplementowane, zbudowane, dekoder strony sprawdzony testem (Chrome/Edge headless). **Nie
-sprawdzone na sprzęcie z telefonem** i nie sprawdzony wpływ na łącze sterujące (zob. „Test do wykonania”).
+**Status:** zaimplementowane, zbudowane, dekoder strony sprawdzony testem (Chrome/Edge headless).
+Pierwszy test na sprzęcie (2026-10-24, relacja pilota): podgląd danych na telefonie działał, a lot po pokoju
+z otwartą stroną przebiegł bez zauważalnych problemów ze sterowaniem. **Nie zapisano pliku CSV**, więc
+`lost`, liczba wierszy i `rc_age_loops` nie są zmierzone (zob. „Test do wykonania”).
 
 ## Użycie
 
