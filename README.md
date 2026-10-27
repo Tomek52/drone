@@ -131,7 +131,7 @@ adresy I2C, procedury wgrywania, parowania i ładowania, M5Burner. Wyniki testó
 | fizyczne położenie przycisku KILL | ✅ wciśnięcie lewego drążka ≥ 0,5 s zatrzymuje silniki (próba bez śmigieł) | docs/05 |
 | częstotliwość telemetrii przez pilota | ⚠️ ok. 16 Hz, nie 25 Hz | docs/03, docs/08 |
 | dystans 1 m z przenoszenia ręcznego ±15% | ⚠️ nie da się zweryfikować ręcznie (rozrzut ±40%); skala potwierdzona z żyroskopu | docs/07 |
-| wartość rezystora bocznikowego INA3221 (prąd baterii nie jest jeszcze mierzony) | do weryfikacji | docs/01 |
+| wartość rezystora bocznikowego INA3221 | ✅ R12 = 10 mΩ, kanał 2 (schemat); prąd nie jest jeszcze logowany | docs/01 |
 | progi napięcia baterii, wzmocnienia regulatorów | ✅ wzmocnienia ustrojone z logów (docs/07); progi 3,50 / 3,35 V działają na pełnej baterii, ⚠️ przy słabszej dron traci wysokość już przy ok. 3,40 V; wyniki: docs/08 (podsumowanie) | docs/07, docs/08 |
 
 ## Struktura repozytorium

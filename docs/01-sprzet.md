@@ -82,9 +82,13 @@ zostanie wyłączony, a tryb Position Hold będzie niedostępny).
 
 Silniki: PWM 150 kHz, rozdzielczość 8 bit (UP). Silniki 716, 17600 kV (DOC).
 
-⚠️ Wartość rezystora bocznikowego INA3221 (potrzebna do przeliczenia prądu) jest
-na schemacie `Stamp_Fly_v1.0.pdf`, którego nie udało się pobrać. Do czasu
-weryfikacji telemetria podaje napięcie bocznika, nie prąd w amperach.
+Bocznik INA3221: **R12 = 10 mΩ na kanale 2** (schemat płyty głównej w PDF dokumentacji
+StampFly), między tranzystorem ochronnym Q1 a szyną `VBAT_IN`, więc mierzy prąd całego drona.
+Biblioteka INA3221 ma domyślnie 10 mΩ, więc `getCurrent(INA3221_CH2)` zwraca ampery
+(zakres ±16 A, rozdzielczość 4 mA). Firmware czyta na razie tylko napięcie `VBAT_IN`;
+prąd nie jest jeszcze logowany (propozycja w [fpv_camera_integration.md](fpv_camera_integration.md#111-prąd-baterii-w-telemetrii-ibat_a)).
+Schemat zasilania (Q1, bocznik, dioda do „+5VOUT”, brak bezpiecznika i wyłącznika):
+[fpv_camera_integration.md](fpv_camera_integration.md#2-zasilanie-stampfly-i-punkty-podłączenia).
 
 ### Specyfikacja (DOC)
 

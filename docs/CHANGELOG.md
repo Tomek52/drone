@@ -2,6 +2,14 @@
 
 Zmiany według gałęzi / PR (najnowsze na górze).
 
+## `docs/fpv-camera-integration`
+
+- `fpv_camera_integration.md`: analiza montażu kamery FPV Eachine TX06 — drzewo zasilania ze schematu
+  (Q1, bocznik R12 10 mΩ, „+5VOUT” = `VBAT_IN` przez diodę B5819W, brak bezpiecznika), wybór punktu
+  zasilania, filtr LC, bilans masy i energii, INA3221 w kodzie, mocowanie, legalne kanały 5,8 GHz,
+  BOM, kroki montażu, ryzyka i propozycje zmian w firmware (niezastosowane).
+- `01-sprzet.md`, `README.md`: wartość bocznika INA3221 potwierdzona ze schematu (10 mΩ, kanał 2).
+
 ## `feat/phone-telemetry`
 
 - Pilot: opcjonalny punkt dostępowy Wi-Fi i strona z podglądem telemetrii oraz zapisem CSV na telefonie
