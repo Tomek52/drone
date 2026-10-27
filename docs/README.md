@@ -19,6 +19,7 @@ są oznaczone: **⚠️ do weryfikacji na sprzęcie**.
 | [11-stable-abs.md](11-stable-abs.md) | Tryb Stable ABS: wysokość z barometru, model podmuchu, plan testów |
 | [12-lagodny-regulator-wysokosci.md](12-lagodny-regulator-wysokosci.md) | Projekt i symulacja łagodnego regulatora wysokości na barometrze (lot powyżej zasięgu ToF) |
 | [13-telemetria-telefon.md](13-telemetria-telefon.md) | Podgląd i zapis telemetrii na telefonie przez Wi-Fi pilota |
+| [fpv_camera_integration.md](fpv_camera_integration.md) | Kamera FPV Eachine TX06: zasilanie ze schematu, filtr, bilans masy i energii, INA3221, mocowanie, kanały 5,8 GHz |
 | [decyzje/](decyzje/) | Architecture Decision Records (ADR) — jedna decyzja = jeden plik |
 | [CHANGELOG.md](CHANGELOG.md) | Zmiany według gałęzi / PR |
 
